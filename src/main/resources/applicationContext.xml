@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:stargate="http://fengchao.baidu.com/dtd/schema/stargate"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://fengchao.baidu.com/dtd/schema/stargate
+		http://fengchao.baidu.com/dtd/schema/stargate/stargate.xsd">
+
+	<!-- db -->
+	<import resource="applicationContext-db.xml" />
+
+	<!-- config -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc-mysql.properties</value>
+				<value>classpath:iwami.properties</value>
+			</list>
+		</property>
+		<property name="placeholderPrefix">
+			<value>#[</value>
+		</property>
+		<property name="placeholderSuffix">
+			<value>]</value>
+		</property>
+	</bean>
+
+	<!-- framework -->
+	<bean id="post" class="com.iwami.iwami.app.common.dispatch.AjaxDispatcher" />
+
+	<!-- ajax -->
+	<bean name="onstartAjax" class="com.iwami.iwami.app.ajax.OnstartAjax">
+		<property name="onstartBiz" ref="onstartBiz" />
+		<property name="apkBiz" ref="apkBiz" />
+	</bean>
+	<bean name="monitorAjax" class="com.iwami.iwami.app.ajax.MonitorAjax" />
+	<bean name="apkAjax" class="com.iwami.iwami.app.ajax.ApkAjax">
+		<property name="apkBiz" ref="apkBiz" />
+	</bean>
+	<bean name="contactAjax" class="com.iwami.iwami.app.ajax.ContactAjax">
+		<property name="contactBiz" ref="contactBiz" />
+	</bean>
+	<bean name="luckyAjax" class="com.iwami.iwami.app.ajax.LuckyAjax">
+		<property name="luckyBiz" ref="luckyBiz" />
+		<property name="userBiz" ref="userBiz" />
+	</bean>
+	<bean name="userAjax" class="com.iwami.iwami.app.ajax.UserAjax">
+		<property name="userBiz" ref="userBiz" />
+	</bean>
+	<bean name="tipsAjax" class="com.iwami.iwami.app.ajax.TipsAjax">
+		<property name="tipsBiz" ref="tipsBiz" />
+	</bean>
+	<bean name="wamiAjax" class="com.iwami.iwami.app.ajax.WamiAjax">
+		<property name="wamiBiz" ref="wamiBiz"></property>
+		<property name="taskBiz" ref="taskBiz"></property>
+		<property name="userBiz" ref="userBiz" />
+	</bean>
+	<bean name="strategyAjax" class="com.iwami.iwami.app.ajax.StrategyAjax">
+		<property name="strategyBiz" ref="strategyBiz"></property>
+	</bean>
+	<bean name="taskAjax" class="com.iwami.iwami.app.ajax.TaskAjax">
+		<property name="taskBiz" ref="taskBiz"></property>
+	</bean>
+	<bean name="presentAjax" class="com.iwami.iwami.app.ajax.PresentAjax">
+		<property name="presentBiz" ref="presentBiz"></property>
+		<property name="userBiz" ref="userBiz" />
+	</bean>
+	
+	<!-- biz -->
+	<bean name="onstartBiz" class="com.iwami.iwami.app.biz.impl.OnstartBizImpl">
+		<property name="onstartService" ref="onstartService" />
+	</bean>
+	<bean name="apkBiz" class="com.iwami.iwami.app.biz.impl.ApkBizImpl">
+		<property name="apkService" ref="apkService" />
+		
+		<property name="defaultURL">
+			<value>#[apk.defaultURL]</value>
+		</property>
+	</bean>
+	<bean name="contactBiz" class="com.iwami.iwami.app.biz.impl.ContactBizImpl">
+		<property name="contactService" ref="contactService" />
+	</bean>
+	<bean name="luckyBiz" class="com.iwami.iwami.app.biz.impl.LuckyBizImpl">
+		<property name="luckyService" ref="luckyService" />
+		<property name="userService" ref="userService" />
+		<property name="presentService" ref="presentService" />
+	</bean>
+	<bean name="userBiz" class="com.iwami.iwami.app.biz.impl.UserBizImpl">
+		<property name="userService" ref="userService" />
+		<property name="verifyCodeLength">
+			<value>#[verifyCode.Length]</value>
+		</property>
+	</bean>
+	<bean name="tipsBiz" class="com.iwami.iwami.app.biz.impl.TipsBizImpl">
+		<property name="tipsService" ref="tipsService" />
+	</bean>
+	<bean name="wamiBiz" class="com.iwami.iwami.app.biz.impl.WamiBizImpl">
+		<property name="wamiService" ref="wamiService" />
+		<property name="taskService" ref="taskService" />
+		<property name="userService" ref="userService" />
+	</bean>
+	<bean name="strategyBiz" class="com.iwami.iwami.app.biz.impl.StrategyBizImpl">
+		<property name="strategyService" ref="strategyService" />
+	</bean>
+	<bean name="taskBiz" class="com.iwami.iwami.app.biz.impl.TaskBizImpl">
+		<property name="taskService" ref="taskService" />
+		<property name="wamiService" ref="wamiService" />
+	</bean>
+	<bean name="presentBiz" class="com.iwami.iwami.app.biz.impl.PresentBizImpl">
+		<property name="presentService" ref="presentService" />
+		<property name="userService" ref="userService" />
+	</bean>
+	
+	<!-- service -->
+	<bean name="onstartService" class="com.iwami.iwami.app.service.impl.OnstartServiceImpl">
+		<property name="onstartDao" ref="onstartDao" />
+	</bean>
+	<bean name="apkService" class="com.iwami.iwami.app.service.impl.ApkServiceImpl">
+		<property name="apkDao" ref="apkDao" />
+		<property name="expireTime" ref="expireTime" />
+	</bean>
+	<bean name="contactService" class="com.iwami.iwami.app.service.impl.ContactServiceImpl">
+		<property name="contactDao" ref="contactDao" />
+		<property name="expireTime" ref="expireTime" />
+	</bean>
+	<bean name="luckyService" class="com.iwami.iwami.app.service.impl.LuckyServiceImpl">
+		<property name="luckyDao" ref="luckyDao" />
+		<property name="expireTime" ref="expireTime" />
+	</bean>
+	<bean name="userService" class="com.iwami.iwami.app.service.impl.UserServiceImpl">
+		<property name="userDao" ref="userDao" />
+	</bean>
+	<bean name="tipsService" class="com.iwami.iwami.app.service.impl.TipsServiceImpl">
+		<property name="tipsDao" ref="tipsDao" />
+		<property name="expireTime" ref="expireTime" />
+	</bean>
+	<bean name="wamiService" class="com.iwami.iwami.app.service.impl.WamiServiceImpl">
+		<property name="wamiDao" ref="wamiDao" />
+	</bean>
+	<bean name="strategyService" class="com.iwami.iwami.app.service.impl.StrategyServiceImpl">
+		<property name="strategyDao" ref="strategyDao" />
+		<property name="expireTime" ref="expireTime" />
+	</bean>
+	<bean name="taskService" class="com.iwami.iwami.app.service.impl.TaskServiceImpl">
+		<property name="taskDao" ref="taskDao" />
+		<property name="expireTime" ref="expireTime" />
+	</bean>
+	<bean name="presentService" class="com.iwami.iwami.app.service.impl.PresentServiceImpl">
+		<property name="presentDao" ref="presentDao" />
+		<property name="expireTime" ref="expireTime" />
+	</bean>
+	
+	<!-- common beans -->
+	<bean name="expireTime" class="java.lang.Long">
+		<constructor-arg><value>#[cache.defaultExpireTime]</value></constructor-arg>
+	</bean>
+</beans>

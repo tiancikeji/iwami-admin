@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+	version="2.4">
+	<display-name>iwami</display-name>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:applicationContext.xml</param-value>
+	</context-param>
+	
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	<!-- *****************************************************filter begin**************************************************** -->
+	<!-- Encoding Filter -->
+	<filter>
+		<filter-name>Encoding Filter</filter-name>
+		<filter-class>
+			com.iwami.iwami.app.common.filter.SetCharacterEncodingFilter
+		</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ignore</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>Encoding Filter</filter-name>
+		<url-pattern>/client/*</url-pattern>
+	</filter-mapping>
+	
+
+    <filter>
+        <filter-name>timecostFilter</filter-name>
+        <filter-class>com.iwami.iwami.app.common.filter.TimeCostFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>timecostFilter</filter-name>
+        <url-pattern>/client/*</url-pattern>
+    </filter-mapping>
+	<!-- *****************************************************filter end**************************************************** -->
+
+	<!-- *****************************************************servlet begin**************************************************** -->
+	<!-- request ajax -->
+	<servlet>
+		<servlet-name>ajax servlet</servlet-name>
+		<servlet-class>
+			com.iwami.iwami.app.common.dispatch.DispatchServlet
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ajax servlet</servlet-name>
+		<url-pattern>/client/*</url-pattern>
+	</servlet-mapping>
+	<!-- *****************************************************servlet end**************************************************** -->
+	
+</web-app>

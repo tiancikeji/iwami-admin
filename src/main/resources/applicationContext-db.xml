@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:stargate="http://fengchao.baidu.com/dtd/schema/stargate"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://fengchao.baidu.com/dtd/schema/stargate
+		http://fengchao.baidu.com/dtd/schema/stargate/stargate.xsd">
+	
+	<context:annotation-config />
+	<tx:annotation-driven  transaction-manager="txManager"/>
+		
+	<bean name="onstartDao" class="com.iwami.iwami.app.dao.impl.OnstartDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+		
+	<bean name="apkDao" class="com.iwami.iwami.app.dao.impl.ApkDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean name="contactDao" class="com.iwami.iwami.app.dao.impl.ContactDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean name="luckyDao" class="com.iwami.iwami.app.dao.impl.LuckyDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean name="userDao" class="com.iwami.iwami.app.dao.impl.UserDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean name="tipsDao" class="com.iwami.iwami.app.dao.impl.TipsDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean name="wamiDao" class="com.iwami.iwami.app.dao.impl.WamiDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean name="strategyDao" class="com.iwami.iwami.app.dao.impl.StrategyDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean name="taskDao" class="com.iwami.iwami.app.dao.impl.TaskDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	<bean name="presentDao" class="com.iwami.iwami.app.dao.impl.PresentDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="dataSourceParent" destroy-method="close" abstract="true">
+		<property name="driverClass">
+			<value>#[jdbc.driverClassName]</value>
+		</property>
+		<property name="maxPoolSize">
+			<value>#[default.maxPoolSize]</value>
+		</property>
+		<property name="minPoolSize">
+			<value>#[default.minPoolSize]</value>
+		</property>
+		<property name="initialPoolSize">
+			<value>#[default.initialPoolSize]</value>
+		</property>
+		<property name="idleConnectionTestPeriod">
+			<value>#[default.idleConnectionTestPeriod]</value>
+		</property>
+		<property name="maxIdleTime">
+			<value>#[default.maxIdleTime]</value>
+		</property>
+	</bean>
+	
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close" parent="dataSourceParent">
+		<property name="jdbcUrl">
+			<value>#[db.url]</value>
+		</property>
+		<property name="user">
+			<value>#[db.username]</value>
+		</property>
+		<property name="password">
+			<value>#[db.password]</value>
+		</property>
+	</bean>
+</beans>
