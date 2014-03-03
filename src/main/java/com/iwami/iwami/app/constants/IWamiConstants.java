@@ -28,4 +28,8 @@ public interface IWamiConstants {
 
 	public static final String SEPARATOR_PRESENT = ",";
 
+	public static final int INACTIVE = 1;
+	public static final int ACTIVE = 0;
+	public static final int ADMIN = 2;
+
 }

@@ -1,21 +1,24 @@
 package com.iwami.iwami.app.biz.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.iwami.iwami.app.biz.UserBiz;
-import com.iwami.iwami.app.exception.VerifyCodeMismatchException;
-import com.iwami.iwami.app.model.Code;
 import com.iwami.iwami.app.model.User;
+import com.iwami.iwami.app.service.OnstartService;
 import com.iwami.iwami.app.service.UserService;
-import com.iwami.iwami.app.util.IWamiUtils;
-import com.iwami.iwami.app.util.SMSUtils;
 
 public class UserBizImpl implements UserBiz {
 	
 	private UserService userService;
+	
+	private OnstartService onstartService;
 	
 	private int verifyCodeLength = 4;
 	
@@ -23,9 +26,76 @@ public class UserBizImpl implements UserBiz {
 		return userService.getUserById(userid);
 	}
 
+	public User getAdminById(long adminid) {
+		return userService.getAdminById(adminid);
+	}
+
 	@Override
 	public User getUserByCellPhone(long cellPhone) {
 		return userService.getUserByCellPhone(cellPhone);
+	}
+
+	@Override
+	public List<User> getUserByIdOCellPhone(long key) {
+		List<User> users = userService.getUserByIdOCellPhone(key);
+		
+		if(users != null && users.size() > 0){
+			Collections.sort(users, new Comparator<User>() {
+
+				@Override
+				public int compare(User u1, User u2) {
+					return (int)(u1.getId() - u2.getId());
+				}
+			});
+		
+			List<Long> userids = new ArrayList<Long>();
+			for(User user : users)
+				userids.add(user.getId());
+			
+			// create time...
+			Map<Long, Date> createTimes = onstartService.getCreateTimes(users);
+			if(createTimes != null && createTimes.size() > 0)
+				for(User user : users)
+					if(createTimes.containsKey(user.getId()))
+						user.setCreateTime(createTimes.get(user.getId()));
+			
+			// last login...
+			Map<Long, Date> lastLogins = onstartService.getLastLogins(userids);
+			if(lastLogins != null && lastLogins.size() > 0)
+				for(User user : users)
+					if(lastLogins.containsKey(user.getId()))
+						user.setLastLoginTime(lastLogins.get(user.getId()));
+		}
+		
+		return users;
+	}
+
+	@Override
+	public boolean canOpt(long adminid, long userid) {
+		User admin = getAdminById(adminid);
+		User user = getUserById(userid);
+		
+		if(admin != null && user != null)
+			return _canOpt();
+			
+		return false;
+	}
+
+	private boolean _canOpt() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class, value="txManager")
+	public boolean modifyUser(User user) {
+		if(userService.modifyUser(user))
+			if(!userService.modifyUserinfo(user))
+				throw new RuntimeException("error in modify user, roolback");
+			else
+				return true;
+		else
+			return false;
 	}
 
 	public UserService getUserService() {
@@ -36,78 +106,19 @@ public class UserBizImpl implements UserBiz {
 		this.userService = userService;
 	}
 
-	@Override
-	public boolean sendVerifyCode(long cellPhone) {
-		boolean result = false;
-		
-		if(cellPhone > 0){
-			String code = IWamiUtils.getRandInt(verifyCodeLength);
-			Code _code = new Code();
-			_code.setCellPhone(cellPhone);
-			_code.setCode(code);
-			if(userService.addCode(_code)){
-				//TODO modify sms content
-				if(SMSUtils.sendLuosiMao("验证码为" + code + "，5分钟内有效【iwami】", "" + cellPhone))
-					result = true;
-				else
-					throw new RuntimeException("Error in sending code to cell phone.");
-			} else
-				throw new RuntimeException("Error in saving code into db.");
-		}
-		return result;
-	}
-
-	@Override
-	public boolean sendSMS(long cellPhone, User user) {
-		boolean result = false;
-		
-		if(cellPhone > 0){
-			//TODO modify sms content
-			if(SMSUtils.sendLuosiMao("发送邀请短信", "" + cellPhone))
-				result = true;
-			else
-				throw new RuntimeException("Error in sending code to cell phone.");
-		}
-		return result;
-	}
-
-	@Override
-	public User register(String uuid, String name, long cellPhone, String alias, String code) throws VerifyCodeMismatchException {
-		// reset expire ms
-		Code _code = userService.getCode(cellPhone, code, DateUtils.addMinutes(new Date(), -5));
-		if(_code != null && _code.getCellPhone() == cellPhone && StringUtils.equals(_code.getCode(), code)){
-			User user = userService.getUserByCellPhone(cellPhone);
-			
-			if(user == null){
-				user = new User();
-				user.setCellPhone(cellPhone);
-				user.setName(name);
-				user.setUuid(uuid);
-				user.setAlias(alias);
-				userService.addUser4Register(user);
-			} else{
-				user.setCellPhone(cellPhone);
-				user.setName(name);
-				user.setUuid(uuid);
-				user.setAlias(alias);
-				userService.updateUser4Register(user);
-			}
-			
-			return user;
-		} else
-			throw new VerifyCodeMismatchException();
-	}
-
-	@Override
-	public boolean modifyUserInfo4Register(User user) {
-		return userService.modifyUserInfo4Register(user);
-	}
-
 	public int getVerifyCodeLength() {
 		return verifyCodeLength;
 	}
 
 	public void setVerifyCodeLength(int verifyCodeLength) {
 		this.verifyCodeLength = verifyCodeLength;
+	}
+
+	public OnstartService getOnstartService() {
+		return onstartService;
+	}
+
+	public void setOnstartService(OnstartService onstartService) {
+		this.onstartService = onstartService;
 	}
 }

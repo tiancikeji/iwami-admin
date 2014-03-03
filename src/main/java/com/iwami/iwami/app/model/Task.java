@@ -69,6 +69,8 @@ public class Task {
 	private Date lastModTime;
 	
 	private long lastModUserid;
+	
+	private int isdel;
 
 	public long getId() {
 		return id;
@@ -275,6 +277,14 @@ public class Task {
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	public int getIsdel() {
+		return isdel;
+	}
+
+	public void setIsdel(int isdel) {
+		this.isdel = isdel;
 	}
 	
 }

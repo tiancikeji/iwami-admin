@@ -30,10 +30,6 @@ public class User {
 	
 	private String lastName;
 	
-	private Date lastmodTime;
-	
-	private long lastmodUserid;
-	
 	// userinfo table
 	private String name;
 	
@@ -50,6 +46,19 @@ public class User {
 	private String job;
 	
 	private String address;
+	
+	private Date addTime;
+	
+	private Date lastmodTime;
+	
+	private long lastmodUserid;
+	
+	private int isdel;
+	
+	// time...
+	private Date createTime;
+	
+	private Date lastLoginTime;
 
 	public long getId() {
 		return id;
@@ -232,5 +241,37 @@ public class User {
 
 	public String getLastBankAccount() {
 		return lastBankAccount;
+	}
+
+	public Date getAddTime() {
+		return addTime;
+	}
+
+	public void setAddTime(Date addTime) {
+		this.addTime = addTime;
+	}
+
+	public int getIsdel() {
+		return isdel;
+	}
+
+	public void setIsdel(int isdel) {
+		this.isdel = isdel;
+	}
+
+	public Date getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
+	}
+
+	public Date getLastLoginTime() {
+		return lastLoginTime;
+	}
+
+	public void setLastLoginTime(Date lastLoginTime) {
+		this.lastLoginTime = lastLoginTime;
 	}
 }

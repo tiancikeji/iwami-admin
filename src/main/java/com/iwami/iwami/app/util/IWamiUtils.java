@@ -1,5 +1,6 @@
 package com.iwami.iwami.app.util;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
@@ -63,5 +64,29 @@ public class IWamiUtils {
 
 	public static Date getTodayStart() {
 		return DateUtils.truncate(new Date(), Calendar.DATE);
+	}
+
+	public static String toStringL(long number) {
+		if(number > 0)
+			return "" + number;
+		return StringUtils.EMPTY;
+	}
+
+	public static String toStringI(int number) {
+		if(number > 0)
+			return "" + number;
+		return StringUtils.EMPTY;
+	}
+
+	public static String getDateString(Date date) {
+		if(date != null)
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+		else
+			return StringUtils.EMPTY;
+	}
+
+	public static Date getDate(String string) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -1,0 +1,156 @@
+1. 用户管理
+	1.1 查询用户
+		路径：GET/user.ajax
+		输入参数：
+			adminid: long 管理员id
+			key：long 用户输入
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data：[
+				{
+						userid: long 用户id	- 不可修改
+			   		username: String 用户名
+			   		uuid: String 设备id	- 不可修改
+			   		alias: String jpush唯一id	- 不可修改
+			   		cellPhone: long 手机号
+			   		age: int 年龄
+			  		gender: int 性别：0帅哥，1美女
+   		  		job: String 职业
+   		  		address: String 地址
+   		  		addTime: String 注册时间	- 不可修改
+   		  		lastModTime: String 上次修改时间	- 不可修改
+   		  		lastModUserid: long 上次修改人	- 不可修改
+   		  		isdel：int 0有效，1无效
+   		  		
+   		  		createTime:String 创建日期	- 不可修改
+   		  		lastLoginTime:String 上次登录时间	- 不可修改
+   		  		
+   		  		currentPrize: int 用户拥有米粒数目
+   		  		exchangePrize: int 用户已经兑换米粒数目
+   		  		lastCellPhone1: long 上次充值手机号
+   		  		lastAlipayAccount： String 上次支付宝账号
+   		  		lastBankName: String 上次银行卡开户行
+   		  		lastBankAccount: String 上次银行开户姓名
+   		  		lastBankNo: long 上次银行账号
+   		  		lastAddress: String 上次线上快递地址
+   		  		lastCellPhone2: String 上次线上快递手机号
+   		  		lastName: String 上次线上快递名字
+				}
+				,
+				...
+			]
+	1.2 修改用户
+		路径：MOD/user.ajax
+		输入参数：
+					adminid: long 管理员id
+					
+					userid: long 用户id	- 不可修改
+		   		username: String 用户名
+		   		cellPhone: long 手机号
+		   		age: int 年龄
+		  		gender: int 性别：0帅哥，1美女
+		  		job: String 职业
+		  		address: String 地址
+		  		isdel：int 0有效，1无效
+		  		
+		  		currentPrize: int 用户拥有米粒数目
+		  		exchangePrize: int 用户已经兑换米粒数目
+		  		lastCellPhone1: long 上次充值手机号
+		  		lastAlipayAccount： String 上次支付宝账号
+		  		lastBankName: String 上次银行卡开户行
+		  		lastBankAccount: String 上次银行开户姓名
+		  		lastBankNo: long 上次银行账号
+		  		lastAddress: String 上次线上快递地址
+		  		lastCellPhone2: String 上次线上快递手机号
+		  		lastName: String 上次线上快递名字
+		输出结果： - 管理后台仅仅给管理员使用，所以不用那么多错误码，假设他所有的修改都是正确的！
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	1.3 发送用户消息
+		路径：PUSH/user.ajax
+		输入参数：
+					adminid: long 管理员id					
+					userid: long 用户id
+		   		msg: String 消息
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+							1000300 用户未设置JPUSH唯一ID
+			msg：错误信息
+2. 任务管理
+	2.1 查询红包触发条件
+		路径：GET/treasureconfig.ajax
+		输入参数：
+			adminid: long 管理员id
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data：{
+				days：int 多少天
+				count：int 多少次
+			}
+	2.2 修改红包触发条件
+		路径：MOD/treasureconfig.ajax
+		输入参数：
+			adminid: long 管理员id
+			days：int 多少天
+			count：int 多少次
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	2.3 查询任务
+		路径：GET/task.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+			type：int 任务类型 0全部 1普通任务，2红包任务，3金榜任务，4分享任务，5线下任务
+			attr: int 后台运行 0全部 1后台台激活，2前台台激活，3注册
+			startL: String 开始时间起始 yyyy-MM-dd HH:mm:ss
+			startR: String 开始时间截止 yyyy-MM-dd HH:mm:ss
+			endL: String 结束时间起始 yyyy-MM-dd HH:mm:ss
+			endR: String 结束时间截止 yyyy-MM-dd HH:mm:ss
+			maxL: int 任务限额起始 -1为未设置
+			maxR：int 任务限额截止 -1为未设置
+			prizeL: int 任务米粒数起始 -1为未设置
+			prizeR：int 任务米粒数截止 -1为未设置
+			currL：int 已抢数量起始 -1为未设置
+			currR：int 已抢数量截止 -1为未设置
+			leftL：int 剩余数量起始 -1为未设置
+			leftR：int 剩余数量截止 -1为未设置
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data：[
+				{
+						taskid：long 任务id - 不可修改
+						name：String app名字
+						rank：int 显示顺序
+						intr：String 任务简介
+						appintr：String app简介
+						prize：int 任务米粒数
+						type：int 1普通任务，2红包任务，3金榜任务，4分享任务，5线下任务
+						attr: int 1后台台激活，2前台台激活，3注册，4分享
+						time：int 任务要求时间
+						startTime：String 开始时间 yyyy-MM-dd HH:mm:ss
+						endTime：String 结束时间 yyyy-MM-dd HH:mm:ss
+						currentPrize：int 当前已抢米粒数
+						maxPrize：int 最大可抢米粒数
+						iconSmall：String 小图
+						iconBig：String 大图
+						lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+						lastModUserid：long 上次修改人
+						isdel: int 状态 0有效，1无效
+						
+						status: int 任务执行情况：1未开始，2正在进行中，3已经完成或失效
+				}
+				,
+				...
+			]
+			
