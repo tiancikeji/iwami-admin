@@ -21,6 +21,18 @@ public class Task {
 	public static final int STATUS_INSTALLED = 4;
 
 	public static final int STATUS_FINISH = 5;
+	
+	public static final int TYPE_NORMAL = 1;
+	
+	public static final int TYPE_TREASURE = 2;
+	
+	public static final int TYPE_SHARE = 4;
+	
+	public static final int TYPE_GOLD = 8;
+	
+	public static final int TYPE_OFFLINE = 16;
+	
+	public static final int RANK_GOLD_DEFAULT = -1;
 
 	private long id;
 	
@@ -35,6 +47,8 @@ public class Task {
 	private String appIntr;
 	
 	private int prize;
+	
+	private String url;
 	
 	private int type;
 	
@@ -285,6 +299,14 @@ public class Task {
 
 	public void setIsdel(int isdel) {
 		this.isdel = isdel;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 	
 }

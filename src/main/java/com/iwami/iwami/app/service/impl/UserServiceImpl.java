@@ -1,9 +1,11 @@
 package com.iwami.iwami.app.service.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import com.iwami.iwami.app.dao.UserDao;
 import com.iwami.iwami.app.model.User;
+import com.iwami.iwami.app.model.UserRole;
 import com.iwami.iwami.app.service.UserService;
 
 public class UserServiceImpl implements UserService {
@@ -46,6 +48,56 @@ public class UserServiceImpl implements UserService {
 
 	public void setUserDao(UserDao userDao) {
 		this.userDao = userDao;
+	}
+
+	@Override
+	public List<User> getAdminUsers() {
+		return userDao.getAdminUsers();
+	}
+
+	@Override
+	public Map<Long, UserRole> getUserRoles(List<Long> ids) {
+		return userDao.getUserRoles(ids);
+	}
+
+	@Override
+	public boolean addAdminUser(User user) {
+		return userDao.addAdminUser(user);
+	}
+
+	@Override
+	public boolean addAdminUserInfo(User user) {
+		return userDao.addAdminUserInfo(user);
+	}
+
+	@Override
+	public boolean addAdminRole(UserRole role) {
+		return userDao.addAdminRole(role);
+	}
+
+	@Override
+	public boolean modAdminUserInfo(User user) {
+		return userDao.modAdminUserInfo(user);
+	}
+
+	@Override
+	public boolean modAdminRole(UserRole role) {
+		return userDao.modAdminRole(role);
+	}
+
+	@Override
+	public boolean delAdminUser(long userid, long adminid) {
+		return userDao.delAdminUser(userid, adminid);
+	}
+
+	@Override
+	public boolean delAdminUserInfo(long userid, long adminid) {
+		return userDao.delAdminUserInfo(userid, adminid);
+	}
+
+	@Override
+	public boolean delAdminRole(long userid, long adminid) {
+		return userDao.delAdminRole(userid, adminid);
 	}
 
 }

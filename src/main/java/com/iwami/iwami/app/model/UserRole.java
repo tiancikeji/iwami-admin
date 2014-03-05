@@ -6,42 +6,40 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public class StrategyImage {
+public class UserRole {
 
-	private long id;
+	private long userid;
 	
-	private int rank;
+	private String password;
 	
-	private String iconUrl;
+	private long role;
 	
 	private Date lastModTime;
 	
 	private long lastModUserid;
-	
-	private int isdel;
 
-	public long getId() {
-		return id;
+	public long getUserid() {
+		return userid;
 	}
 
-	public void setId(long id) {
-		this.id = id;
+	public void setUserid(long userid) {
+		this.userid = userid;
 	}
 
-	public int getRank() {
-		return rank;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setRank(int rank) {
-		this.rank = rank;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
-	public String getIconUrl() {
-		return iconUrl;
+	public long getRole() {
+		return role;
 	}
 
-	public void setIconUrl(String iconUrl) {
-		this.iconUrl = iconUrl;
+	public void setRole(long role) {
+		this.role = role;
 	}
 
 	public Date getLastModTime() {
@@ -73,13 +71,5 @@ public class StrategyImage {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
-	}
-
-	public int getIsdel() {
-		return isdel;
-	}
-
-	public void setIsdel(int isdel) {
-		this.isdel = isdel;
 	}
 }

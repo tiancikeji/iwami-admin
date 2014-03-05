@@ -6,7 +6,7 @@ public interface ContactDao {
 
 	public Contact getContact();
 	
-	public boolean delContact(long id);
+	public boolean delAllContacts();
 	
 	public boolean addContact(Contact contact);
 	

@@ -16,7 +16,7 @@ public class Contact {
 	
 	private String domain;
 	
-	private long qq;
+	private String qq;
 	
 	private String qqgroup;
 	
@@ -60,11 +60,11 @@ public class Contact {
 		this.domain = domain;
 	}
 
-	public long getQq() {
+	public String getQq() {
 		return qq;
 	}
 
-	public void setQq(long qq) {
+	public void setQq(String qq) {
 		this.qq = qq;
 	}
 

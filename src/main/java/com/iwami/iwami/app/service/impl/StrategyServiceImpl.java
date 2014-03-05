@@ -1,66 +1,116 @@
 package com.iwami.iwami.app.service.impl;
 
 import java.util.List;
+import java.util.Map;
 
-import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.dao.StrategyDao;
 import com.iwami.iwami.app.model.Strategy;
 import com.iwami.iwami.app.model.StrategyImage;
 import com.iwami.iwami.app.model.StrategyInfo;
 import com.iwami.iwami.app.model.StrategyRate;
 import com.iwami.iwami.app.service.StrategyService;
-import com.iwami.iwami.app.util.LocalCaches;
 
-@SuppressWarnings("unchecked")
 public class StrategyServiceImpl implements StrategyService {
 
 	private StrategyDao strategyDao;
+
+	// rate
+	@Override
+	public Map<Long, StrategyRate> getRatesByIds(List<Long> ids) {
+		return strategyDao.getRatesByIds(ids);
+	}
+
+	@Override
+	public boolean delRateInfo(long id, long adminid) {
+		return strategyDao.delRateInfo(id, adminid);
+	}
+
+	@Override
+	public boolean delRate(long id, long adminid) {
+		return strategyDao.delRate(id, adminid);
+	}
+
+	@Override
+	public boolean modRate(StrategyRate rate) {
+		return strategyDao.modRate(rate);
+	}
+
+	@Override
+	public boolean addRate(StrategyRate rate) {
+		return strategyDao.addRate(rate);
+	}
 	
-	private long expireTime;
+	// strategy
+	@Override
+	public List<Strategy> getStrategies(String key) {
+		return strategyDao.getStrategies(key);
+	}
+
+	@Override
+	public boolean delStrategy(long id, long adminid) {
+		return strategyDao.delStrategy(id, adminid);
+	}
 	
 	@Override
-	public List<Strategy> getAllStrategies() {
-		List<Strategy> strategies = (List<Strategy>)LocalCaches.get(IWamiConstants.CACHE_STRATEGY_KEY, System.currentTimeMillis(), expireTime);
-		if(strategies == null){
-			strategies = strategyDao.getAllStrategies();
-			LocalCaches.set(IWamiConstants.CACHE_STRATEGY_KEY, strategies, System.currentTimeMillis());
-		}
-		return strategies;
+	public boolean modStrategySeqs(List<Long> lIds, List<Integer> lRanks, long adminid) {
+		return strategyDao.modStrategySeqls(lIds, lRanks, adminid);
 	}
 
 	@Override
-	public List<StrategyImage> getAllStragtegyImages() {
-		List<StrategyImage> images = (List<StrategyImage>)LocalCaches.get(IWamiConstants.CACHE_STRATEGY_IMAGE_KEY, System.currentTimeMillis(), expireTime);
-		if(images == null){
-			images = strategyDao.getAllStrategyImages();
-			LocalCaches.set(IWamiConstants.CACHE_STRATEGY_IMAGE_KEY, images, System.currentTimeMillis());
-		}
-		return images;
+	public boolean modStrategy(Strategy strategy) {
+		return strategyDao.modStrategy(strategy);
 	}
 
 	@Override
-	public List<StrategyInfo> getStrategyInfoByStrateByStrategyId(long strategyId, int start, int step) {
-		return strategyDao.getStrategyInfosByStrategyId(strategyId, start, step);
+	public long addStrategy(Strategy strategy) {
+		return strategyDao.addStrategy(strategy);
+	}
+
+	// image
+	@Override
+	public boolean addImage(StrategyImage image) {
+		return strategyDao.addImage(image);
 	}
 
 	@Override
-	public StrategyRate getStrategyRateByStrategyId(long strategyId) {
-		return strategyDao.getStrategyRateByStrategyId(strategyId);
+	public boolean modImage(StrategyImage image) {
+		return strategyDao.modImage(image);
 	}
 
 	@Override
-	public boolean rateStrategy(long strategyId, String uuid) {
-		return strategyDao.rateStrategy(strategyId, uuid);
+	public boolean delImage(int id, long adminid) {
+		return strategyDao.delImage(id, adminid);
 	}
 
 	@Override
-	public boolean incrStrategyRateSkim(long strategyId) {
-		return strategyDao.incrStrategyRateSkim(strategyId);
+	public List<StrategyImage> getAllImages() {
+		return strategyDao.getAllImages();
 	}
 
 	@Override
-	public boolean incrStrategyRateRate(long strategyId) {
-		return strategyDao.incrStrategyRateRate(strategyId);
+	public boolean modImageSeqs(List<Long> lIds, List<Integer> lRanks, long adminid) {
+		return strategyDao.modImageSeqs(lIds, lRanks, adminid);
+	}
+
+	// info
+	@Override
+	public List<StrategyInfo> getInfos(long id) {
+		return strategyDao.getInfos(id);
+	}
+
+	@Override
+	public boolean addInfo(StrategyInfo info) {
+		return strategyDao.addInfo(info);
+	}
+
+	@Override
+	public boolean modInfo(StrategyInfo info) {
+		return strategyDao.modInfo(info);
+	}
+
+	@Override
+	public boolean delInfo(long id, long adminid) {
+		return strategyDao.delInfo(id, adminid);
 	}
 
 	public StrategyDao getStrategyDao() {
@@ -69,14 +119,6 @@ public class StrategyServiceImpl implements StrategyService {
 
 	public void setStrategyDao(StrategyDao strategyDao) {
 		this.strategyDao = strategyDao;
-	}
-
-	public long getExpireTime() {
-		return expireTime;
-	}
-
-	public void setExpireTime(long expireTime) {
-		this.expireTime = expireTime;
 	}
 
 }

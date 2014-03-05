@@ -1,5 +1,7 @@
 package com.iwami.iwami.app.model;
 
+import java.util.Date;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -12,7 +14,7 @@ public class Tips {
 
 	private String content;
 
-	private long lastmodTime;
+	private Date lastmodTime;
 
 	private long lastmodUserid;
 
@@ -42,11 +44,11 @@ public class Tips {
 		this.content = content;
 	}
 
-	public long getLastmodTime() {
+	public Date getLastmodTime() {
 		return lastmodTime;
 	}
 
-	public void setLastmodTime(long lastmodTime) {
+	public void setLastmodTime(Date lastmodTime) {
 		this.lastmodTime = lastmodTime;
 	}
 

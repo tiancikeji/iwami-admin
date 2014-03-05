@@ -1,14 +1,25 @@
 package com.iwami.iwami.app.dao.impl;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
+import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.constants.SqlConstants;
 import com.iwami.iwami.app.dao.StrategyDao;
 import com.iwami.iwami.app.model.Strategy;
@@ -18,52 +29,183 @@ import com.iwami.iwami.app.model.StrategyRate;
 
 public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 
+	// image
 	@Override
-	public List<StrategyImage> getAllStrategyImages() {
-		return getJdbcTemplate().query("select id, rank, icon_url, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_STRATEGY_IMAGES + " where isdel = ?", 
-				new Object[]{0}, new StrategyImageRowMapper());
+	public List<StrategyImage> getAllImages() {
+		return getJdbcTemplate().query("select id, rank, icon_url, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_STRATEGY_IMAGES, new StrategyImageRowMapper());
 	}
 
 	@Override
-	public List<Strategy> getAllStrategies() {
-		return getJdbcTemplate().query("select id, name, subname, intr, rank, icon_small, icon_big, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_STRATEGY_LIST + " where isdel = ?", 
-				new Object[]{0}, new StrategyRowMapper());
+	public boolean addImage(StrategyImage image) {
+		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_STRATEGY_IMAGES + "(rank, icon_url, lastmod_time, lastmod_userid, isdel) values(?, ?, now(), ?, 0)", new Object[]{image.getRank(), image.getIconUrl(), image.getLastModUserid(), image.getIsdel()});
+		return count > 0;
 	}
 
 	@Override
-	public StrategyRate getStrategyRateByStrategyId(long strategyId) {
-		List<StrategyRate> rates = getJdbcTemplate().query("select strategy_id, skim, rate from " + SqlConstants.TABLE_STRATEGY_RATE + " where isdel = ? and strategy_id = ?",
-				new Object[]{0, strategyId}, new StrategyRateRowMapper());
+	public boolean modImage(StrategyImage image) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_IMAGES + " set rank = ?, icon_url = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where id = ?", new Object[]{image.getRank(), image.getIconUrl(), image.getLastModUserid(), image.getIsdel(), image.getId()});
+		return count > 0;
+	}
+
+	@Override
+	public boolean delImage(int id, long adminid) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_IMAGES + " set lastmod_time = now(), lastmod_userid = ?, isdel = ? where id = ?", new Object[]{adminid, IWamiConstants.INACTIVE, id});
+		return count > 0;
+	}
+
+	@Override
+	public boolean modImageSeqs(final List<Long> lIds, final List<Integer> lRanks, final long adminid) {
+		getJdbcTemplate().batchUpdate("update " + SqlConstants.TABLE_STRATEGY_IMAGES + " set rank = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", new BatchPreparedStatementSetter() {
+			
+			@Override
+			public void setValues(PreparedStatement ps, int index) throws SQLException {
+				if(lIds.size() > index){
+					ps.setObject(1, lRanks.get(index));
+					ps.setObject(2, adminid);
+					ps.setObject(3, lIds.get(index));
+				}
+			}
+			
+			@Override
+			public int getBatchSize() {
+				return lIds.size();
+			}
+		});
+		return true;
+	}
+
+	// strategy
+	@Override
+	public List<Strategy> getStrategies(String key) {
+		String sql = "select id, name, subname, intr, rank, icon_small, icon_big, isdel, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_STRATEGY_LIST;
+		if(StringUtils.isNotBlank(key)){
+			sql += " where id = ? or name = ?";
+			return getJdbcTemplate().query(sql, new Object[]{key, key}, new StrategyRowMapper());
+		}
+		return getJdbcTemplate().query(sql, new StrategyRowMapper());
+	}
+
+	@Override
+	public boolean delStrategy(long id, long adminid) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_LIST + " set isdel = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", new Object[]{IWamiConstants.INACTIVE, adminid, id});
+		return count > 0;
+	}
+
+	@Override
+	public boolean modStrategySeqls(final List<Long> lIds, final List<Integer> lRanks, final long adminid) {
+		getJdbcTemplate().batchUpdate("update " + SqlConstants.TABLE_STRATEGY_LIST + " set rank = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", new BatchPreparedStatementSetter() {
+			
+			@Override
+			public void setValues(PreparedStatement ps, int index) throws SQLException {
+				if(lIds.size() > index){
+					ps.setObject(1, lRanks.get(index));
+					ps.setObject(2, adminid);
+					ps.setObject(3, lIds.get(index));
+				}
+			}
+			
+			@Override
+			public int getBatchSize() {
+				return lIds.size();
+			}
+		});
+		return true;
+	}
+
+	@Override
+	public boolean modStrategy(Strategy strategy) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_LIST + " set name = ?, subname = ?, intr = ?, rank = ?, icon_small = ?, icon_big = ?, isdel = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", 
+				new Object[]{strategy.getName(), strategy.getSubName(), strategy.getIntr(), strategy.getRank(), strategy.getIconSmall(), strategy.getIconBig(), strategy.getIsdel(), strategy.getLastModUserid(), strategy.getId()});
+		return count > 0;
+	}
+
+	@Override
+	public long addStrategy(final Strategy strategy) {
+		KeyHolder holder = new GeneratedKeyHolder();
+		int count = getJdbcTemplate().update(new PreparedStatementCreator() {
+			
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_STRATEGY_LIST + "(name, subname, intr, rank, icon_small, icon_big, isdel, lastmod_time, lastmod_userid) values(?, ?, ?, ?, ?, ?, ?, now(), ?)", Statement.RETURN_GENERATED_KEYS);
+				ps.setObject(1, strategy.getName());
+				ps.setObject(2, strategy.getSubName());
+				ps.setObject(3, strategy.getIntr());
+				ps.setObject(4, strategy.getRank());
+				ps.setObject(5, strategy.getIconSmall());
+				ps.setObject(6, strategy.getIconBig());
+				ps.setObject(7, strategy.getIsdel());
+				ps.setObject(8, strategy.getLastModUserid());
+				return ps;
+			}
+		}, holder);
+		
+		if(count > 0 && holder.getKey() != null)
+			return holder.getKey().longValue();
+		
+		return 0;
+	}
+
+	// info
+	@Override
+	public List<StrategyInfo> getInfos(long id) {
+		return getJdbcTemplate().query("select id, strategy_id, rank, title, content, url, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_STRATEGY_INFO + " where isdel = ? and strategy_id = ?", 
+				new Object[]{IWamiConstants.ACTIVE, id}, new StrategyInfoRowMapper());
+	}
+
+	@Override
+	public boolean delInfo(long id, long adminid) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_INFO + " set isdel = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", new Object[]{IWamiConstants.INACTIVE, adminid, id});
+		return count > 0;
+	}
+
+	@Override
+	public boolean addInfo(StrategyInfo info) {
+		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_STRATEGY_INFO + "(strategy_id, rank, title, content, url, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, ?, now(), ?, ?)", 
+				new Object[]{info.getStrategyId(), info.getRank(), info.getTitle(), info.getContent(), info.getUrl(), info.getLastModUserid(), IWamiConstants.ACTIVE});
+		return count > 0;
+	}
+
+	@Override
+	public boolean modInfo(StrategyInfo info) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_INFO + " set rank = ?, title = ?, content = ?, url = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", 
+				new Object[]{info.getRank(), info.getTitle(), info.getContent(), info.getUrl(), info.getLastModUserid(), info.getId()});
+		return count > 0;
+	}
+
+	// rate
+	@Override
+	public Map<Long, StrategyRate> getRatesByIds(List<Long> ids) {
+		List<StrategyRate> rates = getJdbcTemplate().query("select strategy_id, skim, rate from " + SqlConstants.TABLE_STRATEGY_RATE + " where id in (" + StringUtils.join(ids.toArray(), ",") + ")", new StrategyRateRowMapper());
+		
+		Map<Long, StrategyRate> result = new HashMap<Long, StrategyRate>();
 		if(rates != null && rates.size() > 0)
-			return rates.get(0);
-		else
-			return null;
+			for(StrategyRate rate : rates)
+				result.put(rate.getStrategyId(), rate);
+		
+		return result;
 	}
 
 	@Override
-	public List<StrategyInfo> getStrategyInfosByStrategyId(long strategyId, int start, int step) {
-		return getJdbcTemplate().query("select id, strategy_id, rank, title, content, url, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_STRATEGY_INFO + " where isdel = ? and strategy_id = ? order by rank, id limit ?, ?", 
-				new Object[]{0, strategyId, start, step}, new StrategyInfoRowMapper());
-	}
-
-	@Override
-	public boolean rateStrategy(long strategyId, String uuid) {
-		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_RATE_INFO + "(strategy_id, uuid, lastmod_time, isdel) values(?, ?, now(), ?)", 
-				new Object[]{strategyId, uuid, 0});
+	public boolean delRateInfo(long id, long adminid) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_RATE_INFO + " set isdel = ? where strategy_id = ?", new Object[]{IWamiConstants.INACTIVE, id});
 		return count > 0;
 	}
 
 	@Override
-	public boolean incrStrategyRateSkim(long strategyId) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_RATE + " set skim = skim + 1 where strategy_id = ? and isdel = ?", 
-				new Object[]{strategyId, 0});
+	public boolean delRate(long id, long adminid) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_RATE + " set isdel = ? where strategy_id = ?", new Object[]{IWamiConstants.INACTIVE, id});
 		return count > 0;
 	}
 
 	@Override
-	public boolean incrStrategyRateRate(long strategyId) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_RATE + " set rate = rate + 1 where strategy_id = ? and isdel = ?", 
-				new Object[]{strategyId, 0});
+	public boolean modRate(StrategyRate rate) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_RATE + " set skim = ?, rate = ? where strategy_id = ?", new Object[]{rate.getSkim(), rate.getRate(), rate.getStrategyId()});
+		return count > 0;
+	}
+
+	@Override
+	public boolean addRate(StrategyRate rate) {
+		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_STRATEGY_RATE + "(strategy_id, skim, rate, isdel) values(?, ?, ?, ?)", new Object[]{rate.getStrategyId(), rate.getSkim(), rate.getRate(), IWamiConstants.ACTIVE});
 		return count > 0;
 	}
 }
@@ -73,7 +215,7 @@ class StrategyInfoRowMapper implements RowMapper<StrategyInfo>{
 	@Override
 	public StrategyInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
 		StrategyInfo info = new StrategyInfo();
-		info.setId(rs.getInt("id"));
+		info.setId(rs.getLong("id"));
 		info.setStrategyId(rs.getLong("strategy_id"));
 		info.setRank(rs.getInt("rank"));
 		info.setTitle(rs.getString("title"));
@@ -113,6 +255,7 @@ class StrategyRowMapper implements RowMapper<Strategy>{
 		strategy.setRank(rs.getInt("rank"));
 		strategy.setIconSmall(rs.getString("icon_small"));
 		strategy.setIconBig(rs.getString("icon_big"));
+		strategy.setIsdel(rs.getInt("isdel"));
 		Timestamp ts = rs.getTimestamp("lastmod_time");
 		if(ts != null)
 			strategy.setLastModTime(new Date(ts.getTime()));
@@ -134,6 +277,7 @@ class StrategyImageRowMapper implements RowMapper<StrategyImage>{
 		if(ts != null)
 			image.setLastModTime(new Date(ts.getTime()));
 		image.setLastModUserid(rs.getLong("lastmod_userid"));
+		image.setIsdel(rs.getInt("isdel"));
 		return image;
 	}
 	

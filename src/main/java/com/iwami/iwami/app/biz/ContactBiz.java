@@ -5,4 +5,6 @@ import com.iwami.iwami.app.model.Contact;
 public interface ContactBiz {
 
 	public Contact getContact();
+
+	public boolean modContact(Contact contact);
 }

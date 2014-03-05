@@ -51,7 +51,7 @@ public class TaskAjax {
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
-				logger.error("Exception in top.ajax", t);
+				logger.error("Exception in getTreasureConfig", t);
 			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 		}
 		
@@ -81,9 +81,277 @@ public class TaskAjax {
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
-				logger.error("Exception in top.ajax", t);
+				logger.error("Exception in modTreasureConfig", t);
 			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "ADD/task.ajax")
+	public Map<Object, Object> addTask(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("url")
+					 && params.containsKey("name") && params.containsKey("rank") && params.containsKey("intr")
+					 && params.containsKey("appintr") && params.containsKey("prize") && params.containsKey("type")
+					 && params.containsKey("attr") && params.containsKey("time") && params.containsKey("startTime")
+					 && params.containsKey("endTime") && params.containsKey("currentPrize") && params.containsKey("maxPrize")
+					 && params.containsKey("iconSmall") && params.containsKey("iconBig") && params.containsKey("isdel")){
+				//TODO check admin user
+				
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				
+				if(adminid > 0){
+					String name = StringUtils.trimToEmpty(params.get("name"));
+					int rank = NumberUtils.toInt(params.get("rank"), -1);
+					String intr = StringUtils.trimToEmpty(params.get("intr"));
+					String appintr = StringUtils.trimToEmpty(params.get("appintr"));
+					int prize = NumberUtils.toInt(params.get("prize"), -1);
+					int type = NumberUtils.toInt(params.get("type"), -1);
+					int attr = NumberUtils.toInt(params.get("attr"), -1);
+					int time = NumberUtils.toInt(params.get("time"), -1);
+					Date startTime = IWamiUtils.getDate(StringUtils.trimToEmpty("startTime"));
+					Date endTime = IWamiUtils.getDate(StringUtils.trimToEmpty("endTime"));
+					int currentPrize = NumberUtils.toInt(params.get("currentPrize"), -1);
+					int maxPrize = NumberUtils.toInt(params.get("maxPrize"), -2);
+					String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+					String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+					int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+					String url = StringUtils.trimToEmpty(params.get("url"));
+					
+					int defApp = NumberUtils.toInt(params.get("default"), -1);
+					
+					if(StringUtils.isNotBlank(name) && rank >= 0 && StringUtils.isNotBlank(intr) && StringUtils.isNotBlank(appintr)
+						&& prize > 0 && maxPrize > -2 && currentPrize > -2
+						&& (type == 1 || type == 2 || (type == 3 && StringUtils.isNotBlank(iconBig)) || type == 5)
+						&& (attr == 1 || attr == 2 || attr == 3)
+						&& time > 0 && StringUtils.isNotBlank(iconSmall)
+						&& (isdel == 0 || isdel == 1)
+						&& StringUtils.isNotBlank(url)){
+
+						Task task = new Task();
+						task.setName(name);
+						if(type == 3 && defApp == 1)
+							task.setRank(-1);
+						else
+							task.setRank(rank);
+						task.setIntr(intr);
+						task.setAppIntr(appintr);
+						task.setPrize(prize);
+						
+						task.setType(type);
+						if(type == 3)
+							task.setType(8);
+						else if(type == 5)
+							task.setType(16);
+						
+						int background = 1;
+						int register = 0;
+						if(attr == 2)
+							background = 0;
+						else if(attr == 3)
+							register = 1;
+						task.setBackground(background);
+						task.setRegister(register);
+						
+						task.setTime(time);
+						if(startTime == null)
+							startTime = new Date();
+						task.setStartTime(startTime);
+						task.setEndTime(endTime);
+						task.setCurrentPrize(currentPrize);
+						task.setMaxPrize(maxPrize);
+						//TODO upload icon & url
+						task.setIconSmall(iconSmall);
+						task.setIconBig(iconBig);
+						task.setUrl(url);
+						task.setLastModUserid(adminid);
+						task.setIsdel(isdel);
+					
+						if(taskBiz.addTask(task))
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+						else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in delTasks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "MOD/task.ajax")
+	public Map<Object, Object> modTask(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("taskid") && params.containsKey("url")
+					 && params.containsKey("name") && params.containsKey("rank") && params.containsKey("intr")
+					 && params.containsKey("appintr") && params.containsKey("prize") && params.containsKey("type")
+					 && params.containsKey("attr") && params.containsKey("time") && params.containsKey("startTime")
+					 && params.containsKey("endTime") && params.containsKey("addCurrentPrize") && params.containsKey("maxPrize")
+					 && params.containsKey("iconSmall") && params.containsKey("iconBig") && params.containsKey("isdel")){
+				//TODO check admin user
+				
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long taskid = NumberUtils.toLong(params.get("taskid"), -1);
+				
+				if(adminid > 0 && taskid > 0){
+					Task task = taskBiz.getTaskById(taskid);
+
+					int type = NumberUtils.toInt(params.get("type"), -1);
+					if(task != null && (type > 0 && ((type == 4 && task.getType() == 4) || (type == 1 || type == 2 || type == 3 || type == 5)))){
+						String name = StringUtils.trimToEmpty(params.get("name"));
+						int rank = NumberUtils.toInt(params.get("rank"), -1);
+						String intr = StringUtils.trimToEmpty(params.get("intr"));
+						String appintr = StringUtils.trimToEmpty(params.get("appintr"));
+						int prize = NumberUtils.toInt(params.get("prize"), -1);
+						int attr = NumberUtils.toInt(params.get("attr"), -1);
+						int time = NumberUtils.toInt(params.get("time"), -1);
+						Date startTime = IWamiUtils.getDate(StringUtils.trimToEmpty("startTime"));
+						Date endTime = IWamiUtils.getDate(StringUtils.trimToEmpty("endTime"));
+						int addCurrentPrize = NumberUtils.toInt(params.get("addCurrentPrize"), Integer.MAX_VALUE);
+						int maxPrize = NumberUtils.toInt(params.get("maxPrize"), -2);
+						String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+						String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+						int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+						String url = StringUtils.trimToEmpty(params.get("url"));
+						int defApp = NumberUtils.toInt(params.get("default"), -1);
+						
+						if(StringUtils.isNotBlank(name) && rank >= 0 && StringUtils.isNotBlank(intr) && StringUtils.isNotBlank(appintr)
+							&& prize > 0 && maxPrize > -2 && addCurrentPrize != Integer.MAX_VALUE
+							&& (type == 1 || type == 2 || (type == 3 && StringUtils.isNotBlank(iconBig)) || type == 4 || type == 5)
+							&& (attr == 1 || attr == 2 || attr == 3 || attr == 4)
+							&& time > 0 && startTime != null
+							&& StringUtils.isNotBlank(iconSmall)
+							&& (isdel == 0 || isdel == 1)
+							&& StringUtils.isNotBlank(url)){
+							
+							task.setName(name);
+							if(type == 3 && defApp == 1)
+								task.setRank(-1);
+							else
+								task.setRank(rank);
+							task.setIntr(intr);
+							task.setAppIntr(appintr);
+							task.setPrize(prize);
+							
+							task.setType(type);
+							if(type == 3)
+								task.setType(8);
+							else if(type == 5)
+								task.setType(16);
+							
+							int background = 1;
+							int register = 0;
+							if(attr == 2)
+								background = 0;
+							else if(attr == 3)
+								register = 1;
+							task.setBackground(background);
+							task.setRegister(register);
+							
+							task.setTime(time);
+							task.setStartTime(startTime);
+							task.setEndTime(endTime);
+							task.setCurrentPrize(addCurrentPrize);
+							task.setMaxPrize(maxPrize);
+							//TODO upload icon & url
+							task.setIconSmall(iconSmall);
+							task.setIconBig(iconBig);
+							task.setUrl(url);
+							task.setIsdel(isdel);
+							task.setLastModUserid(adminid);
+						
+							if(taskBiz.modTask(task))
+								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+							else
+								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+						} else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in delTasks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "STOP/task.ajax")
+	public Map<Object, Object> stopTask(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("taskid")){
+				//TODO check admin user
+				
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long taskid = NumberUtils.toLong(params.get("taskid"), -1);
+				
+				//direct check in db
+				if(adminid > 0 && taskid > 0){
+					if(taskBiz.stopTask(taskid, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in stopTasks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "DEL/task.ajax")
+	public Map<Object, Object> delTask(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("taskid")){
+				//TODO check admin user
+				
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long taskid = NumberUtils.toLong(params.get("taskid"), -1);
+				
+				//direct check in db
+				if(adminid > 0 && taskid > 0){
+					if(taskBiz.delUnstartedTask(taskid, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in delTasks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
 		
 		return result;
 	}
@@ -133,7 +401,7 @@ public class TaskAjax {
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
-				logger.error("Exception in top.ajax", t);
+				logger.error("Exception in getTasks", t);
 			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 		}
 		
@@ -150,11 +418,12 @@ public class TaskAjax {
 					Map<String, Object> tmp = new HashMap<String, Object>();
 					
 					tmp.put("taskid", task.getId());
-					tmp.put("name", task.getName());
+					tmp.put("name", StringUtils.trimToEmpty(task.getName()));
 					tmp.put("rank", task.getRank());
-					tmp.put("intr", task.getIntr());
-					tmp.put("appintr", task.getAppIntr());
+					tmp.put("intr", StringUtils.trimToEmpty(task.getIntr()));
+					tmp.put("appintr", StringUtils.trimToEmpty(task.getAppIntr()));
 					tmp.put("prize", task.getPrize());
+					tmp.put("url", StringUtils.trimToEmpty(task.getUrl()));
 					
 					int type = 1;
 					if((task.getType() & 2) > 0)
@@ -181,13 +450,24 @@ public class TaskAjax {
 					tmp.put("endTime", IWamiUtils.getDateString(task.getEndTime()));
 					tmp.put("currentPrize", task.getCurrentPrize());
 					tmp.put("maxPrize", task.getMaxPrize());
-					tmp.put("icomSmall", task.getIconSmall());
-					tmp.put("iconBig", task.getIconBig());
+					
+					int leftPrize = task.getMaxPrize();
+					if(leftPrize >= 0)
+						leftPrize -= task.getCurrentPrize();
+					tmp.put("leftPrize", leftPrize);
+					
+					tmp.put("iconSmall", StringUtils.trimToEmpty(task.getIconSmall()));
+					tmp.put("iconBig", StringUtils.trimToEmpty(task.getIconBig()));
 					tmp.put("lastModTime", IWamiUtils.getDateString(task.getLastModTime()));
 					tmp.put("lastModUserid", task.getLastModUserid());
 					tmp.put("isdel", task.getIsdel());
 
 					tmp.put("status", task.getStatus());
+					
+					if(type == 3 && task.getRank() == -1)
+						tmp.put("default", 1);
+					else
+						tmp.put("default", 0);
 					
 					data.add(tmp);
 				}

@@ -59,7 +59,6 @@ public class UserAjax {
 		if(users != null)
 			for(User user : users){
 				Map<String, Object> tmp = new HashMap<String, Object>();
-				tmp.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				tmp.put("userid", user.getId());
 				tmp.put("username", StringUtils.trimToEmpty(user.getName()));
 				tmp.put("uuid", StringUtils.trimToEmpty(user.getUuid()));

@@ -1,6 +1,7 @@
 package com.iwami.iwami.app.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.iwami.iwami.app.model.Strategy;
 import com.iwami.iwami.app.model.StrategyImage;
@@ -9,17 +10,45 @@ import com.iwami.iwami.app.model.StrategyRate;
 
 public interface StrategyDao {
 
-	public List<StrategyImage> getAllStrategyImages();
+	// image
+	public List<StrategyImage> getAllImages();
+
+	public boolean addImage(StrategyImage image);
+
+	public boolean modImage(StrategyImage image);
+
+	public boolean modImageSeqs(List<Long> lIds, List<Integer> lRanks, long adminid);
+
+	public boolean delImage(int id, long adminid);
+
+	// rates
+	public Map<Long, StrategyRate> getRatesByIds(List<Long> ids);
+
+	public boolean delRateInfo(long id, long adminid);
+
+	public boolean delRate(long id, long adminid);
+
+	public boolean modRate(StrategyRate rate);
+
+	public boolean addRate(StrategyRate rate);
 	
-	public List<Strategy> getAllStrategies();
+	// strategies
+	public List<Strategy> getStrategies(String key);
+
+	public boolean delStrategy(long id, long adminid);
+
+	public boolean modStrategySeqls(List<Long> lIds, List<Integer> lRanks, long adminid);
+
+	public boolean modStrategy(Strategy strategy);
+
+	public long addStrategy(Strategy strategy);
 	
-	public StrategyRate getStrategyRateByStrategyId(long strategyId);
-	
-	public List<StrategyInfo> getStrategyInfosByStrategyId(long strategyId, int start, int step);
-	
-	public boolean rateStrategy(long strategyId, String uuid);
-	
-	public boolean incrStrategyRateSkim(long strategyId);
-	
-	public boolean incrStrategyRateRate(long strategyId);
+	// info
+	public List<StrategyInfo> getInfos(long id);
+
+	public boolean delInfo(long id, long adminid);
+
+	public boolean addInfo(StrategyInfo info);
+
+	public boolean modInfo(StrategyInfo info);
 }

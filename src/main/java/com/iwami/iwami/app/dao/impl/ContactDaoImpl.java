@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
+import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.constants.SqlConstants;
 import com.iwami.iwami.app.dao.ContactDao;
 import com.iwami.iwami.app.model.Contact;
@@ -24,7 +25,7 @@ public class ContactDaoImpl extends JdbcDaoSupport implements ContactDao{
 				contact.setPhone1(rs.getString("phone1"));
 				contact.setEmail1(rs.getString("email1"));
 				contact.setDomain(rs.getString("domain"));
-				contact.setQq(rs.getLong("qq"));
+				contact.setQq(rs.getString("qq"));
 				contact.setQqgroup(rs.getString("qqgroup"));
 				contact.setPhone2(rs.getString("phone2"));
 				contact.setEmail2(rs.getString("email2"));
@@ -41,8 +42,8 @@ public class ContactDaoImpl extends JdbcDaoSupport implements ContactDao{
 	}
 
 	@Override
-	public boolean delContact(long id) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_CONTACT + " set isdel = 1 where id = ?", new Object[]{id});
+	public boolean delAllContacts() {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_CONTACT + " set isdel = ? where isdel = ?", new Object[]{IWamiConstants.INACTIVE, IWamiConstants.ACTIVE});
 		if(count > 0)
 			return true;
 		else

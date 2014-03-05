@@ -25,6 +25,8 @@ public class Strategy {
 	private Date lastModTime;
 	
 	private long lastModUserid;
+	
+	private int isdel;
 
 	public long getId() {
 		return id;
@@ -111,5 +113,13 @@ public class Strategy {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	public int getIsdel() {
+		return isdel;
+	}
+
+	public void setIsdel(int isdel) {
+		this.isdel = isdel;
 	}
 }

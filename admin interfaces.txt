@@ -1,156 +1,599 @@
-1. �û�����
-	1.1 ��ѯ�û�
-		·����GET/user.ajax
-		���������
-			adminid: long ����Աid
-			key��long �û�����
-		��������
-			status��0 ���سɹ�
-							300 ��������
-							400 ϵͳ����
-			data��[
+1. 用户管理
+	1.1 查询用户
+		路径：GET/user.ajax
+		输入参数：
+			adminid: long 管理员id
+			key：long 用户输入
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data：[
 				{
-						userid: long �û�id	- �����޸�
-			   		username: String �û���
-			   		uuid: String �豸id	- �����޸�
-			   		alias: String jpushΨһid	- �����޸�
-			   		cellPhone: long �ֻ���
-			   		age: int ����
-			  		gender: int �Ա�0˧�磬1��Ů
-   		  		job: String ְҵ
-   		  		address: String ��ַ
-   		  		addTime: String ע��ʱ��	- �����޸�
-   		  		lastModTime: String �ϴ��޸�ʱ��	- �����޸�
-   		  		lastModUserid: long �ϴ��޸���	- �����޸�
-   		  		isdel��int 0��Ч��1��Ч
+						userid: long 用户id	- 不可修改
+			   		username: String 用户名
+			   		uuid: String 设备id	- 不可修改
+			   		alias: String jpush唯一id	- 不可修改
+			   		cellPhone: long 手机号
+			   		age: int 年龄
+			  		gender: int 性别：0帅哥，1美女
+   		  		job: String 职业
+   		  		address: String 地址
+   		  		addTime: String 注册时间	- 不可修改
+   		  		lastModTime: String 上次修改时间	- 不可修改
+   		  		lastModUserid: long 上次修改人	- 不可修改
+   		  		isdel：int 0有效，1无效
    		  		
-   		  		createTime:String ��������	- �����޸�
-   		  		lastLoginTime:String �ϴε�¼ʱ��	- �����޸�
+   		  		createTime:String 创建日期	- 不可修改
+   		  		lastLoginTime:String 上次登录时间	- 不可修改
    		  		
-   		  		currentPrize: int �û�ӵ��������Ŀ
-   		  		exchangePrize: int �û��Ѿ��һ�������Ŀ
-   		  		lastCellPhone1: long �ϴγ�ֵ�ֻ���
-   		  		lastAlipayAccount�� String �ϴ�֧�����˺�
-   		  		lastBankName: String �ϴ����п�������
-   		  		lastBankAccount: String �ϴ����п�������
-   		  		lastBankNo: long �ϴ������˺�
-   		  		lastAddress: String �ϴ����Ͽ�ݵ�ַ
-   		  		lastCellPhone2: String �ϴ����Ͽ���ֻ���
-   		  		lastName: String �ϴ����Ͽ������
+   		  		currentPrize: int 用户拥有米粒数目
+   		  		exchangePrize: int 用户已经兑换米粒数目
+   		  		lastCellPhone1: long 上次充值手机号
+   		  		lastAlipayAccount： String 上次支付宝账号
+   		  		lastBankName: String 上次银行卡开户行
+   		  		lastBankAccount: String 上次银行开户姓名
+   		  		lastBankNo: long 上次银行账号
+   		  		lastAddress: String 上次线上快递地址
+   		  		lastCellPhone2: String 上次线上快递手机号
+   		  		lastName: String 上次线上快递名字
 				}
 				,
 				...
 			]
-	1.2 �޸��û�
-		·����MOD/user.ajax
-		���������
-					adminid: long ����Աid
+	1.2 修改用户
+		路径：MOD/user.ajax
+		输入参数：
+					adminid: long 管理员id
 					
-					userid: long �û�id	- �����޸�
-		   		username: String �û���
-		   		cellPhone: long �ֻ���
-		   		age: int ����
-		  		gender: int �Ա�0˧�磬1��Ů
-		  		job: String ְҵ
-		  		address: String ��ַ
-		  		isdel��int 0��Ч��1��Ч
+					userid: long 用户id	- 不可修改
+		   		username: String 用户名
+		   		cellPhone: long 手机号
+		   		age: int 年龄
+		  		gender: int 性别：0帅哥，1美女
+		  		job: String 职业
+		  		address: String 地址
+		  		isdel：int 0有效，1无效
 		  		
-		  		currentPrize: int �û�ӵ��������Ŀ
-		  		exchangePrize: int �û��Ѿ��һ�������Ŀ
-		  		lastCellPhone1: long �ϴγ�ֵ�ֻ���
-		  		lastAlipayAccount�� String �ϴ�֧�����˺�
-		  		lastBankName: String �ϴ����п�������
-		  		lastBankAccount: String �ϴ����п�������
-		  		lastBankNo: long �ϴ������˺�
-		  		lastAddress: String �ϴ����Ͽ�ݵ�ַ
-		  		lastCellPhone2: String �ϴ����Ͽ���ֻ���
-		  		lastName: String �ϴ����Ͽ������
-		�������� - ������̨����������Աʹ�ã����Բ�����ô������룬���������е��޸Ķ�����ȷ�ģ�
-			status��0 ���سɹ�
-							300 ��������
-							400 ϵͳ����
-	1.3 �����û���Ϣ
-		·����PUSH/user.ajax
-		���������
-					adminid: long ����Աid					
-					userid: long �û�id
-		   		msg: String ��Ϣ
-		��������
-			status��0 ���سɹ�
-							300 ��������
-							400 ϵͳ����
-							1000300 �û�δ����JPUSHΨһID
-			msg��������Ϣ
-2. �������
-	2.1 ��ѯ�����������
-		·����GET/treasureconfig.ajax
-		���������
-			adminid: long ����Աid
-		��������
-			status��0 ���سɹ�
-							300 ��������
-							400 ϵͳ����
-			data��{
-				days��int ������
-				count��int ���ٴ�
+		  		currentPrize: int 用户拥有米粒数目
+		  		exchangePrize: int 用户已经兑换米粒数目
+		  		lastCellPhone1: long 上次充值手机号
+		  		lastAlipayAccount： String 上次支付宝账号
+		  		lastBankName: String 上次银行卡开户行
+		  		lastBankAccount: String 上次银行开户姓名
+		  		lastBankNo: long 上次银行账号
+		  		lastAddress: String 上次线上快递地址
+		  		lastCellPhone2: String 上次线上快递手机号
+		  		lastName: String 上次线上快递名字
+		输出结果： - 管理后台仅仅给管理员使用，所以不用那么多错误码，假设他所有的修改都是正确的！
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	1.3 发送用户消息
+		路径：PUSH/user.ajax
+		输入参数：
+					adminid: long 管理员id
+					
+					userid: long 用户id
+		   		msg: String 消息
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+							1000300 用户未设置JPUSH唯一ID
+			msg：错误信息
+2. 任务管理
+	2.1 查询红包触发条件
+		路径：GET/treasureconfig.ajax
+		输入参数：
+			adminid: long 管理员id
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data：{
+				days：int 多少天
+				count：int 多少次
 			}
-	2.2 �޸ĺ����������
-		·����MOD/treasureconfig.ajax
-		���������
-			adminid: long ����Աid
-			days��int ������
-			count��int ���ٴ�
-		��������
-			status��0 ���سɹ�
-							300 ��������
-							400 ϵͳ����
-	2.3 ��ѯ����
-		·����GET/task.ajax
-		���������
-			adminid: long ����Աid
+	2.2 修改红包触发条件
+		路径：MOD/treasureconfig.ajax
+		输入参数：
+			adminid: long 管理员id
+			days：int 多少天
+			count：int 多少次
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	2.3 查询任务
+		路径：GET/task.ajax
+		输入参数：
+			adminid: long 管理员id
 			
-			type��int �������� 0ȫ�� 1��ͨ����2�������3�������4��������5��������
-			attr: int ��̨���� 0ȫ�� 1��̨̨���2ǰ̨̨���3ע��
-			startL: String ��ʼʱ����ʼ yyyy-MM-dd HH:mm:ss
-			startR: String ��ʼʱ���ֹ yyyy-MM-dd HH:mm:ss
-			endL: String ����ʱ����ʼ yyyy-MM-dd HH:mm:ss
-			endR: String ����ʱ���ֹ yyyy-MM-dd HH:mm:ss
-			maxL: int �����޶���ʼ -1Ϊδ����
-			maxR��int �����޶��ֹ -1Ϊδ����
-			prizeL: int ������������ʼ -1Ϊδ����
-			prizeR��int ������������ֹ -1Ϊδ����
-			currL��int ����������ʼ -1Ϊδ����
-			currR��int ����������ֹ -1Ϊδ����
-			leftL��int ʣ��������ʼ -1Ϊδ����
-			leftR��int ʣ��������ֹ -1Ϊδ����
-		��������
-			status��0 ���سɹ�
-							300 ��������
-							400 ϵͳ����
-			data��[
+			type：int 任务类型 0全部 1普通任务，2红包任务，3金榜任务，4分享任务，5线下任务
+			attr: int 后台运行 0全部 1后台台激活，2前台台激活，3注册
+			startL: String 开始时间起始 yyyy-MM-dd HH:mm:ss
+			startR: String 开始时间截止 yyyy-MM-dd HH:mm:ss
+			endL: String 结束时间起始 yyyy-MM-dd HH:mm:ss
+			endR: String 结束时间截止 yyyy-MM-dd HH:mm:ss
+			maxL: int 任务限额起始 -1为未设置
+			maxR：int 任务限额截止 -1为未设置
+			prizeL: int 任务米粒数起始 -1为未设置
+			prizeR：int 任务米粒数截止 -1为未设置
+			currL：int 已抢数量起始 -1为未设置
+			currR：int 已抢数量截止 -1为未设置
+			leftL：int 剩余数量起始 -1为未设置
+			leftR：int 剩余数量截止 -1为未设置
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data：[
 				{
-						taskid��long ����id - �����޸�
-						name��String app����
-						rank��int ��ʾ˳��
-						intr��String ������
-						appintr��String app���
-						prize��int ����������
-						type��int 1��ͨ����2�������3�������4��������5��������
-						attr: int 1��̨̨���2ǰ̨̨���3ע�ᣬ4����
-						time��int ����Ҫ��ʱ��
-						startTime��String ��ʼʱ�� yyyy-MM-dd HH:mm:ss
-						endTime��String ����ʱ�� yyyy-MM-dd HH:mm:ss
-						currentPrize��int ��ǰ����������
-						maxPrize��int ������������
-						iconSmall��String Сͼ
-						iconBig��String ��ͼ
-						lastModTime��String �ϴ��޸�ʱ�� yyyy-MM-dd HH:mm:ss
-						lastModUserid��long �ϴ��޸���
-						isdel: int ״̬ 0��Ч��1��Ч
+						taskid：long 任务id - 不可修改
+						name：String app名字
+						rank：int 显示顺序
+						intr：String 任务简介
+						appintr：String app简介
+						prize：int 任务米粒数
+						url: String apk下载地址
+						type：int 1普通任务，2红包任务，3金榜任务，4分享任务，5线下任务
+						attr: int 1后台台激活，2前台台激活，3注册，4分享
+						time：int 任务要求时间
+						startTime：String 开始时间 yyyy-MM-dd HH:mm:ss
+						endTime：String 结束时间 yyyy-MM-dd HH:mm:ss
+						currentPrize：int 当前已抢米粒数
+						maxPrize：int 最大可抢米粒数
+						leftPrize：int 剩余可抢米粒数
+						iconSmall：String 小图
+						iconBig：String 大图
+						lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+						lastModUserid：long 上次修改人
+						isdel: int 状态 0有效，1无效
 						
-						status: int ����ִ�������1δ��ʼ��2���ڽ����У�3�Ѿ���ɻ�ʧЧ
+						default: int 仅当type为3金榜任务时有用：1 榜单默认显示app，其他值 非默认显示
+						
+						status: int 任务执行情况：1未开始，2正在进行中，3已经完成或失效
 				}
 				,
 				...
 			]
 			
+	2.4 删除任务
+		路径：DEL/task.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+			taskid: long 任务id
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			
+	2.5 停止任务
+		路径：STOP/task.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+			taskid: long 任务id
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			
+	2.6 修改任务
+		路径：MOD/task.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+			taskid: long 任务id
+			name：String app名字
+			rank：int 显示顺序
+			intr：String 任务简介
+			appintr：String app简介
+			prize：int 任务米粒数
+			url: String apk下载地址
+			type：int 1普通任务，2红包任务，3金榜任务，4分享任务，5线下任务
+			attr: int 1后台台激活，2前台台激活，3注册，4分享
+			time：int 任务要求时间
+			startTime：String 开始时间 yyyy-MM-dd HH:mm:ss
+			endTime：String 结束时间 yyyy-MM-dd HH:mm:ss
+			addCurrentPrize：int 需要增加到当前已抢米粒数的米粒数------Note：前端增加当前米粒数的label，新增addCurrentPrize输入框，必须和currentPrize分开是为了防止数据库中字段已经被用户更新过，管理员在此修改的话会覆盖掉用户完成任务修改的currentPrize
+			maxPrize：int 最大可抢米粒数
+			iconSmall：String 小图
+			iconBig：String 大图
+			isdel: int 状态 0有效，1无效
+			
+			default: int 仅当type为3金榜任务时有用：1 榜单默认显示app，其他值 非默认显示
+			
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			
+	2.7 新增任务
+		路径：ADD/task.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+			name：String app名字
+			rank：int 显示顺序
+			intr：String 任务简介
+			appintr：String app简介
+			prize：int 任务米粒数
+			url: String apk下载地址
+			type：int 1普通任务，2红包任务，3金榜任务，5线下任务
+			attr: int 1后台台激活，2前台台激活，3注册，4分享
+			time：int 任务要求时间
+			startTime：String 开始时间 yyyy-MM-dd HH:mm:ss
+			endTime：String 结束时间 yyyy-MM-dd HH:mm:ss
+			currentPrize：int 当前已抢米粒数
+			maxPrize：int 最大可抢米粒数 -1为未设置
+			iconSmall：String 小图
+			iconBig：String 大图
+			isdel: int 状态 0有效，1无效
+			
+			default: int 仅当type为3金榜任务时有用：1 榜单默认显示app，其他值 非默认显示
+			
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+3. 攻略管理
+	3.1 焦点图列表
+		3.1.1 查询列表接口
+			路径：GET/images.ajax
+			输入参数：
+				adminid: long 管理员id
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+				data：[
+					{
+						id: long 焦点图id
+						rank：int 排序
+						url：图片url
+   		  		isdel：int 0有效，1无效
+   		  		
+						lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+						lastModUserid：long 上次修改人
+					},
+					...
+				]
+		3.1.2 新建焦点图接口
+			路径：ADD/image.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				rank：int 排序
+				url：图片url
+   		  isdel：int 0有效，1无效
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+		3.1.3 修改焦点图接口
+			路径：MOD/image.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				id: long 焦点图id
+				rank：int 排序
+				url：图片url
+   		  isdel：int 0有效，1无效
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+		3.1.4 删除焦点图接口
+			路径：DEL/image.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				id: long 焦点图id
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+		3.1.5 修改顺序接口
+			路径：SEQ/image.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				ids: String 焦点图ids，用,分隔
+				ranks：String 排序，用,分隔
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+			
+			
+	3.2 攻略列表
+		3.2.1 查询列表接口
+			路径：GET/strategy.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				key: String 攻略ID或名称
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+				data：[
+					{
+						id: long 攻略id
+						name: String 攻略名称
+						subname：String 攻略子标题
+						intr：String 简介
+						rank：int 排序
+						iconSmall：小图片url
+						iconBig：大图片url
+   		  		isdel：int 0有效，1无效
+   		  		
+   		  		skim: int 浏览次数
+   		  		rate: int 被赞次数
+   		  		
+						lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+						lastModUserid：long 上次修改人
+					},
+					...
+				]
+		3.2.2 新增接口       ------------- NOTE: 新增strategy的主题内容成功后，再新增攻略详情（ADD/info），strategyid从结果的data中获取，可以分着提交（多个攻略详情可以同时发），实在不想搞复杂的事务了
+			路径：ADD/strategy.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				name: String 攻略名称
+				subname：String 攻略子标题
+				intr：String 简介
+				rank：int 排序
+				iconSmall：小图片url
+				iconBig：大图片url
+	  		isdel：int 0有效，1无效
+	  		
+	  		skim: int 浏览次数
+	  		rate: int 被赞次数
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+				data：long 新增攻略的id
+		3.2.3 修改接口       ------------- NOTE: 修改strategy的主题内容和攻略详情（MOD/info）可以分着提交（多个攻略详情可以同时发），实在不想搞复杂的事务了
+			路径：MOD/strategy.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				id: long 攻略id
+				name: String 攻略名称
+				subname：String 攻略子标题
+				intr：String 简介
+				rank：int 排序
+				iconSmall：小图片url
+				iconBig：大图片url
+	  		isdel：int 0有效，1无效
+	  		
+	  		skim: int 浏览次数
+	  		rate: int 被赞次数
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+		3.2.4 删除列表接口
+			路径：DEL/strategy.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				id: long 攻略id
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+		3.2.5 修改顺序接口
+			路径：SEQ/strategy.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				ids: String 焦点图ids，用,分隔
+				ranks：String 排序，用,分隔
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+			
+			
+	3.3 攻略详情列表
+		3.3.1 查询列表接口
+			路径：GET/info.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				strategyid: long 攻略ID
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+				data：[
+					{
+						id: long 攻略详情id
+						rank：int 排序
+						title：String 标题
+						content：String 内容
+						url：图片url
+   		  		
+						lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+						lastModUserid：long 上次修改人
+					},
+					...
+				]
+		3.3.2 新增接口
+			路径：ADD/info.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				strategyid: long 攻略ID
+				
+				rank：int 排序
+				title：String 标题
+				content：String 内容
+				url：图片url
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+		3.3.3 修改接口
+			路径：MOD/info.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				id: long 攻略详情id
+				rank：int 排序
+				title：String 标题
+				content：String 内容
+				url：图片url
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+		3.3.4 删除列表接口
+			路径：DEL/info.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				id: long 攻略详情id
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+								
+4. 消息编辑
+	4.1 联系方式
+		4.1.1 获取接口
+			路径：GET/contact.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+				data：{
+			   		phone1 String "客服电话"
+					email1 String "服务邮箱"
+					domain String "官网地址"
+					qq long "客服qq"
+					qqgroup String "qq群"
+					phone2 String "业务电话"
+					email2 String "业务邮箱"
+   		  		
+					lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+					lastModUserid：long 上次修改人
+				}
+		4.1.2 修改接口
+			路径：MOD/contact.ajax
+			输入参数：
+				adminid: long 管理员id
+		   	phone1 String "客服电话"
+				email1 String "服务邮箱"
+				domain String "官网地址"
+				qq long "客服qq"
+				qqgroup String "qq群"
+				phone2 String "业务电话"
+				email2 String "业务邮箱"
+				
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+	4.2 提示信息
+		4.2.1 获取接口
+			路径：GET/tip.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+				data：[
+					{
+						type : int 0挖米广告词,1没有符合要求的任务提示，2没有礼品提示，3分享内容（微博，微信，朋友圈），4短信接收手机号
+						content : 内容
+   		  		
+						lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+						lastModUserid：long 上次修改人
+					},
+					...
+			   ]
+		4.2.2 修改接口
+			路径：MOD/tip.ajax
+			输入参数：
+				adminid: long 管理员id
+				
+				type : int 0挖米广告词,1没有符合要求的任务提示，2没有礼品提示，3分享内容（微博，微信，朋友圈），4短信接收手机号
+				content : 内容
+				
+			输出结果
+				status：0 返回成功
+								300 参数错误
+								400 系统错误
+								
+5. 人员管理
+	5.1 获取列表
+		路径：GET/admin.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+		输出结果
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data：[
+				{
+		   		userid: long 运营人员id
+		   		username：String 用户名称
+		   		cellPhone：long 用户手机
+		   		password：空 密码
+		   		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
+	 		  		
+					lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+					lastModUserid：long 上次修改人
+				}
+			]
+	5.2 新增运营人员
+		路径：ADD/admin.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+   		username：String 用户名称
+   		cellPhone：long 用户手机
+   		password：String 密码 - 前端md5加密呗
+   		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
+		输出结果
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	5.3 修改运营人员
+		路径：MOD/admin.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+		  userid: long 运营人员id
+			username：String 用户名称
+   		cellPhone：long 用户手机
+   		password：String 密码 - 前端md5加密呗
+   		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
+		输出结果
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	5.4 删除运营人员
+		路径：DEL/admin.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+			userid：long 运营人员id
+		输出结果
+			status：0 返回成功
+							300 参数错误
+							400 系统错误

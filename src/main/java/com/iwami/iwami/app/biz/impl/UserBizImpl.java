@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.iwami.iwami.app.biz.UserBiz;
 import com.iwami.iwami.app.model.User;
+import com.iwami.iwami.app.model.UserRole;
 import com.iwami.iwami.app.service.OnstartService;
 import com.iwami.iwami.app.service.UserService;
 
@@ -120,5 +121,53 @@ public class UserBizImpl implements UserBiz {
 
 	public void setOnstartService(OnstartService onstartService) {
 		this.onstartService = onstartService;
+	}
+
+	// admin user here...
+	@Override
+	public List<User> getAdminUsers() {
+		return userService.getAdminUsers();
+	}
+
+	@Override
+	public Map<Long, UserRole> getUserRoles(List<Long> ids) {
+		return userService.getUserRoles(ids);
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class, value="txManager")
+	public boolean addAdmin(User user, UserRole role) {
+		if(userService.addAdminUser(user)){
+			role.setUserid(user.getId());
+			if(userService.addAdminUserInfo(user) && userService.addAdminRole(role))
+				return true;
+			else
+				throw new RuntimeException("failed add admin, so rollback");
+		} else
+			return false;
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class, value="txManager")
+	public boolean modAdmin(User user, UserRole role) {
+		if(userService.modAdminUserInfo(user))
+			if(userService.modAdminRole(role))
+				return true;
+			else
+				throw new RuntimeException("failed mod admin, so rollback");
+		else
+			return false;
+	}
+
+	@Override
+	@Transactional(rollbackFor=Exception.class, value="txManager")
+	public boolean delAdmin(long userid, long adminid) {
+		if(userService.delAdminUser(userid, adminid))
+			if(userService.delAdminUserInfo(userid, adminid) && userService.delAdminRole(userid, adminid))
+				return true;
+			else
+				throw new RuntimeException("failed mod admin, so rollback");
+		else
+			return false;
 	}
 }

@@ -82,6 +82,33 @@ public class TaskBizImpl implements TaskBiz {
 		return tasks;
 	}
 
+	@Override
+	public boolean modTask(Task task) {
+		if(task.getType() == Task.TYPE_GOLD && task.getRank() == Task.RANK_GOLD_DEFAULT)
+			taskService.incrTaskRankByType(Task.TYPE_GOLD);
+		return taskService.modTask(task);
+	}
+
+	@Override
+	public Task getTaskById(long taskid) {
+		return taskService.getTaskById(taskid);
+	}
+
+	@Override
+	public boolean delUnstartedTask(long taskid, long adminid) {
+		return taskService.delUnstartedTask(taskid, adminid);
+	}
+
+	@Override
+	public boolean stopTask(long taskid, long adminid) {
+		return taskService.stopTask(taskid, adminid);
+	}
+
+	@Override
+	public boolean addTask(Task task) {
+		return taskService.addTask(task);
+	}
+
 	public TaskService getTaskService() {
 		return taskService;
 	}

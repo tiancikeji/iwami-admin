@@ -2,17 +2,14 @@ package com.iwami.iwami.app.biz.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.iwami.iwami.app.biz.StrategyBiz;
 import com.iwami.iwami.app.comparator.StrategyImageRankComparator;
 import com.iwami.iwami.app.comparator.StrategyInfoComparator;
 import com.iwami.iwami.app.comparator.StrategyRankComparator;
-import com.iwami.iwami.app.exception.DuplicateRateStrategyInfoException;
 import com.iwami.iwami.app.model.Strategy;
 import com.iwami.iwami.app.model.StrategyImage;
 import com.iwami.iwami.app.model.StrategyInfo;
@@ -21,13 +18,49 @@ import com.iwami.iwami.app.service.StrategyService;
 
 public class StrategyBizImpl implements StrategyBiz {
 	
-	private Log logger = LogFactory.getLog(getClass());
-	
 	private StrategyService strategyService;
 
+	// image
 	@Override
-	public List<Strategy> getAllStrategies() {
-		List<Strategy> strategies = strategyService.getAllStrategies();
+	public boolean addSImage(StrategyImage image) {
+		// TODO upload image to CDN
+		return strategyService.addImage(image);
+	}
+
+	@Override
+	public boolean modImage(StrategyImage image) {
+		// TODO upload image to CDN
+		return strategyService.modImage(image);
+	}
+
+	@Override
+	public boolean delImage(int id, long adminid) {
+		return strategyService.delImage(id, adminid);
+	}
+
+	@Override
+	public boolean modImageSeqs(List<Long> lIds, List<Integer> lRanks, long adminid) {
+		return strategyService.modImageSeqs(lIds, lRanks, adminid);
+	}
+
+	@Override
+	public List<StrategyImage> getAllImages() {
+		List<StrategyImage> images = strategyService.getAllImages();
+		
+		if(images != null && images.size() > 0){
+			Collections.sort(images, new StrategyImageRankComparator());
+			
+			for(int i = 0; i < images.size(); i ++)
+				images.get(i).setRank(i);
+		}
+		
+		return images;
+	}
+
+	// strategy
+	@Override
+	public List<Strategy> getStrategies(String key) {
+		List<Strategy> strategies = strategyService.getStrategies(key);
 		
 		if(strategies != null && strategies.size() > 0){
 			Collections.sort(strategies, new StrategyRankComparator());
@@ -40,70 +73,74 @@ public class StrategyBizImpl implements StrategyBiz {
 	}
 
 	@Override
-	public List<StrategyImage> getAllStragtegyImages() {
-		List<StrategyImage> images = strategyService.getAllStragtegyImages();
-		
-		if(images != null && images.size() > 0){
-			Collections.sort(images, new StrategyImageRankComparator());
-			
-			for(int i = 0; i < images.size(); i ++)
-				images.get(i).setRank(i);
-		}
-		
-		return images;
+	@Transactional(rollbackFor=Exception.class, value="txManager")
+	public long addStrategy(Strategy strategy, StrategyRate rate) {
+		long id = strategyService.addStrategy(strategy);
+		if(id > 0){
+			rate.setStrategyId(id);
+			if(!strategyService.addRate(rate))
+				throw new RuntimeException("exception in modrate, so rollback");
+			else
+				return id;
+		} else
+			return 0;
 	}
 
 	@Override
-	public List<StrategyInfo> getStrategyInfoByStrateByStrategyId(long strategyId, int start, int step) {
-		List<StrategyInfo> infos = strategyService.getStrategyInfoByStrateByStrategyId(strategyId, start, step);
+	@Transactional(rollbackFor=Exception.class, value="txManager")
+	public boolean modStrategy(Strategy strategy, StrategyRate rate) {
+		if(strategyService.modStrategy(strategy)){
+			if(!strategyService.modRate(rate))
+				throw new RuntimeException("exception in modrate, so rollback");
+			else
+				return true;
+		} else
+			return false;
+	}
+
+	@Override
+	public boolean delStrategy(long id, long adminid) {
+		return strategyService.delStrategy(id, adminid);
+	}
+
+	@Override
+	public boolean modStrategySeqs(List<Long> lIds, List<Integer> lRanks, long adminid) {
+		return strategyService.modStrategySeqs(lIds, lRanks, adminid);
+	}
+
+	// rate
+	@Override
+	public Map<Long, StrategyRate> getRatesByIds(List<Long> ids) {
+		return strategyService.getRatesByIds(ids);
+	}
+
+	// info
+	@Override
+	public List<StrategyInfo> getInfos(long id) {
+		List<StrategyInfo> infos = strategyService.getInfos(id);
 		
 		if(infos != null && infos.size() > 0){
 			Collections.sort(infos, new StrategyInfoComparator());
 			
 			for(int i = 0; i < infos.size(); i ++)
-				infos.get(i).setRank(start + i);
+				infos.get(i).setRank(i);
 		}
-		
-		if(start == 0)
-			try{
-				strategyService.incrStrategyRateSkim(strategyId);
-			} catch(Throwable t){
-				if(logger.isErrorEnabled())
-					logger.error("Error in incr skim for <" + strategyId + "> : ", t);
-			}
-		
 		return infos;
 	}
 
 	@Override
-	public StrategyRate getStrategyRateByStrategyId(long strategyId) {
-		return strategyService.getStrategyRateByStrategyId(strategyId);
+	public boolean addInfo(StrategyInfo info) {
+		return strategyService.addInfo(info);
 	}
 
 	@Override
-	@Transactional(rollbackFor=Exception.class, value="txManager")
-	public boolean rateStrategy(long strategyId, String uuid) throws DuplicateRateStrategyInfoException {
-		try{
-			strategyService.rateStrategy(strategyId, uuid);
-			strategyService.incrStrategyRateRate(strategyId);
-		} catch(DuplicateKeyException e){
-			if(logger.isErrorEnabled())
-				logger.error("DuplicateKeyException in rateStrategy for <" + strategyId + "," + uuid + "> : ", e);
-			throw new DuplicateRateStrategyInfoException();
-		}
-		return true;
+	public boolean modInfo(StrategyInfo info) {
+		return strategyService.modInfo(info);
 	}
 
 	@Override
-	public Strategy getStrategyByStrategyId(long strategyId) {
-		List<Strategy> strategies = getAllStrategies();
-		
-		if(strategies != null && strategies.size() > 0)
-			for(Strategy strategy : strategies)
-				if(strategy != null && strategy.getId() == strategyId)
-					return strategy;
-		
-		return null;
+	public boolean delInfo(long id, long adminid) {
+		return strategyService.delInfo(id, adminid);
 	}
 
 	public StrategyService getStrategyService() {
