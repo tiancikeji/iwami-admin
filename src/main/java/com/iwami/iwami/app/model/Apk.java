@@ -22,6 +22,8 @@ public class Apk {
 	
 	private long lastmodUserid;
 	
+	private int isdel;
+	
 	public long getId() {
 		return id;
 	}
@@ -91,6 +93,14 @@ public class Apk {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	public int getIsdel() {
+		return isdel;
+	}
+
+	public void setIsdel(int isdel) {
+		this.isdel = isdel;
 	}
 	
 }

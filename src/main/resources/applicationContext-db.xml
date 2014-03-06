@@ -18,10 +18,6 @@
 	<context:annotation-config />
 	<tx:annotation-driven  transaction-manager="txManager"/>
 		
-	<bean name="onstartDao" class="com.iwami.iwami.app.dao.impl.OnstartDaoImpl">
-		<property name="jdbcTemplate" ref="jdbcTemplate" />
-	</bean>
-		
 	<bean name="apkDao" class="com.iwami.iwami.app.dao.impl.ApkDaoImpl">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
@@ -41,8 +37,8 @@
 	<bean name="tipsDao" class="com.iwami.iwami.app.dao.impl.TipsDaoImpl">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
-	
-	<bean name="wamiDao" class="com.iwami.iwami.app.dao.impl.WamiDaoImpl">
+		
+	<bean name="onstartDao" class="com.iwami.iwami.app.dao.impl.OnstartDaoImpl">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 	

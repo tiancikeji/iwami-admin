@@ -1,10 +1,14 @@
 package com.iwami.iwami.app.biz;
 
+import java.util.List;
+
 import com.iwami.iwami.app.model.Apk;
 
 public interface ApkBiz {
 	
-	public String getApkURL();
+	public List<Apk> getApks();
 
-	public Apk getApk();
+	public boolean addApk(Apk apk);
+
+	public boolean modApk(Apk apk);
 }

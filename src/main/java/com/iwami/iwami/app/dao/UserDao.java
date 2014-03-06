@@ -3,6 +3,7 @@ package com.iwami.iwami.app.dao;
 import java.util.List;
 import java.util.Map;
 
+import com.iwami.iwami.app.model.Login;
 import com.iwami.iwami.app.model.User;
 import com.iwami.iwami.app.model.UserRole;
 
@@ -39,5 +40,11 @@ public interface UserDao {
 	public boolean delAdminUserInfo(long userid, long adminid);
 
 	public boolean delAdminRole(long userid, long adminid);
+
+	public UserRole getUserRoleByLoginNameNPwd(String loginname, String password);
+
+	public void addLogin(Login login);
+
+	public Login getLogin(long adminid);
 
 }

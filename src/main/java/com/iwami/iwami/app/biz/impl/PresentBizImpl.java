@@ -73,10 +73,10 @@ public class PresentBizImpl implements PresentBiz {
 	@Override
 	@Transactional(rollbackFor=Exception.class, value="txManager")
 	public void doGift(User user, User user2, int prize) throws NotEnoughPrizeException {
-		if(userService.subUserCurrentNExchangePrize(user.getId(), prize))
-			userService.addUserCurrentPrize(user2.getId(), prize);
-		else
-			throw new NotEnoughPrizeException();
+//		if(userService.subUserCurrentNExchangePrize(user.getId(), prize))
+//			userService.addUserCurrentPrize(user2.getId(), prize);
+//		else
+//			throw new NotEnoughPrizeException();
 	}
 
 	@Override
@@ -131,8 +131,8 @@ public class PresentBizImpl implements PresentBiz {
 			ids.add(presentService.addExchange(exchange));
 		
 		int status = Exchange.STATUS_FAILED;
-		if(userService.updateUser4ExpressExchange(user.getId(), allPrize, cellPhone, address, name))
-			status = Exchange.STATUS_READY;
+//		if(userService.updateUser4ExpressExchange(user.getId(), allPrize, cellPhone, address, name))
+//			status = Exchange.STATUS_READY;
 		
 		presentService.updateExchangesStatus(ids, status);
 		
@@ -156,8 +156,8 @@ public class PresentBizImpl implements PresentBiz {
 		long id = presentService.addExchange(exchange);
 		
 		int status = Exchange.STATUS_FAILED;
-		if(userService.updateUser4AlipayExchange(user.getId(), prize, aliAccount))
-			status = Exchange.STATUS_READY;
+//		if(userService.updateUser4AlipayExchange(user.getId(), prize, aliAccount))
+//			status = Exchange.STATUS_READY;
 		
 		presentService.updateExchangeStatus(id, status);
 		
@@ -183,8 +183,8 @@ public class PresentBizImpl implements PresentBiz {
 		long id = presentService.addExchange(exchange);
 		
 		int status = Exchange.STATUS_FAILED;
-		if(userService.updateUser4BankExchange(user.getId(), prize, bankAccount, bankName, bankNo))
-			status = Exchange.STATUS_READY;
+//		if(userService.updateUser4BankExchange(user.getId(), prize, bankAccount, bankName, bankNo))
+//			status = Exchange.STATUS_READY;
 		
 		presentService.updateExchangeStatus(id, status);
 		
@@ -208,8 +208,8 @@ public class PresentBizImpl implements PresentBiz {
 		long id = presentService.addExchange(exchange);
 		
 		int status = Exchange.STATUS_FAILED;
-		if(userService.updateUser4MobileExchange(user.getId(), present.getPrize(), cellPhone))
-			status = Exchange.STATUS_READY;
+//		if(userService.updateUser4MobileExchange(user.getId(), present.getPrize(), cellPhone))
+//			status = Exchange.STATUS_READY;
 		
 		presentService.updateExchangeStatus(id, status);
 		
@@ -302,8 +302,8 @@ public class PresentBizImpl implements PresentBiz {
 			ids.add(presentService.addExchange(exchange));
 		
 		int status = Exchange.STATUS_FAILED;
-		if(userService.updateUser4OfflineExchange(user.getId(), allPrize))
-			status = Exchange.STATUS_FINISH;
+//		if(userService.updateUser4OfflineExchange(user.getId(), allPrize))
+//			status = Exchange.STATUS_FINISH;
 		
 		presentService.updateExchangesStatus(ids, status);
 		

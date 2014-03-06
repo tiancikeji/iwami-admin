@@ -10,6 +10,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.iwami.iwami.app.biz.LoginBiz;
 import com.iwami.iwami.app.biz.UserBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
@@ -24,6 +25,8 @@ public class UserAjax {
 	private Log logger = LogFactory.getLog(getClass());
 	
 	private UserBiz userBiz;
+	
+	private LoginBiz loginBiz;
 
 	@AjaxMethod(path = "GET/user.ajax")
 	public Map<Object, Object> getUserinfo(Map<String, String> params) {
@@ -32,15 +35,16 @@ public class UserAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("key")){
 				List<User> users = null;
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long key = NumberUtils.toLong(params.get("key"), -1);
 				
-				if(key > 0){
-					// TODO check admin here...
+				if(adminid > 0 && key > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.USER_MANAGEMENT)){
 					users = userBiz.getUserByIdOCellPhone(key);
-				}
 
-				result.put("data", parseUserInfo(users));
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					result.put("data", parseUserInfo(users));
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(Throwable t){
@@ -73,7 +77,10 @@ public class UserAjax {
 				tmp.put("lastModUserid", user.getLastmodUserid());
 				tmp.put("isdel", user.getIsdel());
 				
-				tmp.put("createTime", IWamiUtils.getDateString(user.getCreateTime()));
+				if(user.getCreateTime() != null)
+					tmp.put("createTime", IWamiUtils.getDateString(user.getCreateTime()));
+				else
+					tmp.put("createTime", IWamiUtils.getDateString(user.getAddTime()));
 				tmp.put("lastLoginTime", IWamiUtils.getDateString(user.getLastLoginTime()));
 				
 				tmp.put("currentPrize", user.getCurrentPrize());
@@ -103,7 +110,7 @@ public class UserAjax {
 					 && params.containsKey("currentPrize") && params.containsKey("exchangePrize") && params.containsKey("lastCellPhone1") && params.containsKey("lastAlipayAccount") && params.containsKey("lastBankName") && params.containsKey("lastBankAccount") && params.containsKey("lastBankNo") && params.containsKey("lastAddress") && params.containsKey("lastCellPhone2") && params.containsKey("lastName")){
 				long adminid = NumberUtils.toLong(params.get("adminid"));
 				long userid = NumberUtils.toLong(params.get("userid"));
-				if(adminid > 0 && userid > 0 && userBiz.canOpt(adminid, userid)){
+				if(adminid > 0 && userid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.USER_MANAGEMENT)){
 					User user = new User();
 					user.setId(userid);
 					
@@ -153,6 +160,14 @@ public class UserAjax {
 
 	public void setUserBiz(UserBiz userBiz) {
 		this.userBiz = userBiz;
+	}
+
+	public LoginBiz getLoginBiz() {
+		return loginBiz;
+	}
+
+	public void setLoginBiz(LoginBiz loginBiz) {
+		this.loginBiz = loginBiz;
 	}
 
 }

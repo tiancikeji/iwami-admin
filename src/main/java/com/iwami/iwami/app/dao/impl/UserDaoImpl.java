@@ -21,6 +21,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.constants.SqlConstants;
 import com.iwami.iwami.app.dao.UserDao;
+import com.iwami.iwami.app.model.Login;
 import com.iwami.iwami.app.model.User;
 import com.iwami.iwami.app.model.UserRole;
 
@@ -52,7 +53,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 	public List<User> getUserByIdOCellPhone(long key) {
 		return getJdbcTemplate().query("select id, current_prize, exchange_prize, last_cell_phone_1, last_alipay_account, last_bank_account, "
 				+ "last_bank_name, last_bank_no, last_address, last_cell_phone_2, last_name, name, uuid, alias, cell_phone, age, gender, job, address, add_time, b.lastmod_time as lastmod_time, b.lastmod_userid as lastmod_userid, b.isdel as isdel from " 
-				+ SqlConstants.TABLE_USER + " a join " + SqlConstants.TABLE_USERINFO + " b on a.id = b.userid where (b.cell_phone = ? or b.userid = ?) and a.isdel in (0, 1) and b.isdel = in (0, 1)", new Object[]{key, key}, new UserRowMapper());
+				+ SqlConstants.TABLE_USER + " a join " + SqlConstants.TABLE_USERINFO + " b on a.id = b.userid where (b.cell_phone = ? or b.userid = ?) and a.isdel in (0, 1) and b.isdel in (0, 1)", new Object[]{key, key}, new UserRowMapper());
 	}
 
 	@Override
@@ -91,26 +92,13 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 	@Override
 	public Map<Long, UserRole> getUserRoles(List<Long> ids) {
 		final Map<Long, UserRole> roles = new HashMap<Long, UserRole>();
-		getJdbcTemplate().query("select userid, password, role, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_USERROLE + " where isdel = ? and userid in (" + StringUtils.join(ids.toArray(), ",") + ")",
-				new Object[]{IWamiConstants.ACTIVE}, new RowMapper<Integer>(){
-
-					@Override
-					public Integer mapRow(ResultSet rs, int index)
-							throws SQLException {
-						UserRole role = new UserRole();
-						role.setUserid(rs.getLong("userid"));
-						role.setPassword(rs.getString("password"));
-						role.setRole(rs.getLong("role"));
-						Timestamp ts = rs.getTimestamp("lastmod_time");
-						if(ts != null)
-							role.setLastModTime(new Date(ts.getTime()));
-						role.setLastModUserid(rs.getLong("lastmod_userid"));
-						
-						roles.put(role.getUserid(), role);
-						return index;
-					}
-			
-		});
+		List<UserRole> tmp = getJdbcTemplate().query("select userid, name, password, role, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_USERROLE + " where isdel = ? and userid in (" + StringUtils.join(ids.toArray(), ",") + ")",
+				new Object[]{IWamiConstants.ACTIVE}, new UserRoleMapper());
+		
+		if(tmp != null && tmp.size() > 0)
+			for(UserRole role : tmp)
+				roles.put(role.getUserid(), role);
+		
 		return roles;
 	}
 
@@ -143,8 +131,8 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 
 	@Override
 	public boolean addAdminRole(UserRole role) {
-		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_USERROLE + "(userid, password, role, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, now(), ?, ?)", 
-				new Object[]{role.getUserid(), role.getPassword(), role.getRole(), role.getLastModUserid(), IWamiConstants.ACTIVE});
+		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_USERROLE + "(userid, name, password, role, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, now(), ?, ?)", 
+				new Object[]{role.getUserid(), role.getName(), role.getPassword(), role.getRole(), role.getLastModUserid(), IWamiConstants.ACTIVE});
 		if(count > 0)
 			return true;
 		else
@@ -153,8 +141,8 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 
 	@Override
 	public boolean modAdminRole(UserRole role) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERROLE + " set password = ?, role = ?, lastmod_time = now(), lastmod_userid = ? where userid = ?", 
-				new Object[]{role.getPassword(), role.getRole(), role.getLastModUserid(), role.getUserid()});
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERROLE + " set password = ?, name = ?, role = ?, lastmod_time = now(), lastmod_userid = ? where userid = ?", 
+				new Object[]{role.getPassword(), role.getName(), role.getRole(), role.getLastModUserid(), role.getUserid()});
 		if(count > 0)
 			return true;
 		else
@@ -199,6 +187,64 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 			return true;
 		else
 			return false;
+	}
+
+	@Override
+	public UserRole getUserRoleByLoginNameNPwd(String loginname, String password) {
+		List<UserRole> roles = getJdbcTemplate().query("select userid, name, password, role, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_USERROLE + " where isdel = ? and name = ? and password = ?",
+				new Object[]{IWamiConstants.ACTIVE, loginname, password}, new UserRoleMapper());
+		
+		if(roles != null && roles.size() > 0)
+			return roles.get(0);
+		else
+			return null;
+	}
+
+	@Override
+	public void addLogin(Login login) {
+		getJdbcTemplate().update("insert into " + SqlConstants.TABLE_LOGIN + "(userid, add_time) values(?, now())", new Object[]{login.getUserid()});
+	}
+
+	@Override
+	public Login getLogin(long adminid) {
+		List<Login> data = getJdbcTemplate().query("select userid, add_time from " + SqlConstants.TABLE_LOGIN + " where userid = ? order by add_time desc limit 1", new Object[]{adminid}, new RowMapper<Login>(){
+
+			@Override
+			public Login mapRow(ResultSet rs, int rowNum) throws SQLException {
+				Login login = new Login();
+				login.setUserid(rs.getLong("userid"));
+				Timestamp ts = rs.getTimestamp("add_time");
+				if(ts != null)
+					login.setAddTime(new Date(ts.getTime()));
+				return login;
+			}
+			
+		});
+		
+		if(data != null && data.size() > 0)
+			return data.get(0);
+		else
+			return null;
+	}
+
+}
+
+class UserRoleMapper implements RowMapper<UserRole>{
+
+	@Override
+	public UserRole mapRow(ResultSet rs, int index)
+			throws SQLException {
+		UserRole role = new UserRole();
+		role.setUserid(rs.getLong("userid"));
+		role.setName(rs.getString("name"));
+		role.setPassword(rs.getString("password"));
+		role.setRole(rs.getLong("role"));
+		Timestamp ts = rs.getTimestamp("lastmod_time");
+		if(ts != null)
+			role.setLastModTime(new Date(ts.getTime()));
+		role.setLastModUserid(rs.getLong("lastmod_userid"));
+		
+		return role;
 	}
 
 }

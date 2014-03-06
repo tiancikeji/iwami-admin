@@ -81,16 +81,16 @@ public class LuckyBizImpl implements LuckyBiz {
 		int status = Exchange.STATUS_FAILED;
 		
 		// substract from user.current_price
-		boolean result = userService.subUserCurrentNExchangePrize(user.getId(), config.getPrize());
-		
-		if(result)
-			status = Exchange.STATUS_READY;
+//		boolean result = userService.subUserCurrentNExchangePrize(user.getId(), config.getPrize());
+//		
+//		if(result)
+//			status = Exchange.STATUS_READY;
 		
 		presentService.updateExchangeStatus(presentId, status);
 		
-		if(!result)
-			throw new NotEnoughPrizeException();
-		else
+//		if(!result)
+//			throw new NotEnoughPrizeException();
+//		else
 			return frule;
 	}
 

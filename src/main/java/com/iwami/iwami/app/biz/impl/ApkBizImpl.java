@@ -1,6 +1,8 @@
 package com.iwami.iwami.app.biz.impl;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.List;
+
+import org.springframework.transaction.annotation.Transactional;
 
 import com.iwami.iwami.app.biz.ApkBiz;
 import com.iwami.iwami.app.model.Apk;
@@ -9,43 +11,33 @@ import com.iwami.iwami.app.service.ApkService;
 public class ApkBizImpl implements ApkBiz {
 
 	private ApkService apkService;
-	
-	private String defaultURL;
-	
+
 	@Override
-	public String getApkURL() {
-		Apk apk = apkService.getApk();
-		
-		if(apk != null && StringUtils.isNotBlank(apk.getUrl()))
-			return apk.getUrl();
-		else
-			return defaultURL;
+	public List<Apk> getApks() {
+		return apkService.getApks();
 	}
 
 	@Override
-	public Apk getApk() {
-		Apk apk = apkService.getApk();
-		
-		if(apk != null && StringUtils.isNotBlank(apk.getUrl()))
-			return apk;
+	@Transactional(rollbackFor=Exception.class, value="txManager")
+	public boolean addApk(Apk apk) {
+		apkService.delAllApks();
+		if(apkService.addApk(apk))
+			return true;
 		else
-			return null;
+			throw new RuntimeException("failed in addApk, so rollback.");
 	}
 
+	@Override
+	public boolean modApk(Apk apk) {
+		return apkService.modApk(apk);
+	}
+	
 	public ApkService getApkService() {
 		return apkService;
 	}
 
 	public void setApkService(ApkService apkService) {
 		this.apkService = apkService;
-	}
-
-	public String getDefaultURL() {
-		return defaultURL;
-	}
-
-	public void setDefaultURL(String defaultURL) {
-		this.defaultURL = defaultURL;
 	}
 
 }

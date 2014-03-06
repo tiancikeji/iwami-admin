@@ -552,6 +552,7 @@
 				{
 		   		userid: long 运营人员id
 		   		username：String 用户名称
+		   		loginname：String 登陆名称
 		   		cellPhone：long 用户手机
 		   		password：空 密码
 		   		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
@@ -566,6 +567,7 @@
 			adminid: long 管理员id
 			
    		username：String 用户名称
+		  loginname：String 登陆名称
    		cellPhone：long 用户手机
    		password：String 密码 - 前端md5加密呗
    		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
@@ -580,6 +582,7 @@
 			
 		  userid: long 运营人员id
 			username：String 用户名称
+		  loginname：String 登陆名称
    		cellPhone：long 用户手机
    		password：String 密码 - 前端md5加密呗
    		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
@@ -597,3 +600,701 @@
 			status：0 返回成功
 							300 参数错误
 							400 系统错误
+
+6. APK管理
+	6.1 APK所有版本列表
+		路径：GET/apk.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+		输出结果
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data：[
+				{
+					id: long 唯一id
+					version：String 版本号
+					url：String 下载地址
+					force：int 是否强制升级：0否，1是 -------- 下拉菜单
+					desc：String 升级描述							--------- textarea
+					isdel: int 是否有效：0有效，1无效
+					
+					lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+					lastModUserid：long 上次修改人
+				}
+				,
+				...
+			]
+		
+	6.2 新增APK
+		路径：ADD/apk.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+			version：String 版本号
+			url：String 下载地址
+			force：int 是否强制升级：0否，1是 -------- 下拉菜单
+			desc：String 升级描述							--------- textarea
+		输出结果
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+		
+	6.3 修改APK
+		路径：MOD/apk.ajax
+		输入参数：
+			adminid: long 管理员id
+			
+			id: long 唯一id
+			version：String 版本号
+			url：String 下载地址
+			force：int 是否强制升级：0否，1是 -------- 下拉菜单
+			desc：String 升级描述							--------- textarea
+			isdel: int 是否有效：0有效，1无效
+		输出结果
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+							
+7. 消息推送
+	7.1 推送全部
+		路径：PUSH/all.ajax
+		输入参数：
+			adminid：long 管理员id
+			msg：String 消息内容
+			interval：double 推送间隔，以秒为单位
+		输出参数：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	7.2 推送白名单
+		路径：PUSH/white.ajax
+		输入参数：
+			adminid：long 管理员id
+			file：String 白名单路径
+			msg：String 消息内容
+			interval：double 推送间隔，以秒为单位
+		输出参数：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	7.3 推送黑名单外用户
+		路径：PUSH/black.ajax
+		输入参数：
+			adminid：long 管理员id
+			file：String 黑名单路径
+			msg：String 消息内容
+			interval：double 推送间隔，以秒为单位
+		输出参数：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	7.4 推送任务列表
+		路径：PUSH/list.ajax
+		输入参数：
+			adminid：long 管理员id
+		输出参数：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data:[
+				{
+					id:long 推送id
+					interval：double 推送间隔
+					msg：String 消息内容
+					status：int 0新建，1暂停，2停止，3恢复，4推送成功，5短信发送成功
+					cellPhone：long 结束短信接收手机
+					allCnt：int 所有数量
+					succCnt：int 成功数量
+					failCnt：int 失败数量
+					addTime：String 开始时间
+					estimateTime：String 预计结束时间
+					lastModTime：String 上次修改时间
+					lastModUserid：long 上次修改人
+				},
+				...
+			]
+	7.5 暂停推送任务
+		路径：PUSH/pause.ajax
+		输入参数：
+			adminid：long 管理员id
+			
+			id：long 推送任务id
+		输出参数：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	7.6 继续推送任务
+		路径：PUSH/continue.ajax
+		输入参数：
+			adminid：long 管理员id
+			
+			id：long 推送任务id
+		输出参数：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+	7.7 停止推送任务
+		路径：PUSH/stop.ajax
+		输入参数：
+			adminid：long 管理员id
+			
+			id：long 推送任务id
+		输出结果：
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+
+8. 礼品管理
+	8.1 礼品列表
+		8.1.1 银行卡
+			1) 获取列表
+				路径：GET/bank.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					status：int 状态 0全部，1启用，2停用
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					data：[
+						{
+							id：long 唯一id
+							name：String 礼品名称
+							type：int 0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
+							prize：int 兑换比例 N：1
+							count：int 最低兑换额度
+							rank：int 顺序
+							iconSmall：String 小图url
+							iconBig：String 大图url
+							
+							lastModTime：String 上次修改时间
+							lastModUserid：String 上次修改人
+						},
+						...
+					]
+			2) 修改银行卡提现
+				路径：MOD/bank.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+					name：String 礼品名称
+					prize：int 兑换比例 N：1
+					count：int 最低兑换额度
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			3) 停用银行卡提现
+				路径：DEL/bank.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					
+		8.1.2 支付宝
+			1) 获取列表
+				路径：GET/ali.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					status：int 状态 0全部，1启用，2停用
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					data：[
+						{
+							id：long 唯一id
+							name：String 礼品名称
+							type：int 0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
+							prize：int 兑换比例 N：1
+							count：int 最低兑换额度
+							rank：int 顺序
+							iconSmall：String 小图url
+							iconBig：String 大图url
+							
+							lastModTime：String 上次修改时间
+							lastModUserid：String 上次修改人
+						},
+						...
+					]
+			2) 修改
+				路径：MOD/ali.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+					name：String 礼品名称
+					prize：int 兑换比例 N：1
+					count：int 最低兑换额度
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			3) 停用
+				路径：DEL/ali.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+		8.1.3 手机充值卡
+			1) 获取列表
+				路径：GET/mobile.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					status：int 状态 0全部，1启用，2停用
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					data：[
+						{
+							id：long 唯一id
+							name：String 礼品名称
+							type：int 0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
+							prize：int 所需米粒
+							count：int 充值金额
+							rank：int 顺序
+							iconSmall：String 小图url
+							iconBig：String 大图url
+							
+							lastModTime：String 上次修改时间
+							lastModUserid：String 上次修改人
+						},
+						...
+					]
+			2) 新增
+				路径：ADD/mobile.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					name：String 礼品名称
+					prize：int 所需米粒
+					count：int 充值金额
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			3) 修改
+				路径：MOD/mobile.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+					name：String 礼品名称
+					prize：int 所需米粒
+					count：int 充值金额
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			4) 停用
+				路径：DEL/mobile.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+		8.1.4 线上礼品
+			1) 获取列表
+				路径：GET/online.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					status：int 状态 0全部，1启用，2停用
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					data：[
+						{
+							id：long 唯一id
+							name：String 礼品名称
+							type：int 0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
+							prize：int 所需米粒
+							rank：int 顺序
+							iconSmall：String 小图url
+							iconBig：String 大图url
+							
+							lastModTime：String 上次修改时间
+							lastModUserid：String 上次修改人
+						},
+						...
+					]
+			2) 新增
+				路径：ADD/online.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					name：String 礼品名称
+					prize：int 所需米粒
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			3) 修改
+				路径：MOD/online.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+					name：String 礼品名称
+					prize：int 所需米粒
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			4) 停用
+				路径：DEL/online.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+		8.1.5 抽奖
+			1) 获取列表
+				路径：GET/luck.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					status：int 状态 0全部，1启用，2停用
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					data：[
+						{
+							id：long 唯一id
+							name：抽奖
+							type：int 0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
+							prize：int 所需米粒
+							rank：int 顺序
+							iconSmall：String 小图url
+							iconBig：String 大图url
+							
+							lastModTime：String 上次修改时间
+							lastModUserid：String 上次修改人
+							
+							rules：[
+								{
+									index: int 几等奖
+									gift: String 名称
+									prob：int 概率
+									count：int 每日最大上限
+								},
+								...
+							]
+						},
+						...
+					]
+			2) 新增
+				路径：ADD/luck.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					prize：int 所需米粒
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+					
+					gifts：奖品名称，以,分开
+					probs：中奖概率，以,分开
+					counts：每天上限，以,分开
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			3) 修改
+				路径：MOD/luck.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+					
+					prize：int 所需米粒
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+					
+					gifts：奖品名称，以,分开
+					probs：中奖概率，以,分开
+					counts：每天上限，以,分开
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			4) 停用
+				路径：DEL/luck.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+		8.1.6 线下礼品
+			1) 获取列表
+				路径：GET/offline.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					status：int 状态 0全部，1启用，2停用
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					data：[
+						{
+							id：long 唯一id
+							name：String 礼品名称
+							type：int 0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
+							prize：int 所需米粒
+							rank：int 顺序
+							iconSmall：String 小图url
+							iconBig：String 大图url
+							
+							lastModTime：String 上次修改时间
+							lastModUserid：String 上次修改人
+						},
+						...
+					]
+			2) 新增
+				路径：ADD/offline.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					name：String 礼品名称
+					prize：int 所需米粒
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			3) 修改
+				路径：MOD/offline.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+					name：String 礼品名称
+					prize：int 所需米粒
+					rank：int 顺序
+					iconSmall：String 小图url
+					iconBig：String 大图url
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+			4) 停用
+				路径：DEL/offline.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					id：long 唯一id
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+	8.2 兑换列表
+		8.2.1 根据礼类型/发货状态获取列表
+			路径：GET/exch.ajax
+			输入参数：
+					adminid：long 管理员id
+					
+					type：int 礼品类型，0全部，1线上快递，2线上手机充值卡，3线上支付宝，4线上银行卡，5线下, 6抽奖
+					status：int 0全部，1未发货，2已发货，3线下礼品
+			输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					data：[
+						{
+							userid:long 用户id
+							presents：[
+								{
+									id：long 兑换id
+									presentId：long 礼物id
+									presentName：String 礼物名称
+									presentPrize：int 单个礼物兑换米粒数
+									presentType：int 礼物类型，0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
+									count：int 数量
+									prize：int 兑换总米粒数
+									status：int 1未发货，2已发货，3线下礼品
+									cellPhone：long 手机充值号码或者快递地址
+									alipayAccount: String 支付宝账号
+									bankAccount：String 银行开户名
+									bankName：String 银行开户行
+									bankNo：long 银行账号
+									address：String 快递地址
+									name：String 快递名称
+									expressName：String 快递名字
+									expressNo：String 快递单号
+								},
+								...
+							]
+						},
+						...
+					]
+				
+					
+		8.2.2 根据用户/手机号获取列表
+			路径：GET/exchuser.ajax
+			输入参数：
+					adminid：long 管理员id
+					
+					key：String 用户id或者用户手机号
+			输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					data：[
+						{
+							userid:long 用户id
+							presents：[
+								{
+									id：long 兑换id
+									presentId：long 礼物id
+									presentName：String 礼物名称
+									presentPrize：int 单个礼物兑换米粒数
+									presentType：int 礼物类型，0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
+									count：int 数量
+									prize：int 兑换总米粒数
+									status：int 1未发货，2已发货，3线下礼品
+									cellPhone：long 手机充值号码或者快递地址
+									alipayAccount: String 支付宝账号
+									bankAccount：String 银行开户名
+									bankName：String 银行开户行
+									bankNo：long 银行账号
+									address：String 快递地址
+									name：String 快递名称
+									expressName：String 快递名字
+									expressNo：String 快递单号
+								},
+								...
+							]
+						},
+						...
+					]
+		8.2.3 根据礼品id/名称获取列表
+			路径：GET/exchpre.ajax
+			输入参数：
+					adminid：long 管理员id
+					
+					key：String 礼物id或者名称
+			输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					data：[
+						{
+							userid:long 用户id
+							presents：[
+								{
+									id：long 兑换id
+									presentId：long 礼物id
+									presentName：String 礼物名称
+									presentPrize：int 单个礼物兑换米粒数
+									presentType：int 礼物类型，0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
+									count：int 数量
+									prize：int 兑换总米粒数
+									status：int 1未发货，2已发货，3线下礼品
+									cellPhone：long 手机充值号码或者快递地址
+									alipayAccount: String 支付宝账号
+									bankAccount：String 银行开户名
+									bankName：String 银行开户行
+									bankNo：long 银行账号
+									address：String 快递地址
+									name：String 快递名称
+									expressName：String 快递名字
+									expressNo：String 快递单号
+								},
+								...
+							]
+						},
+						...
+					]
+		8.2.4 确认发货
+			路径：MOD/exch.ajax
+			输入参数：
+					adminid：long 管理员id
+					
+					id：long 兑换id
+					name：String 快递公司名称 - 线上快递单子类型必须有值
+					no：String 快递单号 - 线上快递单子类型必须有值
+			输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+					
+	8.3 礼品顺序
+				路径：SEQ/present.ajax
+				输入参数：
+					adminid：long 管理员id
+					
+					ids：String id，以,分开
+					ranks：String 顺序，以,分开
+				输出结果
+					status：0 返回成功
+									300 参数错误
+									400 系统错误
+
+9. 用户登陆
+	9.1 登陆
+		路径：login.ajax
+		输入参数
+			loginname：String 用户名
+			password: String 密码
+		输出结果
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data： { --- 空数据代表登陆失败
+	   		userid: long 运营人员id
+	   		username：String 用户名称
+	   		loginname：String 登陆名称
+	   		cellPhone：long 用户手机
+	   		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
+ 		  		
+				lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+				lastModUserid：long 上次修改人
+			}

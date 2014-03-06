@@ -10,6 +10,8 @@ public class UserRole {
 
 	private long userid;
 	
+	private String name;
+	
 	private String password;
 	
 	private long role;
@@ -71,5 +73,13 @@ public class UserRole {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

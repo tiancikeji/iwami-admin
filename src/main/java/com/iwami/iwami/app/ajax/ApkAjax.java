@@ -1,8 +1,12 @@
 package com.iwami.iwami.app.ajax;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -20,17 +24,109 @@ public class ApkAjax {
 	
 	private ApkBiz apkBiz;
 
-	@AjaxMethod(path = "download.ajax")
-	public Map<Object, Object> download(Map<String, String> params) {
+	@AjaxMethod(path = "MOD/apk.ajax")
+	public Map<Object, Object> modApk(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			String url = apkBiz.getApkURL();
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-			result.put("url", url);
+			if(params.containsKey("adminid") && params.containsKey("version") && params.containsKey("url") && params.containsKey("isdel")
+					&& params.containsKey("force") && params.containsKey("desc") && params.containsKey("id")){
+				// TODO check adminid
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				String version = StringUtils.trimToEmpty(params.get("version"));
+				String url = StringUtils.trimToEmpty(params.get("url"));
+				int force = NumberUtils.toInt(params.get("force"), -1);
+				String desc = StringUtils.trimToEmpty(params.get("desc"));
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				
+				if(adminid > 0 && id > 0 && StringUtils.isNotBlank(version) && StringUtils.isNotBlank(url)
+						&& (force == 0 || force == 1) && (isdel == 0 || isdel == 1)){
+					Apk apk = new Apk();
+					apk.setId(id);
+					apk.setVersion(version);
+					apk.setUrl(url);
+					apk.setDesc(desc);
+					apk.setForce(force);
+					apk.setLastmodUserid(adminid);
+					apk.setIsdel(isdel);
+					
+					if(apkBiz.modApk(apk))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
-				logger.error("Exception in download", t);
+				logger.error("Exception in getApks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "ADD/apk.ajax")
+	public Map<Object, Object> addApk(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("version") && params.containsKey("url")
+					&& params.containsKey("force") && params.containsKey("desc")){
+				// TODO check adminid
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				String version = StringUtils.trimToEmpty(params.get("version"));
+				String url = StringUtils.trimToEmpty(params.get("url"));
+				String desc = StringUtils.trimToEmpty(params.get("desc"));
+				int force = NumberUtils.toInt(params.get("force"), -1);
+				
+				if(adminid > 0 && StringUtils.isNotBlank(version) && StringUtils.isNotBlank(url)
+						&& (force == 0 || force == 1)){
+					Apk apk = new Apk();
+					apk.setVersion(version);
+					apk.setUrl(url);
+					apk.setDesc(desc);
+					apk.setForce(force);
+					apk.setLastmodUserid(adminid);
+					
+					if(apkBiz.addApk(apk))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getApks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/apk.ajax")
+	public Map<Object, Object> getApks(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid")){
+				// TODO check adminid
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				if(adminid > 0){
+					List<Apk> apks = apkBiz.getApks();
+					result.put("data", parseApk(apks));
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getApks", t);
 			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 		}
 		
@@ -38,37 +134,27 @@ public class ApkAjax {
 		return result;
 	}
 
-	@AjaxMethod(path = "checkupdate.ajax")
-	public Map<Object, Object> checkUpdate(Map<String, String> params) {
-		Map<Object, Object> result = new HashMap<Object, Object>();
+	private List<Map<String, Object>> parseApk(List<Apk> apks) {
+		List<Map<String, Object>> data = new ArrayList<Map<String,Object>>();
 		
-		try{
-			Apk apk = apkBiz.getApk();
-			if(apk != null){
-				Map<String, String> data = new HashMap<String, String>();
-				int update = IWamiUtils.calcNew(apk.getVersion(), params.get("version"));
-				if(update > 0){
-					data.put("version", apk.getVersion());
-					data.put("update", "" + update);
-					data.put("force", "" + apk.getForce());
-					data.put("url", apk.getUrl());
-					data.put("desc", apk.getDesc());
-				}
+		if(apks != null && apks.size() > 0)
+			for(Apk apk : apks){
+				Map<String, Object> tmp = new HashMap<String, Object>();
 				
-				result.put("data", data);
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-			} else{
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				tmp.put("id", apk.getId());
+				tmp.put("version", apk.getVersion());
+				tmp.put("url", apk.getUrl());
+				tmp.put("force", apk.getForce());
+				tmp.put("desc", apk.getDesc());
+				tmp.put("isdel", apk.getIsdel());
+
+				tmp.put("lastModTime", IWamiUtils.getDateString(apk.getLastmodTime()));
+				tmp.put("lastModUserid", apk.getLastmodUserid());
+				
+				data.add(tmp);
 			}
-				
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in download", t);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-		}
 		
-		
-		return result;
+		return data;
 	}
 
 	public ApkBiz getApkBiz() {

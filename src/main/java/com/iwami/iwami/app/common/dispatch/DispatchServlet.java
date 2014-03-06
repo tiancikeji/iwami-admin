@@ -16,6 +16,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.iwami.iwami.app.exception.UserNotLoginException;
+
 public class DispatchServlet extends HttpServlet {
 	private static final long serialVersionUID = 5607686507908533512L;
 	
@@ -46,6 +48,9 @@ public class DispatchServlet extends HttpServlet {
 		try {
 			String result = AjaxDispatcher.dispatch(map);
 			writer.write(result);
+		} catch(UserNotLoginException e){
+			logger.error("no login...");
+			resp.sendRedirect(req.getContextPath() + "/" + "login.html");
 		} catch (Throwable e) {
 			logger.error("Something wrong when invoke ajax method", e);
 		} finally {

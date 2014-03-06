@@ -58,11 +58,12 @@ public class AdminAjax {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			if(params.containsKey("adminid") && params.containsKey("userid") && params.containsKey("username") && params.containsKey("cellPhone")
+			if(params.containsKey("adminid") && params.containsKey("userid") && params.containsKey("username") && params.containsKey("loginname") && params.containsKey("cellPhone")
 					 && params.containsKey("password") && params.containsKey("roles")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long userid = NumberUtils.toLong(params.get("userid"), -1);
 				String username = StringUtils.trimToEmpty(params.get("username"));
+				String loginname = StringUtils.trimToEmpty(params.get("loginname"));
 				long cellPhone = NumberUtils.toLong(params.get("cellPhone"), -1);
 				String password = StringUtils.trimToEmpty(params.get("password"));
 				long roles = NumberUtils.toLong(params.get("roles"), -1);
@@ -77,6 +78,7 @@ public class AdminAjax {
 					user.setLastmodUserid(adminid);
 					
 					UserRole role = new UserRole();
+					role.setName(loginname);
 					role.setPassword(password);
 					role.setRole(roles);
 					role.setLastModUserid(adminid);
@@ -103,10 +105,11 @@ public class AdminAjax {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			if(params.containsKey("adminid") && params.containsKey("username") && params.containsKey("cellPhone")
+			if(params.containsKey("adminid") && params.containsKey("username") && params.containsKey("loginname") && params.containsKey("cellPhone")
 					 && params.containsKey("password") && params.containsKey("roles")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				String username = StringUtils.trimToEmpty(params.get("username"));
+				String loginname = StringUtils.trimToEmpty(params.get("loginname"));
 				long cellPhone = NumberUtils.toLong(params.get("cellPhone"), -1);
 				String password = StringUtils.trimToEmpty(params.get("password"));
 				long roles = NumberUtils.toLong(params.get("roles"), -1);
@@ -120,6 +123,7 @@ public class AdminAjax {
 					user.setLastmodUserid(adminid);
 					
 					UserRole role = new UserRole();
+					role.setName(loginname);
 					role.setPassword(password);
 					role.setRole(roles);
 					role.setLastModUserid(adminid);
@@ -188,6 +192,7 @@ public class AdminAjax {
 					tmp.put("cellPhone", IWamiUtils.toStringL(user.getCellPhone()));
 					
 					UserRole role = roles.get(user.getId());
+					tmp.put("loginname", StringUtils.trimToEmpty(role.getName()));
 					tmp.put("password", StringUtils.EMPTY);
 					tmp.put("roles", role.getRole());
 					

@@ -569,10 +569,10 @@ public class PresentAjax {
 							if(cellPhone != user.getCellPhone()){
 								User user2 = userBiz.getUserByCellPhone(cellPhone);
 								if(user2 == null){
-									if(userBiz.sendSMS(cellPhone, user))
-										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-									else
-										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+//									if(userBiz.sendSMS(cellPhone, user))
+//										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+//									else
+//										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 								} else{
 									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_SEND_SMS_REGISTERED);
 									result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_SEND_SMS_REGISTERED));

@@ -24,6 +24,8 @@ public interface IWamiConstants {
 
 	public static final String CACHE_PRESENT_KEY = "iwami#CACHE#PRESENT";
 
+	public static final String CACHE_LOGIN_KEY = "iwami#CACHE#LOGIN";
+
 	public static final int TOP_COUNT = 3;
 
 	public static final int INACTIVE = 1;
@@ -35,5 +37,7 @@ public interface IWamiConstants {
 	public static final String SEPARATOR_CELLPHONE = ",";
 
 	public static final String SEPARATOR_STRATEGY = ",";
+
+	public static final long USER_MANAGEMENT = 1;
 
 }
