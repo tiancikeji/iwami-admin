@@ -40,4 +40,6 @@ public interface IWamiConstants {
 
 	public static final long USER_MANAGEMENT = 1;
 
+	public static final long TASK_MANAGEMENT = 128;
+
 }

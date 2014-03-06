@@ -16,6 +16,7 @@ import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
 import com.iwami.iwami.app.exception.LuckyExceedLimitException;
 import com.iwami.iwami.app.exception.NotEnoughPrizeException;
+import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.LuckyConfig;
 import com.iwami.iwami.app.model.LuckyRule;
 import com.iwami.iwami.app.model.User;
@@ -47,6 +48,8 @@ public class LuckyAjax {
 			result.put("data", tmp);
 			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in lucky rules", t);
@@ -104,6 +107,8 @@ public class LuckyAjax {
 				result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_LUCKY_DRAW_USERID));
 			}
 				
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(LuckyExceedLimitException e){
 			if(logger.isErrorEnabled())
 				logger.error("Exceed lucky limit", e);

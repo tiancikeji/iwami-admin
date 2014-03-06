@@ -62,6 +62,7 @@
 	</bean>
 	<bean name="taskAjax" class="com.iwami.iwami.app.ajax.TaskAjax">
 		<property name="taskBiz" ref="taskBiz"></property>
+		<property name="loginBiz" ref="loginBiz"></property>
 	</bean>
 	<bean name="presentAjax" class="com.iwami.iwami.app.ajax.PresentAjax">
 		<property name="presentBiz" ref="presentBiz"></property>

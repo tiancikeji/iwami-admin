@@ -1,6 +1,7 @@
 package com.iwami.iwami.app.biz.impl;
 
 import com.iwami.iwami.app.biz.LoginBiz;
+import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.UserRole;
 import com.iwami.iwami.app.service.LoginService;
 
@@ -10,7 +11,10 @@ public class LoginBizImpl implements LoginBiz {
 
 	@Override
 	public boolean checkLogin(long adminid) {
-		return loginService.checkLogin(adminid);
+		if(loginService.checkLogin(adminid))
+			return true;
+		else
+			throw new UserNotLoginException();
 	}
 
 	@Override

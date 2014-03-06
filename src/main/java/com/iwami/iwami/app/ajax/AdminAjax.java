@@ -14,6 +14,7 @@ import com.iwami.iwami.app.biz.UserBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
+import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.User;
 import com.iwami.iwami.app.model.UserRole;
 import com.iwami.iwami.app.util.IWamiUtils;
@@ -44,6 +45,8 @@ public class AdminAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -91,6 +94,8 @@ public class AdminAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -136,6 +141,8 @@ public class AdminAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -170,6 +177,8 @@ public class AdminAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);

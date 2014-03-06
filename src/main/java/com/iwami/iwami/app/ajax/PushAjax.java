@@ -15,6 +15,7 @@ import com.iwami.iwami.app.biz.UserBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
+import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.Push;
 import com.iwami.iwami.app.util.IWamiUtils;
 
@@ -43,6 +44,8 @@ public class PushAjax {
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			}
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -70,6 +73,8 @@ public class PushAjax {
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			}
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -98,6 +103,8 @@ public class PushAjax {
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			}
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -126,6 +133,8 @@ public class PushAjax {
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			}
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -150,6 +159,8 @@ public class PushAjax {
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			}
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -200,6 +211,8 @@ public class PushAjax {
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			}
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -223,6 +236,8 @@ public class PushAjax {
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			}
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -246,6 +261,8 @@ public class PushAjax {
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			}
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);

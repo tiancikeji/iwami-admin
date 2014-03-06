@@ -16,6 +16,7 @@ import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
 import com.iwami.iwami.app.constants.IWamiConstants;
+import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.User;
 import com.iwami.iwami.app.util.IWamiUtils;
 
@@ -47,6 +48,8 @@ public class UserAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);
@@ -144,6 +147,8 @@ public class UserAjax {
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			}
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getUserinfo", t);

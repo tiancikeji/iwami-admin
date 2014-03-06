@@ -11,10 +11,13 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.iwami.iwami.app.biz.LoginBiz;
 import com.iwami.iwami.app.biz.TaskBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
+import com.iwami.iwami.app.constants.IWamiConstants;
+import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.Task;
 import com.iwami.iwami.app.model.TreasureConfig;
 import com.iwami.iwami.app.util.IWamiUtils;
@@ -26,29 +29,37 @@ public class TaskAjax {
 	
 	private TaskBiz taskBiz;
 	
+	private LoginBiz loginBiz;
+	
 	@AjaxMethod(path = "GET/treasureconfig.ajax")
 	public Map<Object, Object> getTreasureConfig(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
 			if(params.containsKey("adminid")){
-				// TODO check admin
-				TreasureConfig config = taskBiz.getTreasureConfig();
-				int days = -1;
-				int count = -1;
-				if(config != null){
-					days = config.getDays();
-					count = config.getCount();
-				}
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				
-				Map<String, String> data = new HashMap<String, String>();
-				data.put("days", IWamiUtils.toStringI(days));
-				data.put("count", IWamiUtils.toStringI(count));
-				
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-				result.put("data", data);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.TASK_MANAGEMENT)){
+					TreasureConfig config = taskBiz.getTreasureConfig();
+					int days = -1;
+					int count = -1;
+					if(config != null){
+						days = config.getDays();
+						count = config.getCount();
+					}
+					
+					Map<String, String> data = new HashMap<String, String>();
+					data.put("days", IWamiUtils.toStringI(days));
+					data.put("count", IWamiUtils.toStringI(count));
+					
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					result.put("data", data);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getTreasureConfig", t);
@@ -64,12 +75,11 @@ public class TaskAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("days") && params.containsKey("count")){
-				// TODO check admin
-				long adminid = NumberUtils.toLong(params.get("admin"), -1);
-				if(adminid > 0){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.TASK_MANAGEMENT)){
 					TreasureConfig config = new TreasureConfig();
-					config.setCount(NumberUtils.toInt("count", -1));
-					config.setDays(NumberUtils.toInt("days", -1));
+					config.setCount(NumberUtils.toInt(params.get("count"), -1));
+					config.setDays(NumberUtils.toInt(params.get("days"), -1));
 					config.setLastModUserid(adminid);
 					if(taskBiz.modTreasureConfig(config))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
@@ -79,6 +89,8 @@ public class TaskAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in modTreasureConfig", t);
@@ -99,11 +111,10 @@ public class TaskAjax {
 					 && params.containsKey("attr") && params.containsKey("time") && params.containsKey("startTime")
 					 && params.containsKey("endTime") && params.containsKey("currentPrize") && params.containsKey("maxPrize")
 					 && params.containsKey("iconSmall") && params.containsKey("iconBig") && params.containsKey("isdel")){
-				//TODO check admin user
 				
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				
-				if(adminid > 0){
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.TASK_MANAGEMENT)){
 					String name = StringUtils.trimToEmpty(params.get("name"));
 					int rank = NumberUtils.toInt(params.get("rank"), -1);
 					String intr = StringUtils.trimToEmpty(params.get("intr"));
@@ -180,6 +191,8 @@ public class TaskAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in delTasks", t);
@@ -201,12 +214,11 @@ public class TaskAjax {
 					 && params.containsKey("attr") && params.containsKey("time") && params.containsKey("startTime")
 					 && params.containsKey("endTime") && params.containsKey("addCurrentPrize") && params.containsKey("maxPrize")
 					 && params.containsKey("iconSmall") && params.containsKey("iconBig") && params.containsKey("isdel")){
-				//TODO check admin user
 				
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long taskid = NumberUtils.toLong(params.get("taskid"), -1);
 				
-				if(adminid > 0 && taskid > 0){
+				if(adminid > 0 && taskid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.TASK_MANAGEMENT)){
 					Task task = taskBiz.getTaskById(taskid);
 
 					int type = NumberUtils.toInt(params.get("type"), -1);
@@ -285,6 +297,8 @@ public class TaskAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in delTasks", t);
@@ -300,13 +314,11 @@ public class TaskAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("taskid")){
-				//TODO check admin user
-				
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long taskid = NumberUtils.toLong(params.get("taskid"), -1);
 				
 				//direct check in db
-				if(adminid > 0 && taskid > 0){
+				if(adminid > 0 && taskid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.TASK_MANAGEMENT)){
 					if(taskBiz.stopTask(taskid, adminid))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 					else
@@ -315,6 +327,8 @@ public class TaskAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in stopTasks", t);
@@ -331,13 +345,12 @@ public class TaskAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("taskid")){
-				//TODO check admin user
 				
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long taskid = NumberUtils.toLong(params.get("taskid"), -1);
 				
 				//direct check in db
-				if(adminid > 0 && taskid > 0){
+				if(adminid > 0 && taskid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.TASK_MANAGEMENT)){
 					if(taskBiz.delUnstartedTask(taskid, adminid))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 					else
@@ -346,6 +359,8 @@ public class TaskAjax {
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in delTasks", t);
@@ -369,36 +384,41 @@ public class TaskAjax {
 					&& params.containsKey("prizeL") && params.containsKey("prizeR")
 					&& params.containsKey("currL") && params.containsKey("currR")
 					&& params.containsKey("leftL") && params.containsKey("leftR")){
-				//TODO check admin user
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				
-				int type = NumberUtils.toInt(params.get("type"), -1);
-				int attr = NumberUtils.toInt(params.get("attr"), -1);
-				Date startL = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("startL")));
-				Date startR = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("startR")));
-				Date endL = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("endL")));
-				Date endR = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("endR")));
-				int maxL = NumberUtils.toInt(params.get("maxL"), -2);
-				int maxR = NumberUtils.toInt(params.get("maxR"), -2);
-				int prizeL = NumberUtils.toInt(params.get("prizeL"), -2);
-				int prizeR = NumberUtils.toInt(params.get("prizeR"), -2);
-				int currL = NumberUtils.toInt(params.get("currL"), -2);
-				int currR = NumberUtils.toInt(params.get("currR"), -2);
-				int leftL = NumberUtils.toInt(params.get("leftL"), -2);
-				int leftR = NumberUtils.toInt(params.get("leftR"), -2);
-				
-				if((type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5)
-						&& (attr == 0 || attr == 1 || attr == 2 || attr == 3) 
-						&& maxL >= -1 && maxR >= -1 && maxR >= maxL
-						&& prizeL >= -1 && prizeR >= -1 && prizeR >=prizeL
-						&& currL >= -1 && currR >= -1 && currR >= currL
-						&& leftL >= -1 && leftR >= -1 && leftR >= leftL){
-					List<Task> tasks = taskBiz.getTasks(type, attr, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR);
-					result.put("data", parseTasks(tasks));
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.TASK_MANAGEMENT)){
+					int type = NumberUtils.toInt(params.get("type"), -1);
+					int attr = NumberUtils.toInt(params.get("attr"), -1);
+					Date startL = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("startL")));
+					Date startR = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("startR")));
+					Date endL = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("endL")));
+					Date endR = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("endR")));
+					int maxL = NumberUtils.toInt(params.get("maxL"), -2);
+					int maxR = NumberUtils.toInt(params.get("maxR"), -2);
+					int prizeL = NumberUtils.toInt(params.get("prizeL"), -2);
+					int prizeR = NumberUtils.toInt(params.get("prizeR"), -2);
+					int currL = NumberUtils.toInt(params.get("currL"), -2);
+					int currR = NumberUtils.toInt(params.get("currR"), -2);
+					int leftL = NumberUtils.toInt(params.get("leftL"), -2);
+					int leftR = NumberUtils.toInt(params.get("leftR"), -2);
+					
+					if((type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5)
+							&& (attr == 0 || attr == 1 || attr == 2 || attr == 3) 
+							&& maxL >= -1 && maxR >= -1 && maxR >= maxL
+							&& prizeL >= -1 && prizeR >= -1 && prizeR >=prizeL
+							&& currL >= -1 && currR >= -1 && currR >= currL
+							&& leftL >= -1 && leftR >= -1 && leftR >= leftL){
+						List<Task> tasks = taskBiz.getTasks(type, attr, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR);
+						result.put("data", parseTasks(tasks));
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getTasks", t);
@@ -481,6 +501,14 @@ public class TaskAjax {
 
 	public void setTaskBiz(TaskBiz taskBiz) {
 		this.taskBiz = taskBiz;
+	}
+
+	public LoginBiz getLoginBiz() {
+		return loginBiz;
+	}
+
+	public void setLoginBiz(LoginBiz loginBiz) {
+		this.loginBiz = loginBiz;
 	}
 
 }
