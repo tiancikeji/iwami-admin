@@ -62,6 +62,11 @@ public class StrategyServiceImpl implements StrategyService {
 	}
 
 	@Override
+	public boolean updateStrategyUrl(Strategy strategy) {
+		return strategyDao.updateStrategyUrl(strategy);
+	}
+
+	@Override
 	public long addStrategy(Strategy strategy) {
 		return strategyDao.addStrategy(strategy);
 	}
@@ -75,6 +80,11 @@ public class StrategyServiceImpl implements StrategyService {
 	@Override
 	public boolean modImage(StrategyImage image) {
 		return strategyDao.modImage(image);
+	}
+
+	@Override
+	public boolean updateImageUrl(StrategyImage image) {
+		return strategyDao.updateImageUrl(image);
 	}
 
 	@Override
@@ -106,6 +116,11 @@ public class StrategyServiceImpl implements StrategyService {
 	@Override
 	public boolean modInfo(StrategyInfo info) {
 		return strategyDao.modInfo(info);
+	}
+
+	@Override
+	public boolean updateInfoUrl(StrategyInfo info) {
+		return strategyDao.updateInfoUrl(info);
 	}
 
 	@Override

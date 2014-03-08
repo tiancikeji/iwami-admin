@@ -81,6 +81,11 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public boolean modAdminUser(User user) {
+		return userDao.modAdminUser(user);
+	}
+
+	@Override
 	public boolean modAdminRole(UserRole role) {
 		return userDao.modAdminRole(role);
 	}
@@ -98,6 +103,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean delAdminRole(long userid, long adminid) {
 		return userDao.delAdminRole(userid, adminid);
+	}
+
+	@Override
+	public Map<Long, String> getAllAlias() {
+		return userDao.getAllAlias();
 	}
 
 }

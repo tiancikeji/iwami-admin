@@ -17,6 +17,7 @@
 
 	<!-- db -->
 	<import resource="applicationContext-db.xml" />
+	<import resource="applicationContext-task.xml" />
 
 	<!-- config -->
 	<bean id="propertyConfigurer"
@@ -42,40 +43,60 @@
 	<bean name="monitorAjax" class="com.iwami.iwami.app.ajax.MonitorAjax" />
 	<bean name="apkAjax" class="com.iwami.iwami.app.ajax.ApkAjax">
 		<property name="apkBiz" ref="apkBiz" />
+		<property name="loginBiz" ref="loginBiz" />
 	</bean>
 	<bean name="contactAjax" class="com.iwami.iwami.app.ajax.ContactAjax">
 		<property name="contactBiz" ref="contactBiz" />
+		<property name="loginBiz" ref="loginBiz" />
 	</bean>
 	<bean name="luckyAjax" class="com.iwami.iwami.app.ajax.LuckyAjax">
 		<property name="luckyBiz" ref="luckyBiz" />
 		<property name="userBiz" ref="userBiz" />
+		<property name="loginBiz" ref="loginBiz" />
 	</bean>
 	<bean name="userAjax" class="com.iwami.iwami.app.ajax.UserAjax">
-		<property name="loginBiz" ref="loginBiz"></property>
+		<property name="loginBiz" ref="loginBiz" />
 		<property name="userBiz" ref="userBiz" />
 	</bean>
 	<bean name="tipsAjax" class="com.iwami.iwami.app.ajax.TipsAjax">
 		<property name="tipsBiz" ref="tipsBiz" />
+		<property name="loginBiz" ref="loginBiz" />
 	</bean>
 	<bean name="strategyAjax" class="com.iwami.iwami.app.ajax.StrategyAjax">
-		<property name="strategyBiz" ref="strategyBiz"></property>
+		<property name="strategyBiz" ref="strategyBiz" />
+		<property name="loginBiz" ref="loginBiz" />
 	</bean>
 	<bean name="taskAjax" class="com.iwami.iwami.app.ajax.TaskAjax">
-		<property name="taskBiz" ref="taskBiz"></property>
-		<property name="loginBiz" ref="loginBiz"></property>
+		<property name="taskBiz" ref="taskBiz" />
+		<property name="loginBiz" ref="loginBiz" />
 	</bean>
 	<bean name="presentAjax" class="com.iwami.iwami.app.ajax.PresentAjax">
-		<property name="presentBiz" ref="presentBiz"></property>
+		<property name="presentBiz" ref="presentBiz" />
 		<property name="userBiz" ref="userBiz" />
+		<property name="loginBiz" ref="loginBiz" />
 	</bean>
 	<bean name="loginAjax" class="com.iwami.iwami.app.ajax.LoginAjax">
-		<property name="loginBiz" ref="loginBiz"></property>
+		<property name="loginBiz" ref="loginBiz" />
+		<property name="userBiz" ref="userBiz" />
+	</bean>
+	<bean name="pushAjax" class="com.iwami.iwami.app.ajax.PushAjax">
+		<property name="loginBiz" ref="loginBiz" />
+		<property name="userBiz" ref="userBiz" />
+		<property name="pushBiz" ref="pushBiz" />
+	</bean>
+	<bean name="fileAjax" class="com.iwami.iwami.app.ajax.FileAjax">
+		<property name="loginBiz" ref="loginBiz" />
+		<property name="fileBiz" ref="fileBiz" />
+	</bean>
+	<bean name="adminAjax" class="com.iwami.iwami.app.ajax.AdminAjax">
+		<property name="loginBiz" ref="loginBiz" />
 		<property name="userBiz" ref="userBiz" />
 	</bean>
 	
 	<!-- biz -->
 	<bean name="apkBiz" class="com.iwami.iwami.app.biz.impl.ApkBizImpl">
 		<property name="apkService" ref="apkService" />
+		<property name="fileBiz" ref="fileBiz" />
 	</bean>
 	<bean name="contactBiz" class="com.iwami.iwami.app.biz.impl.ContactBizImpl">
 		<property name="contactService" ref="contactService" />
@@ -94,9 +115,11 @@
 	</bean>
 	<bean name="strategyBiz" class="com.iwami.iwami.app.biz.impl.StrategyBizImpl">
 		<property name="strategyService" ref="strategyService" />
+		<property name="fileBiz" ref="fileBiz" />
 	</bean>
 	<bean name="taskBiz" class="com.iwami.iwami.app.biz.impl.TaskBizImpl">
 		<property name="taskService" ref="taskService" />
+		<property name="fileBiz" ref="fileBiz" />
 	</bean>
 	<bean name="presentBiz" class="com.iwami.iwami.app.biz.impl.PresentBizImpl">
 		<property name="presentService" ref="presentService" />
@@ -104,6 +127,12 @@
 	</bean>
 	<bean name="loginBiz" class="com.iwami.iwami.app.biz.impl.LoginBizImpl">
 		<property name="loginService" ref="loginService" />
+	</bean>
+	<bean name="pushBiz" class="com.iwami.iwami.app.biz.impl.PushBizImpl">
+		<property name="pushService" ref="pushService" />
+	</bean>
+	<bean name="fileBiz" class="com.iwami.iwami.app.biz.impl.FileBizImpl">
+		<!-- <property name="cdnService" ref="cdnService" /> -->
 	</bean>
 	
 	<!-- service -->
@@ -136,6 +165,37 @@
 	</bean>
 	<bean name="onstartService" class="com.iwami.iwami.app.service.impl.OnstartServiceImpl">
 		<property name="onstartDao" ref="onstartDao" />
+	</bean>
+	<bean name="pushService" class="com.iwami.iwami.app.service.impl.PushServiceImpl">
+		<property name="pushSAL" ref="pushSAL" />
+		<property name="pushDao" ref="pushDao" />
+	</bean>
+	<bean name="smsService" class="com.iwami.iwami.app.service.impl.SMSServiceImpl">
+		<property name="smsSAL" ref="smsSAL" />
+	</bean>
+	
+	<!-- sal -->
+	<bean name="pushSAL" class="com.iwami.iwami.app.sal.impl.JPushSALImpl">
+		<property name="jpush">
+			<bean class="cn.jpush.api.JPushClient">
+				<constructor-arg index="0"><value>#[jpush.secret]</value></constructor-arg>
+				<constructor-arg index="1"><value>#[jpush.appKey]</value></constructor-arg>
+			</bean>
+		</property>
+	</bean>
+	<bean name="smsSAL" class="com.iwami.iwami.app.sal.impl.SMSSALImpl">
+		<property name="url">
+			<value>#[sms.url]</value>
+		</property>
+		<property name="apiKey">
+			<value>#[sms.apiKey]</value>
+		</property>
+		<property name="encoding">
+			<value>#[sms.encoding]</value>
+		</property>
+		<property name="send">
+			<value>#[sms.send]</value>
+		</property>
 	</bean>
 	
 	<!-- common beans -->

@@ -13,4 +13,6 @@ public interface ApkService {
 	public boolean addApk(Apk apk);
 
 	public boolean modApk(Apk apk);
+
+	public boolean updateApkUrl(Apk apk);
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import com.iwami.iwami.app.biz.FileBiz;
 import com.iwami.iwami.app.biz.StrategyBiz;
 import com.iwami.iwami.app.comparator.StrategyImageRankComparator;
 import com.iwami.iwami.app.comparator.StrategyInfoComparator;
@@ -19,17 +20,22 @@ import com.iwami.iwami.app.service.StrategyService;
 public class StrategyBizImpl implements StrategyBiz {
 	
 	private StrategyService strategyService;
+	
+	private FileBiz fileBiz;
 
 	// image
 	@Override
-	public boolean addSImage(StrategyImage image) {
-		// TODO upload image to CDN
-		return strategyService.addImage(image);
+	public boolean addImage(StrategyImage image) {
+		if(strategyService.addImage(image)){
+			fileBiz.uploadImageResource(image);
+			return strategyService.updateImageUrl(image);
+		} else
+			return false;
 	}
 
 	@Override
 	public boolean modImage(StrategyImage image) {
-		// TODO upload image to CDN
+		fileBiz.uploadImageResource(image);
 		return strategyService.modImage(image);
 	}
 
@@ -77,6 +83,9 @@ public class StrategyBizImpl implements StrategyBiz {
 	public long addStrategy(Strategy strategy, StrategyRate rate) {
 		long id = strategyService.addStrategy(strategy);
 		if(id > 0){
+			strategy.setId(id);
+			fileBiz.uploadStrategyResource(strategy);
+			strategyService.updateStrategyUrl(strategy);
 			rate.setStrategyId(id);
 			if(!strategyService.addRate(rate))
 				throw new RuntimeException("exception in modrate, so rollback");
@@ -89,6 +98,7 @@ public class StrategyBizImpl implements StrategyBiz {
 	@Override
 	@Transactional(rollbackFor=Exception.class, value="txManager")
 	public boolean modStrategy(Strategy strategy, StrategyRate rate) {
+		fileBiz.uploadStrategyResource(strategy);
 		if(strategyService.modStrategy(strategy)){
 			if(!strategyService.modRate(rate))
 				throw new RuntimeException("exception in modrate, so rollback");
@@ -130,11 +140,16 @@ public class StrategyBizImpl implements StrategyBiz {
 
 	@Override
 	public boolean addInfo(StrategyInfo info) {
-		return strategyService.addInfo(info);
+		if(strategyService.addInfo(info)){
+			fileBiz.uploadStrategyInfoResource(info);
+			return strategyService.updateInfoUrl(info);
+		} else
+			return false;
 	}
 
 	@Override
 	public boolean modInfo(StrategyInfo info) {
+		fileBiz.uploadStrategyInfoResource(info);
 		return strategyService.modInfo(info);
 	}
 
@@ -149,6 +164,14 @@ public class StrategyBizImpl implements StrategyBiz {
 
 	public void setStrategyService(StrategyService strategyService) {
 		this.strategyService = strategyService;
+	}
+
+	public FileBiz getFileBiz() {
+		return fileBiz;
+	}
+
+	public void setFileBiz(FileBiz fileBiz) {
+		this.fileBiz = fileBiz;
 	}
 
 }

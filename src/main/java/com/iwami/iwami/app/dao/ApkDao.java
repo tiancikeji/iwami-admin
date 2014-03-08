@@ -13,4 +13,6 @@ public interface ApkDao {
 	public boolean delAllApks();
 
 	public boolean modApk(Apk apk);
+
+	public boolean updateApkUrl(Apk apk);
 }

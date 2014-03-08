@@ -17,6 +17,8 @@ public interface StrategyService {
 
 	public boolean modImage(StrategyImage image);
 
+	public boolean updateImageUrl(StrategyImage image);
+
 	public boolean modImageSeqs(List<Long> lIds, List<Integer> lRanks, long adminid);
 
 	public boolean delImage(int id, long adminid);
@@ -41,6 +43,8 @@ public interface StrategyService {
 
 	public boolean modStrategy(Strategy strategy);
 
+	public boolean updateStrategyUrl(Strategy strategy);
+
 	public long addStrategy(Strategy strategy);
 	
 	// info
@@ -51,4 +55,6 @@ public interface StrategyService {
 	public boolean delInfo(long id, long adminid);
 
 	public boolean modInfo(StrategyInfo info);
+
+	public boolean updateInfoUrl(StrategyInfo info);
 }

@@ -10,10 +10,12 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.iwami.iwami.app.biz.LoginBiz;
 import com.iwami.iwami.app.biz.TipsBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
+import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.Tips;
 import com.iwami.iwami.app.util.IWamiUtils;
@@ -24,6 +26,8 @@ public class TipsAjax {
 	private Log logger = LogFactory.getLog(getClass());
 
 	private TipsBiz tipsBiz;
+	
+	private LoginBiz loginBiz;
 
 	@AjaxMethod(path = "MOD/tip.ajax")
 	public Map<Object, Object> modTip(Map<String, String> params) {
@@ -33,9 +37,7 @@ public class TipsAjax {
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				int type = NumberUtils.toInt(params.get("type"), -1);
 				String content = StringUtils.trimToEmpty(params.get("content"));
-				
-				// TODO check admin id
-				if (adminid > 0 && type >= 0 && StringUtils.isNotBlank(content)) {
+				if (adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.CONTACT_MANAGEMENT) && type >= 0 && StringUtils.isNotBlank(content)) {
 					Tips tip = new Tips();
 					tip.setContent(content);
 					tip.setType(type);
@@ -67,8 +69,7 @@ public class TipsAjax {
 		try {
 			if (params.containsKey("adminid")) {
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
-				// TODO check admin id
-				if (adminid > 0) {
+				if (adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.CONTACT_MANAGEMENT)) {
 					List<Tips> tips = tipsBiz.getTips();
 					List<Map<String, Object>> data = new ArrayList<Map<String,Object>>();
 					if(tips != null)
@@ -79,6 +80,8 @@ public class TipsAjax {
 							
 							tmp.put("lastModTime", IWamiUtils.getDateString(tip.getLastmodTime()));
 							tmp.put("lastModUserid", tip.getLastmodUserid());
+							
+							data.add(tmp);
 						}
 					result.put("data", data);
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
@@ -104,5 +107,13 @@ public class TipsAjax {
 
 	public void setTipsBiz(TipsBiz tipsBiz) {
 		this.tipsBiz = tipsBiz;
+	}
+
+	public LoginBiz getLoginBiz() {
+		return loginBiz;
+	}
+
+	public void setLoginBiz(LoginBiz loginBiz) {
+		this.loginBiz = loginBiz;
 	}
 }

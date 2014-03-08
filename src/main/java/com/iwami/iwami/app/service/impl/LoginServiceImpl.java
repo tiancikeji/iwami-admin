@@ -29,11 +29,12 @@ public class LoginServiceImpl implements LoginService {
 				if(login != null && left > 0){
 					LocalCaches.set(IWamiConstants.CACHE_LOGIN_KEY + login.getUserid(), login, left);
 					return true;
-				}
-			}
-		}
-		
-		return false;
+				} else
+					return false;
+			} else
+				return false;
+		} else
+			return true;
 	}
 
 	@Override

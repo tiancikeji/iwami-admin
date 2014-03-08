@@ -21,6 +21,8 @@ public class PushTask {
 	private String alias;
 	
 	private int status;
+	
+	private long lastModUserid;
 
 	public long getId() {
 		return id;
@@ -75,6 +77,14 @@ public class PushTask {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	public long getLastModUserid() {
+		return lastModUserid;
+	}
+
+	public void setLastModUserid(long lastModUserid) {
+		this.lastModUserid = lastModUserid;
 	}
 
 }

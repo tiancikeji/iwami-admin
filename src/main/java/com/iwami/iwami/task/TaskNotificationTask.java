@@ -13,15 +13,17 @@ import org.springframework.beans.BeanUtils;
 import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.model.Task;
 import com.iwami.iwami.app.model.TaskNotification;
+import com.iwami.iwami.app.service.SMSService;
 import com.iwami.iwami.app.service.TaskService;
 import com.iwami.iwami.app.util.IWamiUtils;
-import com.iwami.iwami.app.util.SMSUtils;
 
 public class TaskNotificationTask implements Runnable {
 
 	private Log logger = LogFactory.getLog(getClass());
 	
 	private TaskService taskService;
+	
+	private SMSService smsService;
 	
 	@Override
 	public void run() {
@@ -38,7 +40,6 @@ public class TaskNotificationTask implements Runnable {
 						TaskNotification noti = new TaskNotification();
 						noti.setTaskId(task.getId());
 						noti.setStatus(TaskNotification.STATUS_NEW);
-						noti.setCellPhone(cellPhones.get(0));
 						
 						StringBuilder sms = new StringBuilder("任务");
 						if(task.getEndTime() != null && now.after(task.getEndTime()))
@@ -49,6 +50,7 @@ public class TaskNotificationTask implements Runnable {
 							sms.append("\"").append(task.getName()).append("\"").append("已于")
 							.append(IWamiUtils.getDateString(task.getLastModTime())).append("完成，原定时间为（")
 							.append(IWamiUtils.getDateString(task.getStartTime())).append("~").append(task.getEndTime()).append("）");
+						noti.setSms(sms.toString());
 						
 						notis.add(noti);
 					}
@@ -59,17 +61,18 @@ public class TaskNotificationTask implements Runnable {
 							for(TaskNotification tn : notis){
 								TaskNotification tmp = new TaskNotification();
 								BeanUtils.copyProperties(tn, tmp);
-								tn.setCellPhone(cellPhone);
-								tmps.add(tn);
+								tmp.setCellPhone(cellPhone);
+								tmps.add(tmp);
 							}
 						
+						notis.clear();
 						notis.addAll(tmps);
 					}
 					
 					if(taskService.addTaskNotifications(notis)){
 						for(TaskNotification noti : notis){
 							try{
-								if(SMSUtils.sendLuosiMao(noti.getSms(), "" + noti.getCellPhone()))
+								if(smsService.sendSMS("" + noti.getCellPhone(), noti.getSms()))
 									taskService.updateTaskNotificationStatus(noti.getTaskId(), noti.getCellPhone(), TaskNotification.STATUS_SMS);
 							} catch(Throwable t){
 								if(logger.isErrorEnabled())
@@ -103,6 +106,14 @@ public class TaskNotificationTask implements Runnable {
 
 	public void setTaskService(TaskService taskService) {
 		this.taskService = taskService;
+	}
+
+	public SMSService getSmsService() {
+		return smsService;
+	}
+
+	public void setSmsService(SMSService smsService) {
+		this.smsService = smsService;
 	}
 
 }

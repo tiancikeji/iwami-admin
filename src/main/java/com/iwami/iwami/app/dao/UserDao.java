@@ -35,6 +35,8 @@ public interface UserDao {
 
 	public boolean modAdminUserInfo(User user);
 
+	public boolean modAdminUser(User user);
+
 	public boolean delAdminUser(long userid, long adminid);
 
 	public boolean delAdminUserInfo(long userid, long adminid);
@@ -46,5 +48,7 @@ public interface UserDao {
 	public void addLogin(Login login);
 
 	public Login getLogin(long adminid);
+
+	public Map<Long, String> getAllAlias();
 
 }

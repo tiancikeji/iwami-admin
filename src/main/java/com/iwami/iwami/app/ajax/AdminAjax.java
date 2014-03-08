@@ -10,10 +10,12 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.iwami.iwami.app.biz.LoginBiz;
 import com.iwami.iwami.app.biz.UserBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
+import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.User;
 import com.iwami.iwami.app.model.UserRole;
@@ -25,6 +27,8 @@ public class AdminAjax {
 	private Log logger = LogFactory.getLog(getClass());
 	
 	private UserBiz userBiz;
+	
+	private LoginBiz loginBiz;
 
 	@AjaxMethod(path = "DEL/admin.ajax")
 	public Map<Object, Object> delAdmin(Map<String, String> params) {
@@ -35,7 +39,7 @@ public class AdminAjax {
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long userid = NumberUtils.toLong(params.get("userid"), -1);
 				//TODO check admin id
-				if(adminid > 0 && userid > 0){
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.ADMIN_MANAGEMENT) && userid > 0){
 					
 					if(userBiz.delAdmin(userid, adminid))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
@@ -62,7 +66,7 @@ public class AdminAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("userid") && params.containsKey("username") && params.containsKey("loginname") && params.containsKey("cellPhone")
-					 && params.containsKey("password") && params.containsKey("roles")){
+					 && params.containsKey("password") && params.containsKey("roles") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long userid = NumberUtils.toLong(params.get("userid"), -1);
 				String username = StringUtils.trimToEmpty(params.get("username"));
@@ -70,21 +74,27 @@ public class AdminAjax {
 				long cellPhone = NumberUtils.toLong(params.get("cellPhone"), -1);
 				String password = StringUtils.trimToEmpty(params.get("password"));
 				long roles = NumberUtils.toLong(params.get("roles"), -1);
-				//TODO check admin id
-				if(adminid > 0 && userid > 0 && IWamiUtils.validatePhone("" + cellPhone) && StringUtils.isNotBlank(username)
-						&& StringUtils.isNotBlank(password) && roles >= 0){
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.ADMIN_MANAGEMENT) && userid > 0 && IWamiUtils.validatePhone("" + cellPhone) && StringUtils.isNotBlank(username)
+						&& StringUtils.isNotBlank(password) && roles >= 0 && isdel >= 0){
 					
 					User user = new User();
 					user.setId(userid);
 					user.setName(username);
 					user.setCellPhone(cellPhone);
 					user.setLastmodUserid(adminid);
+					if(isdel == 0)
+						user.setIsdel(3);
+					else
+						user.setIsdel(4);
 					
 					UserRole role = new UserRole();
+					role.setUserid(userid);
 					role.setName(loginname);
 					role.setPassword(password);
 					role.setRole(roles);
 					role.setLastModUserid(adminid);
+					role.setIsdel(isdel);
 					
 					if(userBiz.modAdmin(user, role))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
@@ -118,8 +128,7 @@ public class AdminAjax {
 				long cellPhone = NumberUtils.toLong(params.get("cellPhone"), -1);
 				String password = StringUtils.trimToEmpty(params.get("password"));
 				long roles = NumberUtils.toLong(params.get("roles"), -1);
-				//TODO check admin id
-				if(adminid > 0 && IWamiUtils.validatePhone("" + cellPhone) && StringUtils.isNotBlank(username)
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.ADMIN_MANAGEMENT) && IWamiUtils.validatePhone("" + cellPhone) && StringUtils.isNotBlank(username)
 						&& StringUtils.isNotBlank(password) && roles >= 0){
 					
 					User user = new User();
@@ -159,8 +168,7 @@ public class AdminAjax {
 		try{
 			if(params.containsKey("adminid")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
-					//TODO check admin id
-				if(adminid > 0){
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.ADMIN_MANAGEMENT)){
 					Map<Long, UserRole> roles = null;
 					List<User> users = userBiz.getAdminUsers();
 					
@@ -208,6 +216,11 @@ public class AdminAjax {
 					tmp.put("lastModTime", IWamiUtils.getDateString(user.getLastmodTime()));
 					tmp.put("lastModUserid", user.getLastmodUserid());
 					
+					int isdel = 1;
+					if(user.getIsdel() == 3)
+						isdel = 0;
+					tmp.put("isdel", isdel);
+					
 					data.add(tmp);
 				}
 		
@@ -221,6 +234,14 @@ public class AdminAjax {
 
 	public void setUserBiz(UserBiz userBiz) {
 		this.userBiz = userBiz;
+	}
+
+	public LoginBiz getLoginBiz() {
+		return loginBiz;
+	}
+
+	public void setLoginBiz(LoginBiz loginBiz) {
+		this.loginBiz = loginBiz;
 	}
 
 }

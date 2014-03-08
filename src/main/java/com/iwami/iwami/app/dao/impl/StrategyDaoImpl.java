@@ -36,14 +36,37 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 	}
 
 	@Override
-	public boolean addImage(StrategyImage image) {
-		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_STRATEGY_IMAGES + "(rank, icon_url, lastmod_time, lastmod_userid, isdel) values(?, ?, now(), ?, 0)", new Object[]{image.getRank(), image.getIconUrl(), image.getLastModUserid(), image.getIsdel()});
-		return count > 0;
+	public boolean addImage(final StrategyImage image) {
+		KeyHolder holder = new GeneratedKeyHolder();
+		int count = getJdbcTemplate().update(new PreparedStatementCreator() {
+			
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_STRATEGY_IMAGES + "(rank, icon_url, lastmod_time, lastmod_userid, isdel) values(?, ?, now(), ?, ?)", Statement.RETURN_GENERATED_KEYS);
+				ps.setObject(1, image.getRank());
+				ps.setObject(2, image.getIconUrl());
+				ps.setObject(3, image.getLastModUserid());
+				ps.setObject(4, image.getIsdel());
+				return ps;
+			}
+		}, holder);
+		
+		if(count > 0 && holder.getKey() != null){
+			image.setId(holder.getKey().longValue());
+			return true;
+		} else
+			return false;
 	}
 
 	@Override
 	public boolean modImage(StrategyImage image) {
 		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_IMAGES + " set rank = ?, icon_url = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where id = ?", new Object[]{image.getRank(), image.getIconUrl(), image.getLastModUserid(), image.getIsdel(), image.getId()});
+		return count > 0;
+	}
+
+	@Override
+	public boolean updateImageUrl(StrategyImage image) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_IMAGES + " set icon_url = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", new Object[]{image.getIconUrl(), image.getLastModUserid(), image.getId()});
 		return count > 0;
 	}
 
@@ -120,6 +143,13 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 	}
 
 	@Override
+	public boolean updateStrategyUrl(Strategy strategy) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_LIST + " set icon_small = ?, icon_big = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", 
+				new Object[]{strategy.getIconSmall(), strategy.getIconBig(), strategy.getLastModUserid(), strategy.getId()});
+		return count > 0;
+	}
+
+	@Override
 	public long addStrategy(final Strategy strategy) {
 		KeyHolder holder = new GeneratedKeyHolder();
 		int count = getJdbcTemplate().update(new PreparedStatementCreator() {
@@ -159,10 +189,29 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 	}
 
 	@Override
-	public boolean addInfo(StrategyInfo info) {
-		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_STRATEGY_INFO + "(strategy_id, rank, title, content, url, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, ?, now(), ?, ?)", 
-				new Object[]{info.getStrategyId(), info.getRank(), info.getTitle(), info.getContent(), info.getUrl(), info.getLastModUserid(), IWamiConstants.ACTIVE});
-		return count > 0;
+	public boolean addInfo(final StrategyInfo info) {
+		KeyHolder holder = new GeneratedKeyHolder();
+		int count = getJdbcTemplate().update(new PreparedStatementCreator() {
+			
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_STRATEGY_INFO + "(strategy_id, rank, title, content, url, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, ?, now(), ?, ?)", Statement.RETURN_GENERATED_KEYS);
+				ps.setObject(1, info.getStrategyId());
+				ps.setObject(2, info.getRank());
+				ps.setObject(3, info.getTitle());
+				ps.setObject(4, info.getContent());
+				ps.setObject(5, info.getUrl());
+				ps.setObject(6, info.getLastModUserid());
+				ps.setObject(7, IWamiConstants.ACTIVE);
+				return ps;
+			}
+		}, holder);
+		
+		if(count > 0 && holder.getKey() != null){
+			info.setId(holder.getKey().longValue());
+			return true;
+		} else
+			return false;
 	}
 
 	@Override
@@ -172,10 +221,17 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 		return count > 0;
 	}
 
+	@Override
+	public boolean updateInfoUrl(StrategyInfo info) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_INFO + " set url = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", 
+				new Object[]{info.getUrl(), info.getLastModUserid(), info.getId()});
+		return count > 0;
+	}
+
 	// rate
 	@Override
 	public Map<Long, StrategyRate> getRatesByIds(List<Long> ids) {
-		List<StrategyRate> rates = getJdbcTemplate().query("select strategy_id, skim, rate from " + SqlConstants.TABLE_STRATEGY_RATE + " where id in (" + StringUtils.join(ids.toArray(), ",") + ")", new StrategyRateRowMapper());
+		List<StrategyRate> rates = getJdbcTemplate().query("select strategy_id, skim, rate from " + SqlConstants.TABLE_STRATEGY_RATE + " where strategy_id in (" + StringUtils.join(ids.toArray(), ",") + ")", new StrategyRateRowMapper());
 		
 		Map<Long, StrategyRate> result = new HashMap<Long, StrategyRate>();
 		if(rates != null && rates.size() > 0)

@@ -123,8 +123,8 @@ public class TaskAjax {
 					int type = NumberUtils.toInt(params.get("type"), -1);
 					int attr = NumberUtils.toInt(params.get("attr"), -1);
 					int time = NumberUtils.toInt(params.get("time"), -1);
-					Date startTime = IWamiUtils.getDate(StringUtils.trimToEmpty("startTime"));
-					Date endTime = IWamiUtils.getDate(StringUtils.trimToEmpty("endTime"));
+					Date startTime = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("startTime")));
+					Date endTime = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("endTime")));
 					int currentPrize = NumberUtils.toInt(params.get("currentPrize"), -1);
 					int maxPrize = NumberUtils.toInt(params.get("maxPrize"), -2);
 					String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
@@ -138,7 +138,7 @@ public class TaskAjax {
 						&& prize > 0 && maxPrize > -2 && currentPrize > -2
 						&& (type == 1 || type == 2 || (type == 3 && StringUtils.isNotBlank(iconBig)) || type == 5)
 						&& (attr == 1 || attr == 2 || attr == 3)
-						&& time > 0 && StringUtils.isNotBlank(iconSmall)
+						&& time >= 0 && StringUtils.isNotBlank(iconSmall)
 						&& (isdel == 0 || isdel == 1)
 						&& StringUtils.isNotBlank(url)){
 
@@ -230,8 +230,8 @@ public class TaskAjax {
 						int prize = NumberUtils.toInt(params.get("prize"), -1);
 						int attr = NumberUtils.toInt(params.get("attr"), -1);
 						int time = NumberUtils.toInt(params.get("time"), -1);
-						Date startTime = IWamiUtils.getDate(StringUtils.trimToEmpty("startTime"));
-						Date endTime = IWamiUtils.getDate(StringUtils.trimToEmpty("endTime"));
+						Date startTime = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("startTime")));
+						Date endTime = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("endTime")));
 						int addCurrentPrize = NumberUtils.toInt(params.get("addCurrentPrize"), Integer.MAX_VALUE);
 						int maxPrize = NumberUtils.toInt(params.get("maxPrize"), -2);
 						String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
@@ -244,7 +244,7 @@ public class TaskAjax {
 							&& prize > 0 && maxPrize > -2 && addCurrentPrize != Integer.MAX_VALUE
 							&& (type == 1 || type == 2 || (type == 3 && StringUtils.isNotBlank(iconBig)) || type == 4 || type == 5)
 							&& (attr == 1 || attr == 2 || attr == 3 || attr == 4)
-							&& time > 0 && startTime != null
+							&& time >= 0 && startTime != null
 							&& StringUtils.isNotBlank(iconSmall)
 							&& (isdel == 0 || isdel == 1)
 							&& StringUtils.isNotBlank(url)){

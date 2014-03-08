@@ -19,6 +19,8 @@ public class UserRole {
 	private Date lastModTime;
 	
 	private long lastModUserid;
+	
+	private int isdel;
 
 	public long getUserid() {
 		return userid;
@@ -81,5 +83,13 @@ public class UserRole {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getIsdel() {
+		return isdel;
+	}
+
+	public void setIsdel(int isdel) {
+		this.isdel = isdel;
 	}
 }

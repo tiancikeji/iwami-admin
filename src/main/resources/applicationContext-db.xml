@@ -49,7 +49,12 @@
 	<bean name="taskDao" class="com.iwami.iwami.app.dao.impl.TaskDaoImpl">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
+	
 	<bean name="presentDao" class="com.iwami.iwami.app.dao.impl.PresentDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean name="pushDao" class="com.iwami.iwami.app.dao.impl.PushDaoImpl">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 	

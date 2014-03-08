@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import com.iwami.iwami.app.biz.FileBiz;
 import com.iwami.iwami.app.biz.TaskBiz;
 import com.iwami.iwami.app.model.Task;
 import com.iwami.iwami.app.model.TreasureConfig;
@@ -18,7 +19,9 @@ public class TaskBizImpl implements TaskBiz {
 	private TaskService taskService;
 	
 	private WamiService wamiService;
-
+	
+	private FileBiz fileBiz;
+	
 	@Override
 	public TreasureConfig getTreasureConfig() {
 		return taskService.getTreasureConfig();
@@ -47,12 +50,16 @@ public class TaskBizImpl implements TaskBiz {
 		else if(type == 5)
 			ttype = 16;
 		
-		int background = 0;
-		int register = 0;
-		if(attr == 2)
+		int background = -1;
+		int register = -1;
+		if(attr == 1)
 			background = 1;
-		else if(attr == 3)
+		else if(attr == 2)
+			background = 0;
+		else if(attr == 3){
+			background = 1;
 			register = 1;
+		}
 		
 		List<Task> tasks = taskService.getTasks(ttype, background, register, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR);
 		
@@ -83,7 +90,10 @@ public class TaskBizImpl implements TaskBiz {
 	}
 
 	@Override
+	@Transactional(rollbackFor=Exception.class, value="txManager")
 	public boolean modTask(Task task) {
+		fileBiz.uploadTaskResource(task);
+		
 		if(task.getType() == Task.TYPE_GOLD && task.getRank() == Task.RANK_GOLD_DEFAULT)
 			taskService.incrTaskRankByType(Task.TYPE_GOLD);
 		return taskService.modTask(task);
@@ -105,8 +115,13 @@ public class TaskBizImpl implements TaskBiz {
 	}
 
 	@Override
+	@Transactional(rollbackFor=Exception.class, value="txManager")
 	public boolean addTask(Task task) {
-		return taskService.addTask(task);
+		if(taskService.addTask(task)){
+			fileBiz.uploadTaskResource(task);
+			return taskService.updateTaskUrl(task);
+		} else
+			return false;
 	}
 
 	public TaskService getTaskService() {
@@ -125,4 +140,11 @@ public class TaskBizImpl implements TaskBiz {
 		this.wamiService = wamiService;
 	}
 
+	public FileBiz getFileBiz() {
+		return fileBiz;
+	}
+
+	public void setFileBiz(FileBiz fileBiz) {
+		this.fileBiz = fileBiz;
+	}
 }

@@ -150,7 +150,7 @@ public class UserBizImpl implements UserBiz {
 	@Override
 	@Transactional(rollbackFor=Exception.class, value="txManager")
 	public boolean modAdmin(User user, UserRole role) {
-		if(userService.modAdminUserInfo(user))
+		if(userService.modAdminUser(user) && userService.modAdminUserInfo(user))
 			if(userService.modAdminRole(role))
 				return true;
 			else

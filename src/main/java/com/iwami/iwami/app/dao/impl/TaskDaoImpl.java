@@ -1,15 +1,21 @@
 package com.iwami.iwami.app.dao.impl;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.constants.SqlConstants;
@@ -46,81 +52,79 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 	public List<Task> getTasks(int type, int background, int register,
 			int maxL, int maxR, int prizeL, int prizeR, int currL, int currR,
 			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR) {
+		List<Object> params = new ArrayList<Object>();
 		StringBuilder sql = new StringBuilder("select id, name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from ");
 		sql.append(SqlConstants.TABLE_TASK);
-		sql.append(" where type & ");
-		sql.append(type);
-		sql.append(" > 0 ");
-		sql.append(" and isdel in (0, 1) ");
+		sql.append(" where type & ? > 0");
+		params.add(type);
+		sql.append(" and isdel in (?, ?) ");
+		params.add(0);
+		params.add(1);
 		
-		if(type != 4){
-			sql.append(" and background = ");
-			sql.append(background);
-			sql.append(" and register = ");
-			sql.append(register);
+		if(background >= 0){
+			sql.append(" and background = ?");
+			params.add(background);
+		}
+		if(register >= 0){
+			sql.append(" and register = ?");
+			params.add(register);
 		}
 		
 		if(maxL >= 0){
-			sql.append(" and (max_prize = -1 or max_prize >= ");
-			sql.append(maxL);
-			sql.append(")");
+			sql.append(" and (max_prize = -1 or max_prize >= ?)");
+			params.add(maxL);
 		}
 		if(maxR >= 0 && maxR >= maxL){
-			sql.append(" and (max_prize = -1 or max_prize <= ");
-			sql.append(maxR);
-			sql.append(")");
+			sql.append(" and (max_prize = -1 or max_prize <= ?)");
+			params.add(maxR);
 		}
 		
 		if(prizeL >= 0){
-			sql.append(" and prize >= ");
-			sql.append(prizeL);
+			sql.append(" and prize >= ?");
+			params.add(prizeL);
 		}
 		if(prizeR >= 0 && prizeR >= prizeL){
-			sql.append(" and prize <= ");
-			sql.append(prizeR);
+			sql.append(" and prize <= ?");
+			params.add(prizeR);
 		}
 		
 		if(currL >= 0){
-			sql.append(" and current_prize >= ");
-			sql.append(currL);
+			sql.append(" and current_prize >= ?");
+			params.add(currL);
 		}
 		if(currR >= 0 && currR >= currL){
-			sql.append(" and current_prize <= ");
-			sql.append(currR);
+			sql.append(" and current_prize <= ?");
+			params.add(currR);
 		}
 		
 		if(leftL >= 0){
-			sql.append(" and (max_prize = -1 or (max_prize - current_prize) >= ");
-			sql.append(leftL);
-			sql.append(")");
+			sql.append(" and (max_prize = -1 or (max_prize - current_prize) >= ?)");
+			params.add(leftL);
 		}
 		if(leftR >= 0 && leftR >= leftL){
-			sql.append(" and (max_prize = -1 or (max_prize - current_prize) <= ");
-			sql.append(leftR);
-			sql.append(")");
+			sql.append(" and (max_prize = -1 or (max_prize - current_prize) <= ?)");
+			params.add(leftR);
 		}
 		
 		if(startL != null){
-			sql.append(" and start_time >= ");
-			sql.append(startL);
+			sql.append(" and start_time >= ?");
+			params.add(startL);
 		}
 		if(startR != null){
-			sql.append(" and start_time <= ");
-			sql.append(startR);
+			sql.append(" and start_time <= ?");
+			params.add(startR);
 		}
 		
 		if(endL != null){
-			sql.append(" and (end_time is null or end_time >= ");
-			sql.append(endL);
-			sql.append(")");
+			sql.append(" and (end_time is null or end_time >= ?)");
+			params.add(endL);
 		}
 		if(endR != null){
-			sql.append(" and (end_time is null or end_time <= ");
-			sql.append(endR);
-			sql.append(")");
+			sql.append(" and (end_time is null or end_time <= ?)");
+			params.add(endR);
 		}
 		
-		return getJdbcTemplate().query(sql.toString(), new TaskRowMapper());
+		return getJdbcTemplate().query(sql.toString(), params.toArray(),new TaskRowMapper());
 	}
 
 	@Override
@@ -153,26 +157,67 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 	}
 
 	@Override
-	public void incrTaskRankByType(int type) {
-		getJdbcTemplate().update("update " + SqlConstants.TABLE_TASK + " set rank = rank + 1 where type == ?", new Object[]{type});
-	}
-
-	@Override
-	public boolean addTask(Task task) {
-		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_TASK + "(name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, ?, ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?, ?, ?,  ?, now(), ?,  ?",
-				new Object[]{task.getName(), task.getRank(), task.getSize(), task.getIntr(), task.getAppIntr(), task.getPrize(), task.getType(), task.getBackground(), task.getTime(), task.getRegister(), task.getReputation(), task.getStar(), task.getStartTime(), task.getEndTime(), task.getCurrentPrize(), task.getMaxPrize(), task.getUrl(), task.getIconGray(), task.getIconSmall(), task.getIconBig(), task.getLastModUserid(), task.getIsdel()});
+	public boolean updateTaskUrl(Task task) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_TASK + " set url = ?, icon_gray = ?, icon_small = ?, icon_big = ?, lastmod_time = now(), lastmod_userid = ? where id = ?",
+				new Object[]{task.getUrl(), task.getIconGray(), task.getIconSmall(), task.getIconBig(), task.getLastModUserid(), task.getId()});
 		return count > 0;
 	}
 
 	@Override
+	public void incrTaskRankByType(int type) {
+		getJdbcTemplate().update("update " + SqlConstants.TABLE_TASK + " set rank = rank + 1 where type = ?", new Object[]{type});
+	}
+
+	@Override
+	public boolean addTask(final Task task) {
+		KeyHolder holder = new GeneratedKeyHolder();
+		int count = getJdbcTemplate().update(new PreparedStatementCreator() {
+			
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_TASK + "(name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, ?, ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?, ?, ?,  ?, now(), ?,  ?)", Statement.RETURN_GENERATED_KEYS);
+				ps.setObject(1, task.getName());
+				ps.setObject(2, task.getRank());
+				ps.setObject(3, task.getSize());
+				ps.setObject(4, task.getIntr());
+				ps.setObject(5, task.getAppIntr());
+				ps.setObject(6, task.getPrize());
+				ps.setObject(7, task.getType());
+				ps.setObject(8, task.getBackground());
+				ps.setObject(9, task.getTime());
+				ps.setObject(10, task.getRegister());
+				ps.setObject(11, task.getReputation());
+				ps.setObject(12, task.getStar());
+				ps.setObject(13, task.getStartTime());
+				ps.setObject(14, task.getEndTime());
+				ps.setObject(15, task.getCurrentPrize());
+				ps.setObject(16, task.getMaxPrize());
+				ps.setObject(17, task.getUrl());
+				ps.setObject(18, task.getIconGray());
+				ps.setObject(19, task.getIconSmall());
+				ps.setObject(20, task.getIconBig());
+				ps.setObject(21, task.getLastModUserid());
+				ps.setObject(22, task.getIsdel());
+				return ps;
+			}
+		}, holder);
+		
+		if(count > 0 && holder.getKey() != null){
+			task.setId(holder.getKey().longValue());
+			return true;
+		} else
+			return false;
+	}
+
+	@Override
 	public List<Task> getFinishedTasks() {
-		return getJdbcTemplate().query("select id, name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_TASK + " where isdel = ? and ((max_prize > -1 and current_prize >= max_prize) or (end_time is not null and end_time <= now())) and id not in (select distinct id from " + SqlConstants.TABLE_TASK_NOTIFICATION + " where status = ?)", 
+		return getJdbcTemplate().query("select id, name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_TASK + " where isdel = ? and ((max_prize > -1 and current_prize >= max_prize) or (end_time is not null and end_time <= now())) and id not in (select distinct task_id from " + SqlConstants.TABLE_TASK_NOTIFICATION + " where status = ?)", 
 				new Object[]{IWamiConstants.ACTIVE, TaskNotification.STATUS_SMS}, new TaskRowMapper());
 	}
 
 	@Override
 	public void updateTaskNotificationStatus(long taskid, long cellPhone, int status) {
-		getJdbcTemplate().update("update " + SqlConstants.TABLE_TASK_NOTIFICATION + " set status = ? where task_id = ?, cell_phone = ?", new Object[]{status, taskid, cellPhone});
+		getJdbcTemplate().update("update " + SqlConstants.TABLE_TASK_NOTIFICATION + " set status = ? where task_id = ? and cell_phone = ?", new Object[]{status, taskid, cellPhone});
 	}
 
 	@Override

@@ -32,6 +32,8 @@ public interface UserService {
 
 	public boolean modAdminUserInfo(User user);
 
+	public boolean modAdminUser(User user);
+
 	public boolean modAdminRole(UserRole role);
 
 	public boolean delAdminUser(long userid, long adminid);
@@ -39,4 +41,6 @@ public interface UserService {
 	public boolean delAdminUserInfo(long userid, long adminid);
 
 	public boolean delAdminRole(long userid, long adminid);
+
+	public Map<Long, String> getAllAlias();
 }

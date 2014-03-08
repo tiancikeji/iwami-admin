@@ -1,5 +1,6 @@
 package com.iwami.iwami.app.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -85,8 +86,13 @@ public class IWamiUtils {
 			return StringUtils.EMPTY;
 	}
 
-	public static Date getDate(String string) {
-		// TODO Auto-generated method stub
+	public static Date getDate(String date) {
+		try {
+			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
 		return null;
 	}
 }

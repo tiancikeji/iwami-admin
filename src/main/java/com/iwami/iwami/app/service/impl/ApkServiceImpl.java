@@ -30,6 +30,11 @@ public class ApkServiceImpl implements ApkService {
 		return apkDao.modApk(apk);
 	}
 
+	@Override
+	public boolean updateApkUrl(Apk apk) {
+		return apkDao.updateApkUrl(apk);
+	}
+
 	public ApkDao getApkDao() {
 		return apkDao;
 	}

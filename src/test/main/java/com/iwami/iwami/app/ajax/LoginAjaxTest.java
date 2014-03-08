@@ -12,6 +12,21 @@ public class LoginAjaxTest extends TestCase {
 
 	private boolean flag = false;
 	
+	public void testLogin2(){
+		if(flag){
+			LoginAjax ajax = getAjax();
+			
+			Map<String, String> params = new HashMap<String, String>();
+			System.out.println(ajax.login(params));
+
+			params.put("loginname", "10");
+			System.out.println(ajax.login(params));
+
+			params.put("password", "1220");
+			System.out.println(ajax.login(params));
+		}
+	}
+	
 	public void testLogin(){
 		if(flag){
 			LoginAjax ajax = getAjax();

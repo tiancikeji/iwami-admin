@@ -10,6 +10,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.iwami.iwami.app.biz.LoginBiz;
 import com.iwami.iwami.app.biz.PresentBiz;
 import com.iwami.iwami.app.biz.UserBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
@@ -32,6 +33,8 @@ public class PresentAjax {
 	private PresentBiz presentBiz;
 	
 	private UserBiz userBiz;
+	
+	private LoginBiz loginBiz;
 
 	@AjaxMethod(path = "exchange/history.ajax")
 	public Map<Object, Object> getExchangeHistory(Map<String, String> params) {
@@ -768,6 +771,14 @@ public class PresentAjax {
 
 	public void setUserBiz(UserBiz userBiz) {
 		this.userBiz = userBiz;
+	}
+
+	public LoginBiz getLoginBiz() {
+		return loginBiz;
+	}
+
+	public void setLoginBiz(LoginBiz loginBiz) {
+		this.loginBiz = loginBiz;
 	}
 
 }

@@ -51,4 +51,8 @@ public interface SqlConstants {
 	public static final String TABLE_TASK_NOTIFICATION = DATABASE + ".`task_notification`";
 
 	public static final String TABLE_LOGIN = DATABASE + ".`admin_login`";
+
+	public static final String TABLE_PUSH = DATABASE + ".`push`";
+
+	public static final String TABLE_PUSH_TASK = DATABASE + ".`push_task`";
 }

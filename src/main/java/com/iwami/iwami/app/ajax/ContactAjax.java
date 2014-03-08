@@ -9,9 +9,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.iwami.iwami.app.biz.ContactBiz;
+import com.iwami.iwami.app.biz.LoginBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
+import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.Contact;
 import com.iwami.iwami.app.util.IWamiUtils;
@@ -22,6 +24,8 @@ public class ContactAjax {
 	private Log logger = LogFactory.getLog(getClass());
 	
 	private ContactBiz contactBiz;
+	
+	private LoginBiz loginBiz;
 
 	@AjaxMethod(path = "GET/contact.ajax")
 	public Map<Object, Object> getContact(Map<String, String> params) {
@@ -30,9 +34,7 @@ public class ContactAjax {
 		try{
 			if(params.containsKey("adminid")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
-				//TODO check admin id
-				
-				if(adminid > 0){
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.CONTACT_MANAGEMENT)){
 					Contact contact = contactBiz.getContact();
 					Map<String, Object> data = new HashMap<String, Object>();
 					if(contact != null){
@@ -74,8 +76,6 @@ public class ContactAjax {
 					&& params.containsKey("qq") && params.containsKey("qqgroup") && params.containsKey("phone2")
 					&& params.containsKey("email2")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
-				//TODO check admin id
-				
 				String phone1 = StringUtils.trimToEmpty(params.get("phone1"));
 				String email1 = StringUtils.trimToEmpty(params.get("email1"));
 				String domain = StringUtils.trimToEmpty(params.get("domain"));
@@ -83,7 +83,7 @@ public class ContactAjax {
 				String qqgroup = StringUtils.trimToEmpty(params.get("qqgroup"));
 				String phone2 = StringUtils.trimToEmpty(params.get("phone2"));
 				String email2 = StringUtils.trimToEmpty(params.get("email2"));
-				if(adminid > 0 && StringUtils.isNotBlank(phone1)
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.CONTACT_MANAGEMENT) && StringUtils.isNotBlank(phone1)
 						 && StringUtils.isNotBlank(email1) && StringUtils.isNotBlank(domain) && StringUtils.isNotBlank(qq)
 						 && StringUtils.isNotBlank(qqgroup) && StringUtils.isNotBlank(phone2) && StringUtils.isNotBlank(email2)){
 					Contact contact = new Contact();
@@ -121,6 +121,14 @@ public class ContactAjax {
 
 	public void setContactBiz(ContactBiz contactBiz) {
 		this.contactBiz = contactBiz;
+	}
+
+	public LoginBiz getLoginBiz() {
+		return loginBiz;
+	}
+
+	public void setLoginBiz(LoginBiz loginBiz) {
+		this.loginBiz = loginBiz;
 	}
 
 }

@@ -38,5 +38,7 @@ public interface TaskDao {
 	public String getSMSNo();
 
 	public void incrTaskRankByType(int type);
+
+	public boolean updateTaskUrl(Task task);
 	
 }

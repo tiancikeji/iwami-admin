@@ -27,6 +27,8 @@ public interface TaskService {
 
 	public boolean modTask(Task task);
 
+	public boolean updateTaskUrl(Task task);
+
 	public boolean addTask(Task task);
 
 	public List<Task> getFinishedTasks();

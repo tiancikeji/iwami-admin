@@ -34,7 +34,7 @@ public class UserAjaxTest extends TestCase {
 	}
 	
 	public void testModUserInfo(){
-		if(true){
+		if(flag){
 			UserAjax ajax = getAjax();
 			
 			Map<String, String> params = new HashMap<String, String>();

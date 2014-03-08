@@ -10,6 +10,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.iwami.iwami.app.biz.LoginBiz;
 import com.iwami.iwami.app.biz.StrategyBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
@@ -26,16 +27,17 @@ public class StrategyAjax {
 	private Log logger = LogFactory.getLog(getClass());
 
 	private StrategyBiz strategyBiz;
+	
+	private LoginBiz loginBiz;
 
 	@AjaxMethod(path = "DEL/info.ajax")
 	public Map<Object, Object> delInfo(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		try{
-			if(params.containsKey("strategyid") && params.containsKey("id")){
-				// TODO check admin id
+			if(params.containsKey("adminid") && params.containsKey("id")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
-				if(adminid > 0 && id > 0){
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT) && id > 0){
 					if(strategyBiz.delInfo(id, adminid))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 					else
@@ -65,14 +67,13 @@ public class StrategyAjax {
 			if(params.containsKey("strategyid") && params.containsKey("id")
 					 && params.containsKey("rank") && params.containsKey("title")
 					 && params.containsKey("content") && params.containsKey("url")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				int rank = NumberUtils.toInt(params.get("rank"));
 				String title = StringUtils.trimToEmpty(params.get("title"));
 				String content = StringUtils.trimToEmpty(params.get("content"));
 				String url = StringUtils.trimToEmpty(params.get("url"));
-				if(adminid > 0 && id > 0 && rank >= 0 && StringUtils.isNotBlank(title)
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT) && id > 0 && rank >= 0 && StringUtils.isNotBlank(title)
 						&& StringUtils.isNotBlank(url) && StringUtils.isNotBlank(content)){
 					StrategyInfo info = new StrategyInfo();
 					info.setId(id);
@@ -111,14 +112,13 @@ public class StrategyAjax {
 			if(params.containsKey("strategyid") && params.containsKey("adminid")
 					 && params.containsKey("rank") && params.containsKey("title")
 					 && params.containsKey("content") && params.containsKey("url")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long strategyid = NumberUtils.toLong(params.get("strategyid"), -1);
 				int rank = NumberUtils.toInt(params.get("rank"));
 				String title = StringUtils.trimToEmpty(params.get("title"));
 				String content = StringUtils.trimToEmpty(params.get("content"));
 				String url = StringUtils.trimToEmpty(params.get("url"));
-				if(adminid > 0 && strategyid > 0 && rank >= 0 && StringUtils.isNotBlank(title)
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT) && strategyid > 0 && rank >= 0 && StringUtils.isNotBlank(title)
 						&& StringUtils.isNotBlank(url) && StringUtils.isNotBlank(content)){
 					StrategyInfo info = new StrategyInfo();
 					info.setStrategyId(strategyid);
@@ -155,10 +155,9 @@ public class StrategyAjax {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		try{
 			if(params.containsKey("strategyid") && params.containsKey("adminid")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long strategyid = NumberUtils.toLong(params.get("strategyid"), -1);
-				if(adminid > 0 && strategyid > 0){
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT) && strategyid > 0){
 					List<StrategyInfo> infos = strategyBiz.getInfos(strategyid);
 					
 					result.put("data", parseStrategyInfo(infos));
@@ -209,10 +208,8 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("ranks") && params.containsKey("ids")){
-				long adminid = NumberUtils.toLong("adminid", -1);
-				if(adminid > 0){
-					// TODO check admin id
-					
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT)){
 					String ids = StringUtils.trimToEmpty(params.get("ids"));
 					String ranks = StringUtils.trimToEmpty(params.get("ranks"));
 					if(StringUtils.isNotBlank(ids) && StringUtils.isNotBlank(ranks)){
@@ -264,11 +261,10 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id")){
-				//TODO check adminid
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				
-				if(adminid > 0 && id > 0){
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT) && id > 0){
 					if(strategyBiz.delStrategy(id, adminid))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 					else
@@ -297,7 +293,6 @@ public class StrategyAjax {
 					 && params.containsKey("subname") && params.containsKey("intr") && params.containsKey("rank")
 					 && params.containsKey("iconSmall") && params.containsKey("iconBig") && params.containsKey("isdel")
 					 && params.containsKey("skim") && params.containsKey("rate")){
-				//TODO check adminid
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
 				String subname = StringUtils.trimToEmpty(params.get("subname"));
@@ -309,7 +304,7 @@ public class StrategyAjax {
 				int skim = NumberUtils.toInt(params.get("skim"), -1);
 				int rate = NumberUtils.toInt(params.get("rate"), -1);
 				
-				if(adminid > 0 && StringUtils.isNotBlank(name) && StringUtils.isNotBlank(intr)
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT) && StringUtils.isNotBlank(name) && StringUtils.isNotBlank(intr)
 						&& StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)
 						&& rank >= 0 && skim >= 0 && rate >= 0 && (isdel == 0 || isdel == 1)){
 					Strategy strategy = new Strategy();
@@ -356,7 +351,6 @@ public class StrategyAjax {
 					 && params.containsKey("subname") && params.containsKey("intr") && params.containsKey("rank")
 					 && params.containsKey("iconSmall") && params.containsKey("iconBig") && params.containsKey("isdel")
 					 && params.containsKey("skim") && params.containsKey("rate")){
-				//TODO check adminid
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
@@ -369,7 +363,7 @@ public class StrategyAjax {
 				int skim = NumberUtils.toInt(params.get("skim"), -1);
 				int rate = NumberUtils.toInt(params.get("rate"), -1);
 				
-				if(adminid > 0 && id > 0 && StringUtils.isNotBlank(name) && StringUtils.isNotBlank(intr)
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT) && id > 0 && StringUtils.isNotBlank(name) && StringUtils.isNotBlank(intr)
 						&& StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)
 						&& rank >= 0 && skim >= 0 && rate >= 0 && (isdel == 0 || isdel == 1)){
 					Strategy strategy = new Strategy();
@@ -413,11 +407,10 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("key")){
-				//TODO check adminid
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				String key = StringUtils.trimToEmpty(params.get("key"));
 				
-				if(adminid > 0){
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT)){
 					List<Strategy> strategies = strategyBiz.getStrategies(key);
 					
 					Map<Long, StrategyRate> rates = null;
@@ -486,10 +479,8 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("ranks") && params.containsKey("ids")){
-				long adminid = NumberUtils.toLong("adminid", -1);
-				if(adminid > 0){
-					// TODO check admin id
-					
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT)){
 					String ids = StringUtils.trimToEmpty(params.get("ids"));
 					String ranks = StringUtils.trimToEmpty(params.get("ranks"));
 					if(StringUtils.isNotBlank(ids) && StringUtils.isNotBlank(ranks)){
@@ -541,10 +532,8 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id")){
-				long adminid = NumberUtils.toLong("adminid", -1);
-				if(adminid > 0){
-					// TODO check admin id
-					
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT)){
 					int id = NumberUtils.toInt(params.get("id"), -1);
 					if(id > 0 && strategyBiz.delImage(id, adminid))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
@@ -571,10 +560,8 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("rank") && params.containsKey("url") && params.containsKey("id") && params.containsKey("isdel")){
-				long adminid = NumberUtils.toLong("adminid", -1);
-				if(adminid > 0){
-					// TODO check admin id
-					
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT)){
 					int id = NumberUtils.toInt(params.get("id"), -1);
 					int rank = NumberUtils.toInt(params.get("rank"), -2);
 					String url = StringUtils.trimToEmpty(params.get("url"));
@@ -614,10 +601,8 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("rank") && params.containsKey("url") && params.containsKey("isdel")){
-				long adminid = NumberUtils.toLong("adminid", -1);
-				if(adminid > 0){
-					// TODO check admin id
-					
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT)){
 					int rank = NumberUtils.toInt(params.get("rank"), -2);
 					String url = StringUtils.trimToEmpty(params.get("url"));
 					int isdel = NumberUtils.toInt(params.get("isdel"), -1);
@@ -628,7 +613,7 @@ public class StrategyAjax {
 						image.setLastModUserid(adminid);
 						image.setIsdel(isdel);
 						
-						if(strategyBiz.addSImage(image))
+						if(strategyBiz.addImage(image))
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						else
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
@@ -655,10 +640,8 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid")){
-				long adminid = NumberUtils.toLong("adminid", -1);
-				if(adminid > 0){
-					// TODO check admin id
-					
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT)){
 					List<StrategyImage> images = strategyBiz.getAllImages();
 					
 					result.put("data", parseStrategyImages(images));
@@ -690,6 +673,8 @@ public class StrategyAjax {
 				tmp.put("rank", image.getRank());
 				tmp.put("url", StringUtils.trimToEmpty(image.getIconUrl()));
 				tmp.put("isdel", image.getIsdel());
+				tmp.put("lastModTime", IWamiUtils.getDateString(image.getLastModTime()));
+				tmp.put("lastModUserid", image.getLastModUserid());
 				
 				data.add(tmp);
 			}
@@ -703,6 +688,14 @@ public class StrategyAjax {
 
 	public void setStrategyBiz(StrategyBiz strategyBiz) {
 		this.strategyBiz = strategyBiz;
+	}
+
+	public LoginBiz getLoginBiz() {
+		return loginBiz;
+	}
+
+	public void setLoginBiz(LoginBiz loginBiz) {
+		this.loginBiz = loginBiz;
 	}
 	
 }

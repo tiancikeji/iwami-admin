@@ -30,16 +30,28 @@ public interface IWamiConstants {
 
 	public static final int INACTIVE = 1;
 	public static final int ACTIVE = 0;
-	public static final int ADMIN = 2;
+	public static final int ADMIN = 3;
 
 	public static final String SEPARATOR_PRESENT = ",";
 
-	public static final String SEPARATOR_CELLPHONE = ",";
+	public static final String SEPARATOR_CELLPHONE = ";";
 
 	public static final String SEPARATOR_STRATEGY = ",";
 
 	public static final long USER_MANAGEMENT = 1;
 
 	public static final long TASK_MANAGEMENT = 128;
+
+	public static final long PUSH_MANAGEMENT = 256;
+
+	public static final long FILE_MANAGEMENT = 512;
+
+	public static final long STRATEGY_MANAGEMENT = 1024;
+
+	public static final long CONTACT_MANAGEMENT = 2048;
+
+	public static final long ADMIN_MANAGEMENT = 4096;
+
+	public static final long APK_MANAGEMENT = 8192;
 
 }

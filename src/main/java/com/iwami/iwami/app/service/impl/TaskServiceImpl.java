@@ -58,6 +58,11 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	public boolean updateTaskUrl(Task task) {
+		return taskDao.updateTaskUrl(task);
+	}
+
+	@Override
 	public boolean addTask(Task task) {
 		return taskDao.addTask(task);
 	}

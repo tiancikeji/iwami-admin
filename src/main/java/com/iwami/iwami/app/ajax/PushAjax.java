@@ -11,12 +11,16 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.iwami.iwami.app.biz.LoginBiz;
+import com.iwami.iwami.app.biz.PushBiz;
 import com.iwami.iwami.app.biz.UserBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
+import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.Push;
+import com.iwami.iwami.app.model.User;
 import com.iwami.iwami.app.util.IWamiUtils;
 
 @AjaxClass
@@ -25,6 +29,12 @@ public class PushAjax {
 	private Log logger = LogFactory.getLog(getClass());
 	
 	private UserBiz userBiz;
+	
+	private PushBiz pushBiz;
+	
+	private LoginBiz loginBiz;
+	
+	private static BigDecimal bd = new BigDecimal(1000);
 
 	@AjaxMethod(path = "PUSH/user.ajax")
 	public Map<Object, Object> pushSingleUserMsg(Map<String, String> params) {
@@ -32,17 +42,21 @@ public class PushAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("userid") && params.containsKey("msg") ){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"));
 				long userid = NumberUtils.toLong(params.get("userid"));
-				if(adminid > 0 && userid > 0 && userBiz.canOpt(adminid, userid)){
-					// TODO push biz here...
-					/*if(userBiz.modifyUser(user, adminid))*/
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-						/*else
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);*/
+				String msg = StringUtils.trimToEmpty(params.get("msg"));
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PUSH_MANAGEMENT) 
+						&& userid > 0 && StringUtils.isNotBlank(msg)){
+					User user = userBiz.getUserById(userid);
+					if(user != null && StringUtils.isNotBlank(user.getAlias())){
+						if(pushBiz.pushUserMsg(user.getAlias(), msg))
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+						else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 				} else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
 			throw e;
@@ -61,17 +75,16 @@ public class PushAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("msg") && params.containsKey("interval")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"));
 				String msg = StringUtils.trimToEmpty(params.get("msg"));
-				if(adminid > 0 && StringUtils.isNotBlank(msg)){
-					// TODO push biz here...
-					/*if(userBiz.modifyUser(user, adminid))*/
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-						/*else
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);*/
+				double interval = NumberUtils.toDouble(params.get("interval"));
+				if(adminid > 0 && interval >= 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PUSH_MANAGEMENT) && StringUtils.isNotBlank(msg)){
+					if(pushBiz.pushAllMsgs(msg, new BigDecimal(interval).multiply(bd).longValue(), adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK); 
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 				} else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
 			throw e;
@@ -90,18 +103,17 @@ public class PushAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("msg") && params.containsKey("interval") && params.containsKey("file")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"));
 				String msg = StringUtils.trimToEmpty(params.get("msg"));
 				String file = StringUtils.trimToEmpty(params.get("file"));
-				if(adminid > 0 && StringUtils.isNotBlank(msg) && StringUtils.isNotBlank(file)){
-					// TODO push biz here...
-					/*if(userBiz.modifyUser(user, adminid))*/
+				double interval = NumberUtils.toDouble(params.get("interval"));
+				if(adminid > 0 && interval >= 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PUSH_MANAGEMENT) && StringUtils.isNotBlank(msg) && StringUtils.isNotBlank(file)){
+					if(pushBiz.pushWhiteMsgs(file, msg, new BigDecimal(interval).multiply(bd).longValue(), adminid))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-						/*else
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);*/
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 				} else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
 			throw e;
@@ -120,18 +132,17 @@ public class PushAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("msg") && params.containsKey("interval") && params.containsKey("file")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"));
 				String msg = StringUtils.trimToEmpty(params.get("msg"));
 				String file = StringUtils.trimToEmpty(params.get("file"));
-				if(adminid > 0 && StringUtils.isNotBlank(msg) && StringUtils.isNotBlank(file)){
-					// TODO push biz here...
-					/*if(userBiz.modifyUser(user, adminid))*/
+				double interval = NumberUtils.toDouble(params.get("interval"));
+				if(adminid > 0 && interval >= 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PUSH_MANAGEMENT) && StringUtils.isNotBlank(msg) && StringUtils.isNotBlank(file)){
+					if(pushBiz.pushBlackMsgs(file, msg, new BigDecimal(interval).multiply(bd).longValue(), adminid))
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-						/*else
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);*/
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 				} else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
 			throw e;
@@ -150,14 +161,13 @@ public class PushAjax {
 		
 		try{
 			if(params.containsKey("adminid")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"));
-				if(adminid > 0){
-					List<Push> pushes = null;
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PUSH_MANAGEMENT)){
+					List<Push> pushes = pushBiz.getUnFinishedPushTasks();
 					result.put("data", parsePush(pushes));
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				} else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
 			throw e;
@@ -172,8 +182,6 @@ public class PushAjax {
 
 	private List<Map<String, Object>> parsePush(List<Push> pushes) {
 		List<Map<String, Object>> data = new ArrayList<Map<String,Object>>();
-		
-		BigDecimal bd = new BigDecimal(1000);
 		if(pushes != null && pushes.size() > 0)
 			for(Push push : pushes){
 				Map<String, Object> tmp = new HashMap<String, Object>();
@@ -203,13 +211,15 @@ public class PushAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"));
 				long id = NumberUtils.toLong(params.get("id"));
-				if(adminid > 0 && id > 0){
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PUSH_MANAGEMENT) && id > 0){
+					if(pushBiz.pauseTask(id, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 				} else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
 			throw e;
@@ -228,13 +238,15 @@ public class PushAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"));
 				long id = NumberUtils.toLong(params.get("id"));
-				if(adminid > 0 && id > 0){
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PUSH_MANAGEMENT) && id > 0){
+					if(pushBiz.continueTask(id, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 				} else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
 			throw e;
@@ -253,13 +265,15 @@ public class PushAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id")){
-				// TODO check admin id
 				long adminid = NumberUtils.toLong(params.get("adminid"));
 				long id = NumberUtils.toLong(params.get("id"));
-				if(adminid > 0 && id > 0){
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PUSH_MANAGEMENT) && id > 0){
+					if(pushBiz.stopTask(id, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 				} else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
 			throw e;
@@ -278,6 +292,22 @@ public class PushAjax {
 
 	public void setUserBiz(UserBiz userBiz) {
 		this.userBiz = userBiz;
+	}
+
+	public PushBiz getPushBiz() {
+		return pushBiz;
+	}
+
+	public void setPushBiz(PushBiz pushBiz) {
+		this.pushBiz = pushBiz;
+	}
+
+	public LoginBiz getLoginBiz() {
+		return loginBiz;
+	}
+
+	public void setLoginBiz(LoginBiz loginBiz) {
+		this.loginBiz = loginBiz;
 	}
 
 }

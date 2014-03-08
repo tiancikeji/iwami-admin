@@ -36,7 +36,7 @@ public interface StrategyBiz {
 	// images
 	public List<StrategyImage> getAllImages();
 
-	public boolean addSImage(StrategyImage image);
+	public boolean addImage(StrategyImage image);
 
 	public boolean modImage(StrategyImage image);
 

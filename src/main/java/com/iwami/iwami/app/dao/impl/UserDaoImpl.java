@@ -122,7 +122,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 	@Override
 	public boolean addAdminUserInfo(User user) {
 		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_USERINFO + "(userid, name, uuid, alias, cell_phone, add_time, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, ?, now(), now(), ?, ?)", 
-				new Object[]{user.getId(), user.getName(), StringUtils.EMPTY, StringUtils.EMPTY, user.getCellPhone(), user.getLastmodUserid()});
+				new Object[]{user.getId(), user.getName(), StringUtils.EMPTY, StringUtils.EMPTY, user.getCellPhone(), user.getLastmodUserid(), IWamiConstants.ADMIN});
 		if(count > 0)
 			return true;
 		else
@@ -131,7 +131,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 
 	@Override
 	public boolean addAdminRole(UserRole role) {
-		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_USERROLE + "(userid, name, password, role, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, now(), ?, ?)", 
+		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_USERROLE + "(userid, name, password, role, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, now(), ?, ?)", 
 				new Object[]{role.getUserid(), role.getName(), role.getPassword(), role.getRole(), role.getLastModUserid(), IWamiConstants.ACTIVE});
 		if(count > 0)
 			return true;
@@ -140,9 +140,19 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 	}
 
 	@Override
+	public boolean modAdminUser(User user) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USER + " set lastmod_time = now(), lastmod_userid = ?, isdel = ? where id = ?", 
+				new Object[]{user.getLastmodUserid(), user.getIsdel(), user.getId()});
+		if(count > 0)
+			return true;
+		else
+			return false;
+	}
+
+	@Override
 	public boolean modAdminRole(UserRole role) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERROLE + " set password = ?, name = ?, role = ?, lastmod_time = now(), lastmod_userid = ? where userid = ?", 
-				new Object[]{role.getPassword(), role.getName(), role.getRole(), role.getLastModUserid(), role.getUserid()});
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERROLE + " set password = ?, name = ?, role = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where userid = ?", 
+				new Object[]{role.getPassword(), role.getName(), role.getRole(), role.getLastModUserid(), role.getIsdel(), role.getUserid()});
 		if(count > 0)
 			return true;
 		else
@@ -151,8 +161,8 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 
 	@Override
 	public boolean modAdminUserInfo(User user) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERINFO + " set name = ?, cell_phone = ?, lastmod_time = now(), lastmod_userid = ? where userid = ?", 
-				new Object[]{user.getName(), user.getCellPhone(), user.getLastmodUserid(), user.getId()});
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERINFO + " set name = ?, cell_phone = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where userid = ?", 
+				new Object[]{user.getName(), user.getCellPhone(), user.getLastmodUserid(), user.getIsdel(), user.getId()});
 		if(count > 0)
 			return true;
 		else
@@ -162,7 +172,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 	@Override
 	public boolean delAdminUser(long userid, long adminid) {
 		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USER + " set isdel = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", 
-				new Object[]{IWamiConstants.INACTIVE, adminid, userid});
+				new Object[]{4, adminid, userid});
 		if(count > 0)
 			return true;
 		else
@@ -172,7 +182,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 	@Override
 	public boolean delAdminUserInfo(long userid, long adminid) {
 		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERINFO + " set isdel = ?, lastmod_time = now(), lastmod_userid = ? where userid = ?", 
-				new Object[]{IWamiConstants.INACTIVE, adminid, userid});
+				new Object[]{4, adminid, userid});
 		if(count > 0)
 			return true;
 		else
@@ -181,7 +191,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 
 	@Override
 	public boolean delAdminRole(long userid, long adminid) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERINFO + " set isdel = ?, lastmod_time = now(), lastmod_userid = ? where userid = ?", 
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERROLE + " set isdel = ?, lastmod_time = now(), lastmod_userid = ? where userid = ?", 
 				new Object[]{IWamiConstants.INACTIVE, adminid, userid});
 		if(count > 0)
 			return true;
@@ -225,6 +235,24 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 			return data.get(0);
 		else
 			return null;
+	}
+
+	@Override
+	public Map<Long, String> getAllAlias() {
+		final Map<Long, String> result = new HashMap<Long, String>();
+		
+		getJdbcTemplate().query("select userid, alias from " + SqlConstants.TABLE_USERINFO + " where alias is not null and isdel = 0", new RowMapper<Integer>(){
+
+			@Override
+			public Integer mapRow(ResultSet rs, int index) throws SQLException {
+				result.put(rs.getLong("userid"), rs.getString("alias"));
+				
+				return index;
+			}
+			
+		});
+		
+		return result;
 	}
 
 }
