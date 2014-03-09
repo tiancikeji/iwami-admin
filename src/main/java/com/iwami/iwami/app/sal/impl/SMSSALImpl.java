@@ -22,7 +22,7 @@ import com.iwami.iwami.app.sal.SMSSAL;
 
 public class SMSSALImpl implements SMSSAL {
 	
-	private String url = "http://yunpian.com/v1/sms/send.json";
+	private String url = "http://yunpian.com/v1/sms/tpl_send.json";
 	
 	private String apiKey = "da8ab8cb7815f4e379cd5a5a9956e7f1";
 	
@@ -54,7 +54,8 @@ public class SMSSALImpl implements SMSSAL {
 			
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 			nameValuePairs.add(new BasicNameValuePair("apikey", apiKey));
-			nameValuePairs.add(new BasicNameValuePair("text", msg));
+			nameValuePairs.add(new BasicNameValuePair("tpl_id", "111"));
+			nameValuePairs.add(new BasicNameValuePair("tpl_value", "111"));
 			nameValuePairs.add(new BasicNameValuePair("mobile", cellPhone));
 			
 			HttpPost method = new HttpPost(url);

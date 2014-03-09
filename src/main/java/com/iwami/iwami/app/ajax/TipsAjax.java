@@ -54,7 +54,7 @@ public class TipsAjax {
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch (Throwable t) {
 			if (logger.isErrorEnabled())
 				logger.error("Exception in tips", t);
@@ -92,7 +92,7 @@ public class TipsAjax {
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch (Throwable t) {
 			if (logger.isErrorEnabled())
 				logger.error("Exception in tips", t);

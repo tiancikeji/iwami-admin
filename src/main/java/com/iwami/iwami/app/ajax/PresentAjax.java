@@ -79,7 +79,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in exchangePresents", t);
@@ -134,7 +134,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in exchangePresents", t);
@@ -189,7 +189,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in exchangePresents", t);
@@ -259,7 +259,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in exchangePresents", t);
@@ -352,7 +352,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -381,7 +381,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -458,7 +458,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -514,7 +514,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getLuck", t);
@@ -544,7 +544,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -593,7 +593,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -644,7 +644,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -679,7 +679,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getLuck", t);
@@ -709,7 +709,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -758,7 +758,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -809,7 +809,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -844,7 +844,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getOnline", t);
@@ -874,7 +874,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -924,7 +924,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -976,7 +976,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -1011,7 +1011,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getMobile", t);
@@ -1041,7 +1041,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -1093,7 +1093,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -1128,7 +1128,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getAlis", t);
@@ -1158,7 +1158,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -1210,7 +1210,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);
@@ -1245,7 +1245,7 @@ public class PresentAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getBanks", t);

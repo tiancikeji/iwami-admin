@@ -50,7 +50,7 @@ public class StrategyAjax {
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyDetail", t);
@@ -95,7 +95,7 @@ public class StrategyAjax {
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyDetail", t);
@@ -140,7 +140,7 @@ public class StrategyAjax {
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyDetail", t);
@@ -170,7 +170,7 @@ public class StrategyAjax {
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			}
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyDetail", t);
@@ -245,7 +245,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyList", t);
@@ -274,7 +274,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyList", t);
@@ -332,7 +332,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyList", t);
@@ -391,7 +391,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyList", t);
@@ -429,7 +429,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyList", t);
@@ -516,7 +516,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyList", t);
@@ -544,7 +544,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyList", t);
@@ -585,7 +585,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyList", t);
@@ -624,7 +624,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyList", t);
@@ -651,7 +651,7 @@ public class StrategyAjax {
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
-			throw e;
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
 				logger.error("Exception in getStrategyImages", t);
