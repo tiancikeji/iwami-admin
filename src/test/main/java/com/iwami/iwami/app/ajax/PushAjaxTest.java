@@ -67,6 +67,153 @@ public class PushAjaxTest extends TestCase {
 		}
 	}
 	
+	public void testPushWhiteUserMsg(){
+		if(flag){
+			PushAjax ajax = getAjax();
+			
+			Map<String, String> params = new HashMap<String, String>();
+			System.out.println(ajax.pushWhiteUserMsg(params));
+
+			try{
+				params.put("adminid", "10");
+				params.put("msg", "1110");
+				params.put("interval", "0.34");
+				params.put("file", "http://115.28.232.121/file/abc.txt");
+				System.out.println(ajax.pushWhiteUserMsg(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+
+			try{
+				params.put("adminid", "11");
+				System.out.println(ajax.pushWhiteUserMsg(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+		}
+	}
+	
+	public void testPushBlackUserMsg(){
+		if(flag){
+			PushAjax ajax = getAjax();
+			
+			Map<String, String> params = new HashMap<String, String>();
+			System.out.println(ajax.pushBlackUserMsg(params));
+
+			try{
+				params.put("adminid", "10");
+				params.put("msg", "1110");
+				params.put("interval", "0.34");
+				params.put("file", "http://115.28.232.121/file/abc.txt");
+				System.out.println(ajax.pushBlackUserMsg(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+
+			try{
+				params.put("adminid", "11");
+				System.out.println(ajax.pushBlackUserMsg(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+		}
+	}
+	
+	public void testGetPushList(){
+		if(flag){
+			PushAjax ajax = getAjax();
+			
+			Map<String, String> params = new HashMap<String, String>();
+			System.out.println(ajax.pushList(params));
+
+			try{
+				params.put("adminid", "10");
+				System.out.println(ajax.pushList(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+
+			try{
+				params.put("adminid", "11");
+				System.out.println(ajax.pushList(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+		}
+	}
+	
+	public void testPauseTask(){
+		if(flag){
+			PushAjax ajax = getAjax();
+			
+			Map<String, String> params = new HashMap<String, String>();
+			System.out.println(ajax.pausePush(params));
+
+			try{
+				params.put("adminid", "10");
+				params.put("id", "5");
+				System.out.println(ajax.pausePush(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+
+			try{
+				params.put("adminid", "11");
+				System.out.println(ajax.pausePush(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+		}
+	}
+	
+	public void testResumeTask(){
+		if(flag){
+			PushAjax ajax = getAjax();
+			
+			Map<String, String> params = new HashMap<String, String>();
+			System.out.println(ajax.continuePush(params));
+
+			try{
+				params.put("adminid", "10");
+				params.put("id", "5");
+				System.out.println(ajax.continuePush(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+
+			try{
+				params.put("adminid", "11");
+				System.out.println(ajax.continuePush(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+		}
+	}
+	
+	public void testStopTask(){
+		if(flag){
+			PushAjax ajax = getAjax();
+			
+			Map<String, String> params = new HashMap<String, String>();
+			System.out.println(ajax.stopPush(params));
+
+			try{
+				params.put("adminid", "10");
+				params.put("id", "5");
+				System.out.println(ajax.stopPush(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+
+			try{
+				params.put("adminid", "11");
+				System.out.println(ajax.stopPush(params));
+			}catch(Throwable t){
+				t.printStackTrace();
+			}
+		}
+	}
+	
 	private PushAjax getAjax(){
 		ApplicationContext ac = new ClassPathXmlApplicationContext("applicationContext.xml");
 		return ac.getBean("pushAjax", PushAjax.class);

@@ -49,11 +49,6 @@
 		<property name="contactBiz" ref="contactBiz" />
 		<property name="loginBiz" ref="loginBiz" />
 	</bean>
-	<bean name="luckyAjax" class="com.iwami.iwami.app.ajax.LuckyAjax">
-		<property name="luckyBiz" ref="luckyBiz" />
-		<property name="userBiz" ref="userBiz" />
-		<property name="loginBiz" ref="loginBiz" />
-	</bean>
 	<bean name="userAjax" class="com.iwami.iwami.app.ajax.UserAjax">
 		<property name="loginBiz" ref="loginBiz" />
 		<property name="userBiz" ref="userBiz" />
@@ -74,6 +69,7 @@
 		<property name="presentBiz" ref="presentBiz" />
 		<property name="userBiz" ref="userBiz" />
 		<property name="loginBiz" ref="loginBiz" />
+		<property name="luckyBiz" ref="luckyBiz" />
 	</bean>
 	<bean name="loginAjax" class="com.iwami.iwami.app.ajax.LoginAjax">
 		<property name="loginBiz" ref="loginBiz" />
@@ -103,8 +99,6 @@
 	</bean>
 	<bean name="luckyBiz" class="com.iwami.iwami.app.biz.impl.LuckyBizImpl">
 		<property name="luckyService" ref="luckyService" />
-		<property name="userService" ref="userService" />
-		<property name="presentService" ref="presentService" />
 	</bean>
 	<bean name="userBiz" class="com.iwami.iwami.app.biz.impl.UserBizImpl">
 		<property name="userService" ref="userService" />
@@ -123,13 +117,14 @@
 	</bean>
 	<bean name="presentBiz" class="com.iwami.iwami.app.biz.impl.PresentBizImpl">
 		<property name="presentService" ref="presentService" />
-		<property name="userService" ref="userService" />
+		<property name="fileBiz" ref="fileBiz" />
 	</bean>
 	<bean name="loginBiz" class="com.iwami.iwami.app.biz.impl.LoginBizImpl">
 		<property name="loginService" ref="loginService" />
 	</bean>
 	<bean name="pushBiz" class="com.iwami.iwami.app.biz.impl.PushBizImpl">
 		<property name="pushService" ref="pushService" />
+		<property name="userService" ref="userService" />
 	</bean>
 	<bean name="fileBiz" class="com.iwami.iwami.app.biz.impl.FileBizImpl">
 		<!-- <property name="cdnService" ref="cdnService" /> -->

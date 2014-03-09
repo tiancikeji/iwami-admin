@@ -10,6 +10,8 @@ public interface PushDao {
 
 	public List<Push> getUnFinishedPushTasks();
 
+	public List<Push> getTodoPushTasks();
+
 	public Map<Long, Map<Integer, Integer>> getAllCntsByIds(List<Long> ids);
 
 	public boolean addPush(Push push);
@@ -17,5 +19,13 @@ public interface PushDao {
 	public void addPushTasks(List<PushTask> tasks);
 
 	public boolean updatePush(int status, long id, long adminid);
+
+	public boolean updatePush(int status, long id);
+
+	public boolean updatePush(String cellPhone, int status, long id);
+
+	public boolean updatePushTask(int status, long id);
+
+	public List<PushTask> getLimitedPushTaskById(long pushid, int limit);
 
 }

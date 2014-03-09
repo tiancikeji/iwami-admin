@@ -1,23 +1,24 @@
 package com.iwami.iwami.app.dao.impl;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
+import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.constants.SqlConstants;
 import com.iwami.iwami.app.dao.LuckyDao;
-import com.iwami.iwami.app.model.LuckyConfig;
 import com.iwami.iwami.app.model.LuckyRule;
-import com.iwami.iwami.app.model.Present;
 
 public class LuckyDaoImpl extends JdbcDaoSupport implements LuckyDao {
 
 	@Override
 	public List<LuckyRule> getLuckyRules() {
-		List<LuckyRule> result = getJdbcTemplate().query("select id, index_lev, gift, prob, count, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_LUCKY_RULE + " where isdel = 0", new RowMapper<LuckyRule>() {
+		List<LuckyRule> result = getJdbcTemplate().query("select id, index_lev, gift, prob, `count`, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_LUCKY_RULE, new RowMapper<LuckyRule>() {
 
 			@Override
 			public LuckyRule mapRow(ResultSet rs, int rowNum)
@@ -37,8 +38,8 @@ public class LuckyDaoImpl extends JdbcDaoSupport implements LuckyDao {
 	}
 
 	@Override
-	public boolean delLuckyRules(long id) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_LUCKY_RULE + " set isdel = 1 where id = ?", new Object[]{id});
+	public boolean delRules(long adminid) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_LUCKY_RULE + " set isdel = ?, lastmod_time = now(), lastmod_userid = ?", new Object[]{IWamiConstants.INACTIVE, adminid});
 		if(count > 0)
 			return true;
 		else
@@ -46,36 +47,30 @@ public class LuckyDaoImpl extends JdbcDaoSupport implements LuckyDao {
 	}
 
 	@Override
-	public boolean addLuckyRule(LuckyRule rule) {
-		int count = getJdbcTemplate().update("insert into " + SqlConstants.TABLE_LUCKY_RULE + "(index_lev, gift, prob, lastmod_time, lastmod_userid, isdel) values(?,?,?,now(),?,0)", 
-				new Object[]{rule.getIndexLevel(), rule.getGift(), rule.getProb(), rule.getLastmodUserid()});
-		if(count > 0)
-			return true;
-		else
-			return false;
-	}
-
-	@Override
-	public LuckyConfig getLuckyConfig() {
-		List<LuckyConfig> configs = getJdbcTemplate().query("select id, name, prize, `count`, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PRESENT + " where isdel = ? and type = ? order by lastmod_time desc limit 1", new Object[]{0, Present.TYPE_LUCK}, new RowMapper<LuckyConfig>(){
-
+	public boolean modRules(final List<LuckyRule> rules) {
+		getJdbcTemplate().batchUpdate("update " + SqlConstants.TABLE_LUCKY_RULE + " set gift = ?, prob = ?, `count` = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where index_lev = ?", new BatchPreparedStatementSetter() {
+			
 			@Override
-			public LuckyConfig mapRow(ResultSet rs, int rowNum)
-					throws SQLException {
-				LuckyConfig config = new LuckyConfig();
-				config.setId(rs.getLong("id"));
-				config.setCount(rs.getInt("count"));
-				config.setPrize(rs.getInt("prize"));
-				config.setLastmodTime(rs.getDate("lastmod_time"));
-				config.setLastmodUserid(rs.getLong("lastmod_userid"));
-				return config;
+			public void setValues(PreparedStatement ps, int index) throws SQLException {
+				if(rules.size() > index){
+					LuckyRule rule = rules.get(index);
+					if(rule != null){
+						ps.setObject(1, rule.getGift());
+						ps.setObject(2, rule.getProb());
+						ps.setObject(3, rule.getCount());
+						ps.setObject(4, rule.getLastmodUserid());
+						ps.setObject(5, rule.getIsdel());
+						ps.setObject(6, rule.getIndexLevel());
+					}
+				}
 			}
 			
+			@Override
+			public int getBatchSize() {
+				return rules.size();
+			}
 		});
-		if(configs != null && configs.size() > 0)
-			return configs.get(0);
-		else
-			return null;
+		return true;
 	}
 
 }

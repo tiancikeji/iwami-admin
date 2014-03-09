@@ -28,7 +28,7 @@ public class Push {
 	
 	private int status;
 	
-	private long cellPhone;
+	private String cellPhone;
 	
 	private int allCnt;
 	
@@ -76,11 +76,11 @@ public class Push {
 		this.status = status;
 	}
 
-	public long getCellPhone() {
+	public String getCellPhone() {
 		return cellPhone;
 	}
 
-	public void setCellPhone(long cellPhone) {
+	public void setCellPhone(String cellPhone) {
 		this.cellPhone = cellPhone;
 	}
 

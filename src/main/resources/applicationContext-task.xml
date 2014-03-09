@@ -14,20 +14,50 @@
 		http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://fengchao.baidu.com/dtd/schema/stargate
 		http://fengchao.baidu.com/dtd/schema/stargate/stargate.xsd">
-
 	
     <bean id="taskNotificationTask" class ="com.iwami.iwami.task.TaskNotificationTask">
 		<property name="taskService" ref="taskService" />
 		<property name="smsService" ref="smsService" />
+    </bean>
+    <bean id="pushTask" class ="com.iwami.iwami.task.PushTask">
+		<property name="pushService" ref="pushService" />
+		<property name="smsService" ref="smsService" />
+		<property name="taskService" ref="taskService" />
+		<property name="startHour">
+			<value>#[start.hour]</value>
+		</property>
+		<property name="endHour">
+			<value>#[end.hour]</value>
+		</property>
+		
+		<property name="executorService">
+			<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+				<property name="targetClass"><value>java.util.concurrent.Executors</value></property>
+   				<property name="targetMethod"><value>newFixedThreadPool</value></property>
+			   <property name="arguments">
+			       <value>#[pool.size]</value>
+			   </property>
+			</bean>
+		</property>
     </bean>
 
 	<bean id="taskNotificationTaskJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="taskNotificationTask" />
 		<property name="targetMethod" value="run" />
 	</bean>
+	<bean id="pushTaskJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="pushTask" />
+		<property name="targetMethod" value="run" />
+	</bean>
 	
 	<bean id="taskNotificationTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
 		<property name="jobDetail" ref="taskNotificationTaskJob" />
+	    <property name="startDelay" value="1000" />
+	    <property name="repeatInterval" value="300000" />
+	    <property name="repeatCount" value="-1" />
+	</bean>
+	<bean id="pushTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+		<property name="jobDetail" ref="pushTaskJob" />
 	    <property name="startDelay" value="1000" />
 	    <property name="repeatInterval" value="300000" />
 	    <property name="repeatCount" value="-1" />
@@ -44,7 +74,8 @@
 		</property>
 		<property name="triggers">
 			<list>
-                <!--ref bean="taskNotificationTrigger" /-->
+                <ref bean="taskNotificationTrigger" />
+                <ref bean="pushTrigger" />
 			</list>
 		</property>
 	</bean>

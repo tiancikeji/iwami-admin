@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.iwami.iwami.app.biz.FileBiz;
 import com.iwami.iwami.app.model.Apk;
+import com.iwami.iwami.app.model.Present;
 import com.iwami.iwami.app.model.Strategy;
 import com.iwami.iwami.app.model.StrategyImage;
 import com.iwami.iwami.app.model.StrategyInfo;
@@ -105,6 +106,18 @@ public class FileBizImpl implements FileBiz {
 		// TODO Auto-generated method stub
 		if(StringUtils.startsWith(apk.getUrl(), url))
 			apk.setUrl(cdnService.uploadFile(apk.getUrl()));
+		
+		return true;
+	}
+
+	@Override
+	public boolean uploadPresentResource(Present present) {
+		// TODO Auto-generated method stub
+		if(StringUtils.startsWith(present.getIconSmall(), url))
+			present.setIconSmall(cdnService.uploadFile(present.getIconSmall()));
+		
+		if(StringUtils.startsWith(present.getIconBig(), url))
+			present.setIconBig(cdnService.uploadFile(present.getIconBig()));
 		
 		return true;
 	}

@@ -29,7 +29,13 @@ public class PushDaoImpl extends JdbcDaoSupport implements PushDao {
 
 	@Override
 	public List<Push> getUnFinishedPushTasks() {
-		return getJdbcTemplate().query("select id, `interval`, msg, status, cell_phone, add_time, estimate_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PUSH + " where isdel = 0", 
+		return getJdbcTemplate().query("select id, `interval`, msg, status, cell_phone, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PUSH + " where isdel = 0 and status in (0, 3, 4)", 
+				new PushRowMapper());
+	}
+
+	@Override
+	public List<Push> getTodoPushTasks() {
+		return getJdbcTemplate().query("select id, `interval`, msg, status, cell_phone, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PUSH + " where isdel = 0 and status in (0, 1, 3)", 
 				new PushRowMapper());
 	}
 
@@ -68,14 +74,13 @@ public class PushDaoImpl extends JdbcDaoSupport implements PushDao {
 			
 			@Override
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_PUSH + "(`interval`, msg, status, cell_phone, add_time, estimate_time, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, now(), ?, now() ?, ?)", Statement.RETURN_GENERATED_KEYS);
+				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_PUSH + "(`interval`, msg, status, cell_phone, add_time, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, now(), now(), ?, ?)", Statement.RETURN_GENERATED_KEYS);
 				ps.setObject(1, push.getInterval());
 				ps.setObject(2, push.getMsg());
 				ps.setObject(3, push.getStatus());
 				ps.setObject(4, push.getCellPhone());
-				ps.setObject(5, push.getEstimateTime());
-				ps.setObject(6, push.getLastModUserid());
-				ps.setObject(7, IWamiConstants.ACTIVE);
+				ps.setObject(5, push.getLastModUserid());
+				ps.setObject(6, IWamiConstants.ACTIVE);
 				return ps;
 			}
 		}, holder);
@@ -88,8 +93,26 @@ public class PushDaoImpl extends JdbcDaoSupport implements PushDao {
 	}
 
 	@Override
+	public boolean updatePush(int status, long id, long adminid) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_PUSH + " set status = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", new Object[]{status, adminid, id});
+		return count > 0;
+	}
+
+	@Override
+	public boolean updatePush(int status, long id) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_PUSH + " set status = ?, lastmod_time = now() where id = ?", new Object[]{status, id});
+		return count > 0;
+	}
+
+	@Override
+	public boolean updatePush(String cellPhone, int status, long id) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_PUSH + " set cell_phone = ?, status = ?, lastmod_time = now() where id = ?", new Object[]{cellPhone, status, id});
+		return count > 0;
+	}
+
+	@Override
 	public void addPushTasks(final List<PushTask> tasks) {
-		getJdbcTemplate().batchUpdate("insert into " + SqlConstants.TABLE_PUSH_TASK + "(push_id, userid, alias, status, add_time, lastmod_userid) values(?, ?, ?, ?, now(), ?)", new BatchPreparedStatementSetter() {
+		getJdbcTemplate().batchUpdate("insert into " + SqlConstants.TABLE_PUSH_TASK + "(push_id, userid, alias, status, add_time, lastmod_time, lastmod_userid) values(?, ?, ?, ?, now(), now(), ?)", new BatchPreparedStatementSetter() {
 			
 			@Override
 			public void setValues(PreparedStatement ps, int index) throws SQLException {
@@ -113,11 +136,41 @@ public class PushDaoImpl extends JdbcDaoSupport implements PushDao {
 	}
 
 	@Override
-	public boolean updatePush(int status, long id, long adminid) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_PUSH + " set status = ?, lastmod_time = now(), lastmod_userid = ? where id = ?", new Object[]{status, adminid, id});
+	public boolean updatePushTask(int status, long id) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_PUSH_TASK + " set status = ?, lastmod_time = now() where id = ?", new Object[]{status, id});
 		return count > 0;
 	}
 
+	@Override
+	public List<PushTask> getLimitedPushTaskById(long pushid, int limit) {
+		return getJdbcTemplate().query("select id, push_id, userid, alias, status, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PUSH_TASK + " where push_id = ? and status = ? limit ?", 
+				new Object[]{pushid, PushTask.STATUS_NEW, limit}, new PushTaskRowMapper());
+	}
+
+}
+
+class PushTaskRowMapper implements RowMapper<PushTask>{
+
+	@Override
+	public PushTask mapRow(ResultSet rs, int index) throws SQLException {
+		PushTask task = new PushTask();
+		
+		task.setId(rs.getLong("id"));
+		task.setPushId(rs.getLong("push_id"));
+		task.setUserid(rs.getLong("userid"));
+		task.setAlias(rs.getString("alias"));
+		task.setStatus(rs.getInt("status"));
+		Timestamp ts = rs.getTimestamp("add_time");
+		if(ts != null)
+			task.setAddTime(new Date(ts.getTime()));
+		ts = rs.getTimestamp("lastmod_time");
+		if(ts != null)
+			task.setLastModTime(new Date(ts.getTime()));
+		task.setLastModUserid(rs.getLong("lastmod_userid"));
+		
+		return task;
+	}
+	
 }
 
 class PushRowMapper implements RowMapper<Push>{
@@ -130,13 +183,10 @@ class PushRowMapper implements RowMapper<Push>{
 		push.setInterval(rs.getLong("interval"));
 		push.setMsg(rs.getString("msg"));
 		push.setStatus(rs.getInt("status"));
-		push.setCellPhone(rs.getLong("cellPhone"));
+		push.setCellPhone(rs.getString("cell_phone"));
 		Timestamp ts = rs.getTimestamp("add_time");
 		if(ts != null)
 			push.setAddTime(new Date(ts.getTime()));
-		ts = rs.getTimestamp("estimate_time");
-		if(ts != null)
-			push.setEstimateTime(new Date(ts.getTime()));
 		ts = rs.getTimestamp("lastmod_time");
 		if(ts != null)
 			push.setLastModTime(new Date(ts.getTime()));

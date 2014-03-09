@@ -98,7 +98,7 @@ public class PushAjax {
 	}
 
 	@AjaxMethod(path = "PUSH/white.ajax")
-	public Map<Object, Object> pushwhiteUserMsg(Map<String, String> params) {
+	public Map<Object, Object> pushWhiteUserMsg(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{

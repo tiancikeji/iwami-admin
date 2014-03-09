@@ -26,7 +26,10 @@ public class ApkBizImpl implements ApkBiz {
 		apkService.delAllApks();
 		if(apkService.addApk(apk)){
 			fileBiz.uploadApkResource(apk);
-			return apkService.updateApkUrl(apk);
+			if(apkService.updateApkUrl(apk))
+				return true;
+			else
+				throw new RuntimeException("failed in addApk, so rollback.");
 		} else
 			throw new RuntimeException("failed in addApk, so rollback.");
 	}

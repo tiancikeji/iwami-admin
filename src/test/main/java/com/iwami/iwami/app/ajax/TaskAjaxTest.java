@@ -397,7 +397,7 @@ public class TaskAjaxTest extends TestCase {
 	}
 	
 	public void testNotifyTask(){
-		if(true){
+		if(flag){
 			getTask().run();
 		}
 	}

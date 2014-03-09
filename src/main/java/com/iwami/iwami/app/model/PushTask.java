@@ -1,5 +1,7 @@
 package com.iwami.iwami.app.model;
 
+import java.util.Date;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -22,8 +24,12 @@ public class PushTask {
 	
 	private int status;
 	
+	private Date lastModTime;
+	
 	private long lastModUserid;
-
+	
+	private Date addTime;
+	
 	public long getId() {
 		return id;
 	}
@@ -85,6 +91,22 @@ public class PushTask {
 
 	public void setLastModUserid(long lastModUserid) {
 		this.lastModUserid = lastModUserid;
+	}
+
+	public Date getLastModTime() {
+		return lastModTime;
+	}
+
+	public void setLastModTime(Date lastModTime) {
+		this.lastModTime = lastModTime;
+	}
+
+	public Date getAddTime() {
+		return addTime;
+	}
+
+	public void setAddTime(Date addTime) {
+		this.addTime = addTime;
 	}
 
 }

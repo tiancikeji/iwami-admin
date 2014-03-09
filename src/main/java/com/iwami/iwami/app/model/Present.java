@@ -41,6 +41,8 @@ public class Present {
 	private Date lastModTime;
 	
 	private long lastModUserid;
+	
+	private int isdel;
 
 	public long getId() {
 		return id;
@@ -135,6 +137,14 @@ public class Present {
 
 	public void setCount(int count) {
 		this.count = count;
+	}
+
+	public int getIsdel() {
+		return isdel;
+	}
+
+	public void setIsdel(int isdel) {
+		this.isdel = isdel;
 	}
 	
 }

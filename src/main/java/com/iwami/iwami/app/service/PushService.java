@@ -20,4 +20,14 @@ public interface PushService {
 
 	public boolean updatePush(int status, long id, long adminid);
 
+	public boolean updatePush(int status, long id);
+
+	public boolean updatePush(String cellPhone, int status, long id);
+
+	public List<PushTask> getLimitedPushTaskById(long pushid, int limit);
+
+	public List<Push> getTodoPushTasks();
+
+	public boolean updatePushTask(int status, long id);
+
 }

@@ -18,6 +18,8 @@ public class LuckyRule {
 	
 	private int count;
 	
+	private int isdel;
+	
 	private Date lastmodTime;
 	
 	private long lastmodUserid;
@@ -91,5 +93,13 @@ public class LuckyRule {
 
 	public void setCount(int count) {
 		this.count = count;
+	}
+
+	public int getIsdel() {
+		return isdel;
+	}
+
+	public void setIsdel(int isdel) {
+		this.isdel = isdel;
 	}
 }

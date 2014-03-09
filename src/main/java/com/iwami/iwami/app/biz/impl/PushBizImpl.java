@@ -47,6 +47,8 @@ public class PushBizImpl implements PushBiz {
 				task.setAlias(alias.get(userid));
 				task.setStatus(PushTask.STATUS_NEW);
 				task.setLastModUserid(adminid);
+				
+				tasks.add(task);
 			}
 			
 			pushService.addPushTasks(tasks);
@@ -74,6 +76,8 @@ public class PushBizImpl implements PushBiz {
 					task.setAlias(alias.get(userid));
 					task.setStatus(PushTask.STATUS_NEW);
 					task.setLastModUserid(adminid);
+					
+					tasks.add(task);
 				}
 			
 			pushService.addPushTasks(tasks);
@@ -101,6 +105,8 @@ public class PushBizImpl implements PushBiz {
 					task.setAlias(alias.get(userid));
 					task.setStatus(PushTask.STATUS_NEW);
 					task.setLastModUserid(adminid);
+					
+					tasks.add(task);
 				}
 			
 			pushService.addPushTasks(tasks);
@@ -135,7 +141,6 @@ public class PushBizImpl implements PushBiz {
 		push.setInterval(interval);
 		push.setMsg(msg);
 		push.setStatus(Push.STATUS_NEW);
-		push.setEstimateTime(DateUtils.addMilliseconds(new Date(), defaultTime));
 		push.setLastModUserid(adminid);
 		
 		pushService.addPush(push);
@@ -155,7 +160,8 @@ public class PushBizImpl implements PushBiz {
 			Map<Long, Map<Integer, Integer>> cnts = pushService.getAllCntsByIds(ids);
 			
 			if(cnts != null && cnts.size() > 0)
-				for(Push push : pushes)
+				for(Push push : pushes){
+					push.setEstimateTime(new Date());
 					if(cnts.containsKey(push.getId())){
 						Map<Integer, Integer> tmp = cnts.get(push.getId());
 						
@@ -173,7 +179,10 @@ public class PushBizImpl implements PushBiz {
 						push.setSuccCnt(succ);
 						push.setFailCnt(fail);
 						push.setAllCnt(fre + succ + fail);
+						
+						push.setEstimateTime(DateUtils.addMilliseconds(push.getEstimateTime(), defaultTime * fre));
 					}
+				}
 		}
 		
 		return pushes;

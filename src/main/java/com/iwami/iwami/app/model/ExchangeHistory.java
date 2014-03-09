@@ -10,60 +10,14 @@ public class ExchangeHistory {
 	
 	public static final int STATUS_NEW = 0;
 	
-	public static final int STATUS_SENT = 0;
+	public static final int STATUS_SENT = 1;
 	
-	public static final int STATUS_OFFLINE = 0;
+	public static final int STATUS_OFFLINE = 2;
 
-	private long time;
+	private long userid;
 	
-	private int type;
+	private List<Exchange> exchange;
 	
-	private String express;
-	
-	private int status;
-	
-	private List<Gift> gifts;
-
-	public long getTime() {
-		return time;
-	}
-
-	public void setTime(long time) {
-		this.time = time;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
-	}
-
-	public String getExpress() {
-		return express;
-	}
-
-	public void setExpress(String express) {
-		this.express = express;
-	}
-
-	public int getStatus() {
-		return status;
-	}
-
-	public void setStatus(int status) {
-		this.status = status;
-	}
-
-	public List<Gift> getGifts() {
-		return gifts;
-	}
-
-	public void setGifts(List<Gift> gifts) {
-		this.gifts = gifts;
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		return EqualsBuilder.reflectionEquals(this, obj);
@@ -77,5 +31,21 @@ public class ExchangeHistory {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
+	}
+
+	public long getUserid() {
+		return userid;
+	}
+
+	public void setUserid(long userid) {
+		this.userid = userid;
+	}
+
+	public List<Exchange> getExchange() {
+		return exchange;
+	}
+
+	public void setExchange(List<Exchange> exchange) {
+		this.exchange = exchange;
 	}
 }

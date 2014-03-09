@@ -11,18 +11,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.iwami.iwami.app.biz.LoginBiz;
+import com.iwami.iwami.app.biz.LuckyBiz;
 import com.iwami.iwami.app.biz.PresentBiz;
 import com.iwami.iwami.app.biz.UserBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
 import com.iwami.iwami.app.constants.IWamiConstants;
-import com.iwami.iwami.app.exception.NotEnoughPrizeException;
 import com.iwami.iwami.app.exception.UserNotLoginException;
+import com.iwami.iwami.app.model.Exchange;
 import com.iwami.iwami.app.model.ExchangeHistory;
-import com.iwami.iwami.app.model.Gift;
+import com.iwami.iwami.app.model.LuckyRule;
 import com.iwami.iwami.app.model.Present;
-import com.iwami.iwami.app.model.User;
+import com.iwami.iwami.app.model.UserRole;
 import com.iwami.iwami.app.util.IWamiUtils;
 
 @AjaxClass
@@ -32,35 +33,229 @@ public class PresentAjax {
 	
 	private PresentBiz presentBiz;
 	
+	private LuckyBiz luckyBiz;
+	
 	private UserBiz userBiz;
 	
 	private LoginBiz loginBiz;
 
-	@AjaxMethod(path = "exchange/history.ajax")
+	@AjaxMethod(path = "MOD/exch.ajax")
+	public Map<Object, Object> modExchange(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && id > 0){
+					List<Long> ids = new ArrayList<Long>();
+					ids.add(adminid);
+					Map<Long, UserRole> roles = userBiz.getUserRoles(ids);
+					UserRole role = roles.get(adminid);
+					
+					if(role != null){
+						Exchange exchange = presentBiz.getExchangeById(id);
+						
+						String name = StringUtils.trimToEmpty(params.get("name"));
+						String no = StringUtils.trimToEmpty(params.get("no"));
+						if(exchange != null){
+							if((StringUtils.isNotBlank(name) && StringUtils.isNotBlank(no) && exchange.getPresentType() == Present.TYPE_ONLINE_EMS && (role.getRole() & IWamiConstants.EXCHANGE_ONLINE_MANAGEMENT) > 0)
+									|| (exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_MOBILE && (role.getRole() & IWamiConstants.EXCHANGE_MOBILE_MANAGEMENT) > 0)
+									|| (exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_ALIPAY && (role.getRole() & IWamiConstants.EXCHANGE_ALIPAY_MANAGEMENT) > 0)
+									|| (exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_BANK && (role.getRole() & IWamiConstants.EXCHANGE_BANK_MANAGEMENT) > 0)
+									|| (exchange.getPresentType() == Present.TYPE_LUCK && (role.getRole() & IWamiConstants.EXCHANGE_LUCKY_MANAGEMENT) > 0))
+								if(presentBiz.modExchange(name, no, id, adminid))
+									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+								else
+									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR); 
+							else
+								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+						} else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in exchangePresents", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/exchpre.ajax")
+	public Map<Object, Object> getExchangeHistoryByPresent(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("key")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				String key = StringUtils.trimToEmpty(params.get("key"));
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && StringUtils.isNotBlank(key)){
+					List<Long> ids = new ArrayList<Long>();
+					ids.add(adminid);
+					Map<Long, UserRole> roles = userBiz.getUserRoles(ids);
+					UserRole role = roles.get(adminid);
+					
+					if(role != null){
+						List<Integer> types = new ArrayList<Integer>();
+						
+						if((role.getRole() & IWamiConstants.EXCHANGE_ONLINE_MANAGEMENT) > 0)
+							types.add(Present.TYPE_ONLINE_EMS);
+						if((role.getRole() & IWamiConstants.EXCHANGE_MOBILE_MANAGEMENT) > 0)
+							types.add(Present.TYPE_ONLINE_RECHARGE_MOBILE);
+						if((role.getRole() & IWamiConstants.EXCHANGE_ALIPAY_MANAGEMENT) > 0)
+							types.add(Present.TYPE_ONLINE_RECHARGE_ALIPAY);
+						if((role.getRole() & IWamiConstants.EXCHANGE_BANK_MANAGEMENT) > 0)
+							types.add(Present.TYPE_ONLINE_RECHARGE_BANK);
+						if((role.getRole() & IWamiConstants.EXCHANGE_OFFLINE_MANAGEMENT) > 0)
+							types.add(Present.TYPE_OFFLINE);
+						if((role.getRole() & IWamiConstants.EXCHANGE_LUCKY_MANAGEMENT) > 0)
+							types.add(Present.TYPE_LUCK);
+						
+						if(types != null && types.size() > 0){
+							List<ExchangeHistory> history = presentBiz.getExchangeHistoryByPresent(types, key);
+							Map<String, Object> data = new HashMap<String, Object>();
+							data.put("list", parseExchangeHistory(history));
+							result.put("data", data);
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+						} else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in exchangePresents", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/exchuser.ajax")
+	public Map<Object, Object> getExchangeHistoryByUser(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("key")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long key = NumberUtils.toLong(params.get("key"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && key > 0){
+					List<Long> ids = new ArrayList<Long>();
+					ids.add(adminid);
+					Map<Long, UserRole> roles = userBiz.getUserRoles(ids);
+					UserRole role = roles.get(adminid);
+					
+					if(role != null){
+						List<Integer> types = new ArrayList<Integer>();
+						
+						if((role.getRole() & IWamiConstants.EXCHANGE_ONLINE_MANAGEMENT) > 0)
+							types.add(Present.TYPE_ONLINE_EMS);
+						if((role.getRole() & IWamiConstants.EXCHANGE_MOBILE_MANAGEMENT) > 0)
+							types.add(Present.TYPE_ONLINE_RECHARGE_MOBILE);
+						if((role.getRole() & IWamiConstants.EXCHANGE_ALIPAY_MANAGEMENT) > 0)
+							types.add(Present.TYPE_ONLINE_RECHARGE_ALIPAY);
+						if((role.getRole() & IWamiConstants.EXCHANGE_BANK_MANAGEMENT) > 0)
+							types.add(Present.TYPE_ONLINE_RECHARGE_BANK);
+						if((role.getRole() & IWamiConstants.EXCHANGE_OFFLINE_MANAGEMENT) > 0)
+							types.add(Present.TYPE_OFFLINE);
+						if((role.getRole() & IWamiConstants.EXCHANGE_LUCKY_MANAGEMENT) > 0)
+							types.add(Present.TYPE_LUCK);
+						
+						if(types != null && types.size() > 0){
+							List<ExchangeHistory> history = presentBiz.getExchangeHistoryByUser(types, key);
+							Map<String, Object> data = new HashMap<String, Object>();
+							data.put("list", parseExchangeHistory(history));
+							result.put("data", data);
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+						} else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in exchangePresents", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/exch.ajax")
 	public Map<Object, Object> getExchangeHistory(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			if(params.containsKey("userid")){
-				long userid = NumberUtils.toLong(params.get("userid"), -1);
-				if(userid > 0){
-					User user = userBiz.getUserById(userid);
-					if(user != null && user.getId() == userid){
-						List<ExchangeHistory> history = presentBiz.getExchangeHistory(userid);
-						Map<String, Object> data = new HashMap<String, Object>();
-						data.put("exchangePrize", user.getExchangePrize());
-						data.put("count", getExchangeCount(history));
-						data.put("list", parseExchangeHistory(history));
-						result.put("data", data);
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-					} else{
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_HISTORY_USERID);
-						result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_HISTORY_USERID));
-					}
-				} else{
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_HISTORY_USERID);
-					result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_HISTORY_USERID));
-				}
+			if(params.containsKey("adminid") && params.containsKey("type") && params.containsKey("status")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int status = NumberUtils.toInt(params.get("status"), -1);
+				int type = NumberUtils.toInt(params.get("type"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid)
+						&& status >= 0 && status <= 3
+						&& type >= 0 && type <= 6){
+					List<Long> ids = new ArrayList<Long>();
+					ids.add(adminid);
+					Map<Long, UserRole> roles = userBiz.getUserRoles(ids);
+					UserRole role = roles.get(adminid);
+					
+					if(role != null){
+						List<Integer> types = new ArrayList<Integer>();
+						
+						if(type == 1 || type == 0)
+							if((role.getRole() & IWamiConstants.EXCHANGE_ONLINE_MANAGEMENT) > 0)
+								types.add(Present.TYPE_ONLINE_EMS);
+						if(type == 2 || type == 0)
+							if((role.getRole() & IWamiConstants.EXCHANGE_MOBILE_MANAGEMENT) > 0)
+								types.add(Present.TYPE_ONLINE_RECHARGE_MOBILE);
+						if(type == 3 || type == 0)
+							if((role.getRole() & IWamiConstants.EXCHANGE_ALIPAY_MANAGEMENT) > 0)
+								types.add(Present.TYPE_ONLINE_RECHARGE_ALIPAY);
+						if(type == 4 || type == 0)
+							if((role.getRole() & IWamiConstants.EXCHANGE_BANK_MANAGEMENT) > 0)
+								types.add(Present.TYPE_ONLINE_RECHARGE_BANK);
+						if(type == 5 || type == 0)
+							if((role.getRole() & IWamiConstants.EXCHANGE_OFFLINE_MANAGEMENT) > 0)
+								types.add(Present.TYPE_OFFLINE);
+						if(type == 6 || type == 0)
+							if((role.getRole() & IWamiConstants.EXCHANGE_LUCKY_MANAGEMENT) > 0)
+								types.add(Present.TYPE_LUCK);
+						
+						if(types != null && types.size() > 0){
+							List<Integer> stats = new ArrayList<Integer>();
+							if(status == 1 || status == 0)
+								stats.add(Exchange.STATUS_READY);
+							if(status == 2 || status == 3 || status == 0)
+								stats.add(Exchange.STATUS_FINISH);
+							
+							List<ExchangeHistory> history = presentBiz.getExchangeHistory(types, stats);
+							Map<String, Object> data = new HashMap<String, Object>();
+							data.put("list", parseExchangeHistory(history));
+							result.put("data", data);
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+						} else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
@@ -79,658 +274,983 @@ public class PresentAjax {
 		
 		if(history != null && history.size() > 0)
 			for(ExchangeHistory tmp : history)
-				if(tmp != null && tmp.getGifts() != null){
+				if(tmp != null && tmp.getExchange() != null){
 					Map<String, Object> data = new HashMap<String, Object>();
-					data.put("time", tmp.getTime());
-					data.put("type", tmp.getType());
-					data.put("status", tmp.getStatus());
-					data.put("gifts", parseGifts(tmp.getGifts()));
+					data.put("userid", tmp.getUserid());
+					data.put("presents", parseExchange(tmp.getExchange()));
 					
 					list.add(data);
 				}
 		return list;
 	}
 
-	private List<Map<String, Object>> parseGifts(List<Gift> gifts) {
+	private List<Map<String, Object>> parseExchange(List<Exchange> exchanges) {
 		List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
 		
-		if(gifts != null && gifts.size() > 0)
-			for(Gift gift : gifts){
+		if(exchanges != null && exchanges.size() > 0)
+			for(Exchange exchange : exchanges){
 				Map<String, Object> tmp = new HashMap<String, Object>();
 				
-				tmp.put("name", gift.getName());
-				tmp.put("count", gift.getCount());
-				tmp.put("prize", gift.getPrize());
+				tmp.put("id", exchange.getId());
+				tmp.put("presentId", exchange.getPresentId());
+				tmp.put("presentName", exchange.getPresentName());
+				tmp.put("presentPrize", exchange.getPresentId());
+				tmp.put("presentType", exchange.getPresentType());
+				tmp.put("count", exchange.getCount());
+				tmp.put("prize", exchange.getPrize());
+				tmp.put("status", exchange.getStatus());
+				tmp.put("cellPhone", exchange.getCellPhone());
+				tmp.put("alipayAccount", exchange.getAlipayAccount());
+				tmp.put("bankAccount", exchange.getBankAccount());
+				tmp.put("bankName", exchange.getBankName());
+				tmp.put("bankNo", exchange.getBankNo());
+				tmp.put("address", exchange.getAddress());
+				tmp.put("name", exchange.getName());
+				tmp.put("expressName", exchange.getExpressName());
+				tmp.put("expressNo", exchange.getExpressNo());
+				tmp.put("channel", exchange.getChannel());
+
+				tmp.put("lastModTime", IWamiUtils.getDateString(exchange.getLastModTime()));
+				tmp.put("lastModUserid", exchange.getLastModUserid());
 				
 				result.add(tmp);
 			}
 		
 		return result;
 	}
-
-	private Object getExchangeCount(List<ExchangeHistory> history) {
-		int count = 0;
-		
-		if(history != null && history.size() > 0)
-			for(ExchangeHistory tmp : history)
-				if(tmp != null && tmp.getType() != Present.TYPE_GIFT && tmp.getGifts() != null)
-					count += tmp.getGifts().size();
-		
-		return count;
-	}
-
-	@AjaxMethod(path = "exchange/offline.ajax")
-	public Map<Object, Object> exchangeOfflinePresents(Map<String, String> params) {
+	
+	@AjaxMethod(path = "SEQ/present.ajax")
+	public Map<Object, Object> seqPresent(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			if(params.containsKey("userid") && params.containsKey("ids") && params.containsKey("counts") && params.containsKey("channel")){
-				long userid = NumberUtils.toLong(params.get("userid"), -1);
-				if(userid > 0){
-					// 1. split ids
-					String[] tmpids = StringUtils.split(params.get("ids"), IWamiConstants.SEPARATOR_PRESENT);
-					// 2. check ids
-					if(tmpids != null && tmpids.length > 0){
-						List<Long> ids = new ArrayList<Long>();
-						for(String tmpid : tmpids){
-							long id = NumberUtils.toLong(tmpid, -1);
-							if(id > 0)
-								ids.add(id);
-						}
+			if(params.containsKey("adminid") && params.containsKey("ids") && params.containsKey("ranks")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				String[] ids = StringUtils.split(params.get("ids"), IWamiConstants.SEPARATOR_PRESENT);
+				String[] ranks = StringUtils.split(params.get("ranks"), IWamiConstants.SEPARATOR_PRESENT);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& ids != null && ranks != null && ids.length > 0 && ids.length == ranks.length){
+					Map<Long, Integer> data = new HashMap<Long, Integer>();
+					
+					for(int i = 0; i < ids.length; i ++){
+						long id = NumberUtils.toLong(ids[i], -1);
+						int rank = NumberUtils.toInt(ranks[i], Integer.MAX_VALUE);
+						if(id > 0)
+							data.put(id, rank);
+					}
+					
+					if(data != null && data.size() > 0 && data.size() == ids.length){
+						if(presentBiz.seqPresent(data, adminid))
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+						else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "DEL/luck.ajax")
+	public Map<Object, Object> delLuck(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0){
+					if(presentBiz.delPresent(id, adminid) && luckyBiz.delRules(adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "MOD/luck.ajax")
+	public Map<Object, Object> modLuck(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id")
+					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("gifts") && params.containsKey("probs") && params.containsKey("counts")
+					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				int prize = NumberUtils.toInt(params.get("prize"), -1);
+				int rank = NumberUtils.toInt(params.get("rank"), -1);
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
+				String[] gifts = StringUtils.split(StringUtils.trimToEmpty(params.get("gifts")), IWamiConstants.SEPARATOR_PRESENT);
+				String[] probs = StringUtils.split(StringUtils.trimToEmpty(params.get("probs")), IWamiConstants.SEPARATOR_PRESENT);
+				String[] counts = StringUtils.split(StringUtils.trimToEmpty(params.get("counts")), IWamiConstants.SEPARATOR_PRESENT);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0 && prize > 0 && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)
+						 && gifts != null && gifts.length == 4 && probs != null && probs.length == 4 &&  counts != null && counts.length == 4){
+					
+					List<LuckyRule> rules = new ArrayList<LuckyRule>();
+					for(int i = 0; i < gifts.length; i ++){
+						String gift = StringUtils.trimToEmpty(gifts[i]);
+						int prob = NumberUtils.toInt(probs[i], -1);
+						int count = NumberUtils.toInt(counts[i], -1);
 						
-						if(ids.size() == tmpids.length){
-							String[] tmpcounts = StringUtils.split(params.get("counts"), IWamiConstants.SEPARATOR_PRESENT);
-							if(tmpcounts != null && tmpcounts.length > 0){
-								List<Integer> counts = new ArrayList<Integer>();
-								for(String tmpcount : tmpcounts){
-									int count = NumberUtils.toInt(tmpcount, -1);
-									if(count > 0)
-										counts.add(count);
-								}
+						if(StringUtils.isNotBlank(gift) && prob > 0){
+							LuckyRule rule = new LuckyRule();
+							rule.setIndexLevel(i + 1);
+							rule.setGift(gift);
+							rule.setCount(count);
+							rule.setProb(prob);
+							rule.setLastmodUserid(adminid);
+							rule.setIsdel(isdel);
+							
+							rules.add(rule);
+						}
+					}
+					
+					if(rules != null && rules.size() == 4){
+						Present present = new Present();
+						present.setId(id);
+						present.setName("抽奖");
+						present.setPrize(prize);
+						present.setCount(-1);
+						present.setType(Present.TYPE_LUCK);
+						present.setRank(rank);
+						present.setIconSmall(iconSmall);
+						present.setIconBig(iconBig);
+						present.setIsdel(isdel);
+						present.setLastModUserid(adminid);
+					
+						if(presentBiz.modPresent(present) && luckyBiz.modRules(rules))
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+						else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					} else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/luck.ajax")
+	public Map<Object, Object> getLuck(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("status")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int status = NumberUtils.toInt(params.get("status"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& status >= 0 && status <= 2){
+					List<Integer> stat = new ArrayList<Integer>();
+					if(status == 0 || status == 1)
+						stat.add(IWamiConstants.ACTIVE);
+					if(status == 0 || status == 2)
+						stat.add(IWamiConstants.INACTIVE);
+							
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_LUCK, stat);
+					List<LuckyRule> rules = luckyBiz.getLuckyRules();
+					
+					List<Map<String, Object>> data = parsePresents(presents);
+					if(data != null && data.size() > 0){
+						Map<String, Object> tmp = data.get(0);
+						List<Map<String, Object>> ruleTmp = new ArrayList<Map<String,Object>>();
+						if(tmp != null && rules != null && rules.size() > 0)
+							for(LuckyRule rule : rules){
+								Map<String, Object> rtmp = new HashMap<String, Object>();
 								
-								if(counts.size() == ids.size()){
-									User user = userBiz.getUserById(userid);
-									if(user != null){
-										// 3. get present by ids
-										Map<Long, Present> presents = presentBiz.getOfflinePresentsByIds(ids);
-										// 4. present count = ids.length?
-										if(presents != null && presents.size() == ids.size()){
-											// 5. group by type
-											List<Present> onlineExpress = new ArrayList<Present>();
-			
-											for(Present present : presents.values())
-												if(present.getType() == Present.TYPE_OFFLINE)
-													onlineExpress.add(present);
-											
-											if(onlineExpress.size() == ids.size()){
-												Map<Present, Integer> presentCnts = new HashMap<Present, Integer>();
-												int allPrize = 0;
-												for(int i = 0; i < ids.size(); i ++){
-													long tmpid = ids.get(i);
-													int tmpCnt = counts.get(i);
-													
-													Present present = presents.get(tmpid);
-													
-													allPrize += (present.getPrize() * tmpCnt);
-													presentCnts.put(present, tmpCnt);
-												}
-												
-												if(allPrize <= user.getCurrentPrize() && presentBiz.exchangeOffline(user, presentCnts, StringUtils.trimToEmpty(params.get("channel"))))
-													result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-												else {
-													result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE);
-													result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE));
-												}
-											} else{
-												result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-												result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-											}
-										}
-									} else{
-										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-										result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-									}
-								} else{
-									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_COUNT);
-									result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_COUNT));
-								}
-							} else{
-								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_COUNT);
-								result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_COUNT));
-							}
-						} else{
-							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-							result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-						}
-					} else{
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-						result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-					}
-				} else{
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-					result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-				}
-			} else
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
-		} catch(UserNotLoginException e){
-			throw e;
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in exchangePresents", t);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-		}
-		
-		return result;
-	}
-
-	@AjaxMethod(path = "exchange/mobile.ajax")
-	public Map<Object, Object> exchangeMobilePresent(Map<String, String> params) {
-		Map<Object, Object> result = new HashMap<Object, Object>();
-		
-		try{
-			if(params.containsKey("userid") && params.containsKey("id") && params.containsKey("cellPhone")){
-				long userid = NumberUtils.toLong(params.get("userid"), -1);
-				if(userid > 0){
-					long presentId = NumberUtils.toLong(params.get("id"), -1);
-					if(presentId > 0){
-						long cellPhone = NumberUtils.toLong(params.get("cellPhone"), -1);
-						if(cellPhone > 0 && IWamiUtils.validatePhone("" + cellPhone)){
-							User user = userBiz.getUserById(userid);
-							if(user != null && user.getId() == userid){
-								Present present = null;
-								List<Long> ids = new ArrayList<Long>();
-								ids.add(presentId);
-								Map<Long, Present> presents = presentBiz.getPresentsByIds(ids);
-								if(presents != null && presents.size() > 0 && presents.containsKey(presentId))
-									present = presents.get(presentId);
-								if(present != null && present.getType() == Present.TYPE_ONLINE_RECHARGE_MOBILE){
-									if(user.getCurrentPrize() >= present.getPrize() && presentBiz.exchangeMobile(user, present, cellPhone))
-										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-									else {
-										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE);
-										result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE));
-									}
-								}else{
-									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-									result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-								}
-							} else{
-								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-								result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-							}
-						} else{
-							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_CELLPHONE);
-							result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_CELLPHONE));
-						}
-					} else{
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-						result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-					}
-				} else{
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-					result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-				}
-			} else
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
-		} catch(UserNotLoginException e){
-			throw e;
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in exchangePresents", t);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-		}
-		
-		return result;
-	}
-
-	@AjaxMethod(path = "exchange/bank.ajax")
-	public Map<Object, Object> exchangeBankPresent(Map<String, String> params) {
-		Map<Object, Object> result = new HashMap<Object, Object>();
-		
-		try{
-			if(params.containsKey("userid") && params.containsKey("id") && params.containsKey("bankName") && params.containsKey("bankAccount")  && params.containsKey("bankNo") && params.containsKey("prize")){
-				long userid = NumberUtils.toLong(params.get("userid"), -1);
-				if(userid > 0){
-					long presentId = NumberUtils.toLong(params.get("id"), -1);
-					if(presentId > 0){
-						String bankAccount = StringUtils.trimToEmpty(params.get("bankAccount"));
-						if(StringUtils.isNotBlank(bankAccount)){
-							String bankName = StringUtils.trimToEmpty(params.get("bankName"));
-							if(StringUtils.isNotBlank(bankName)){
-								long bankNo = NumberUtils.toLong(params.get("bankNo"), -1);
-								if(bankNo > 0){
-									int prize = NumberUtils.toInt(params.get("prize"), -1);
-									if(prize > 0){
-										User user = userBiz.getUserById(userid);
-										if(user != null && user.getId() == userid){
-											Present present = null;
-											List<Long> ids = new ArrayList<Long>();
-											ids.add(presentId);
-											Map<Long, Present> presents = presentBiz.getPresentsByIds(ids);
-											if(presents != null && presents.size() > 0 && presents.containsKey(presentId))
-												present = presents.get(presentId);
-											if(present != null && present.getType() == Present.TYPE_ONLINE_RECHARGE_BANK){
-												if(prize >= present.getCount()){
-													if((prize % present.getPrize()) == 0){
-														if(user.getCurrentPrize() >= prize && presentBiz.exchangeBank(user, present, prize, bankAccount, bankName, bankNo))
-															result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-														else {
-															result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE);
-															result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE));
-														}
-													} else{
-														result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_NOTBLE);
-														result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_NOTBLE));
-													}
-												} else{
-													result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_MIN);
-													result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_MIN));
-												}
-											}else{
-												result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-												result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-											}
-										} else{
-											result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-											result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-										}
-									} else {
-										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_ZERO);
-										result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_ZERO));
-									}
-								} else{
-									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_BANK_NO);
-									result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_BANK_NO));
-								}
-							} else{
-								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_BANK_NAME);
-								result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_BANK_NAME));
-							}
-						} else{
-							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NAME);
-							result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-						}
-					} else{
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-						result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-					}
-				} else{
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-					result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-				}
-			} else
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
-		} catch(UserNotLoginException e){
-			throw e;
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in exchangePresents", t);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-		}
-		
-		return result;
-	}
-
-	@AjaxMethod(path = "exchange/alipay.ajax")
-	public Map<Object, Object> exchangeAlipayPresent(Map<String, String> params) {
-		Map<Object, Object> result = new HashMap<Object, Object>();
-		
-		try{
-			if(params.containsKey("userid") && params.containsKey("id") && params.containsKey("aliAccount") && params.containsKey("prize")){
-				long userid = NumberUtils.toLong(params.get("userid"), -1);
-				if(userid > 0){
-					long presentId = NumberUtils.toLong(params.get("id"), -1);
-					if(presentId > 0){
-						String aliAccount = StringUtils.trimToEmpty(params.get("aliAccount"));
-						if(StringUtils.isNotBlank(aliAccount)){
-							int prize = NumberUtils.toInt(params.get("prize"), -1);
-							if(prize > 0){
-								User user = userBiz.getUserById(userid);
-								if(user != null && user.getId() == userid){
-									Present present = null;
-									List<Long> ids = new ArrayList<Long>();
-									ids.add(presentId);
-									Map<Long, Present> presents = presentBiz.getPresentsByIds(ids);
-									if(presents != null && presents.size() > 0 && presents.containsKey(presentId))
-										present = presents.get(presentId);
-									if(present != null && present.getType() == Present.TYPE_ONLINE_RECHARGE_ALIPAY){
-										if(prize >= present.getCount()){
-											if((prize % present.getPrize()) == 0){
-												if(user.getCurrentPrize() >= prize && presentBiz.exchangeAlipay(user, present, prize, aliAccount))
-													result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-												else {
-													result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE);
-													result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE));
-												}
-											} else{
-												result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_NOTBLE);
-												result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_NOTBLE));
-											}
-										} else{
-											result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_MIN);
-											result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_MIN));
-										}
-									}else{
-										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-										result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-									}
-								} else{
-									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-									result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-								}
-							} else {
-								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_ZERO);
-								result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRIZE_ZERO));
-							}
-						} else{
-							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_ALIACCOUNT);
-							result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_ALIACCOUNT));
-						}
-					} else{
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-						result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-					}
-				} else{
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-					result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-				}
-			} else
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
-		} catch(UserNotLoginException e){
-			throw e;
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in exchangePresents", t);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-		}
-		
-		return result;
-	}
-
-	@AjaxMethod(path = "exchange/express.ajax")
-	public Map<Object, Object> exchangeExpressPresents(Map<String, String> params) {
-		Map<Object, Object> result = new HashMap<Object, Object>();
-		
-		try{
-			if(params.containsKey("userid") && params.containsKey("ids") && params.containsKey("counts") && params.containsKey("cellPhone")
-					 && params.containsKey("address") && params.containsKey("name")){
-				long userid = NumberUtils.toLong(params.get("userid"), -1);
-				if(userid > 0){
-					// 1. split ids
-					String[] tmpids = StringUtils.split(params.get("ids"), IWamiConstants.SEPARATOR_PRESENT);
-					// 2. check ids
-					if(tmpids != null && tmpids.length > 0){
-						List<Long> ids = new ArrayList<Long>();
-						for(String tmpid : tmpids){
-							long id = NumberUtils.toLong(tmpid, -1);
-							if(id > 0)
-								ids.add(id);
-						}
-						
-						if(ids.size() == tmpids.length){
-							String[] tmpcounts = StringUtils.split(params.get("counts"), IWamiConstants.SEPARATOR_PRESENT);
-							if(tmpcounts != null && tmpcounts.length > 0){
-								List<Integer> counts = new ArrayList<Integer>();
-								for(String tmpcount : tmpcounts){
-									int count = NumberUtils.toInt(tmpcount, -1);
-									if(count > 0)
-										counts.add(count);
-								}
+								rtmp.put("index", rule.getIndexLevel());
+								rtmp.put("gift", rule.getGift());
+								rtmp.put("prob", rule.getProb());
+								rtmp.put("count", rule.getCount());
 								
-								if(counts.size() == ids.size()){
-									long cellPhone = NumberUtils.toLong(params.get("cellPhone"), -1);
-									if(cellPhone > 0 && IWamiUtils.validatePhone("" + cellPhone)){
-										String address = StringUtils.trimToEmpty(params.get("address"));
-										if(StringUtils.isNotBlank(address)){
-											String name = StringUtils.trimToEmpty(params.get("name"));
-											if(StringUtils.isNotBlank(name)){
-												User user = userBiz.getUserById(userid);
-												if(user != null){
-													// 3. get present by ids
-													Map<Long, Present> presents = presentBiz.getPresentsByIds(ids);
-													// 4. present count = ids.length?
-													if(presents != null && presents.size() == ids.size()){
-														// 5. group by type
-														List<Present> onlineExpress = new ArrayList<Present>();
+								ruleTmp.add(rtmp);
+							}
 						
-														for(Present present : presents.values())
-															if(present.getType() == Present.TYPE_ONLINE_EMS)
-																onlineExpress.add(present);
-														
-														if(onlineExpress.size() == ids.size()){
-															Map<Present, Integer> presentCnts = new HashMap<Present, Integer>();
-															int allPrize = 0;
-															for(int i = 0; i < ids.size(); i ++){
-																long tmpid = ids.get(i);
-																int tmpCnt = counts.get(i);
-																
-																Present present = presents.get(tmpid);
-																
-																allPrize += (present.getPrize() * tmpCnt);
-																presentCnts.put(present, tmpCnt);
-															}
-															
-															if(allPrize <= user.getCurrentPrize() && presentBiz.exchangeExpress(user, presentCnts, cellPhone, address, name))
-																result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-															else {
-																result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE);
-																result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NOTENOUGHT_PRIZE));
-															}
-														} else{
-															result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-															result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-														}
-													}
-												} else{
-													result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-													result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-												}
-											} else{
-												result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NAME);
-												result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_NAME));
-											}
-										} else{
-											result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ADDRESS);
-											result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ADDRESS));
-										}
-									} else{
-										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_CELLPHONE);
-										result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_CELLPHONE));
-									}
-								} else{
-									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_COUNT);
-									result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_COUNT));
-								}
-							} else{
-								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_COUNT);
-								result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_COUNT));
-							}
-						} else{
-							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-							result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
-						}
-					} else{
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID);
-						result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_PRESENT_ID));
+						tmp.put("rules", ruleTmp);
 					}
-				} else{
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID);
-					result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_EXCHANGE_USERID));
-				}
-			} else
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
-		} catch(UserNotLoginException e){
-			throw e;
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in exchangePresents", t);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-		}
-		
-		return result;
-	}
-
-	@AjaxMethod(path = "sendsms.ajax")
-	public Map<Object, Object> sendSMS(Map<String, String> params) {
-		Map<Object, Object> result = new HashMap<Object, Object>();
-		
-		try{
-			if(params.containsKey("userid") && params.containsKey("cellPhone")){
-				long userid = NumberUtils.toLong(params.get("userid"), -1);
-				if(userid > 0){
-					long cellPhone = NumberUtils.toLong(params.get("cellPhone"), -1);
-					if(cellPhone > 0 && IWamiUtils.validatePhone("" + cellPhone)){
-						User user = userBiz.getUserById(userid);
-						if(user != null){
-							if(cellPhone != user.getCellPhone()){
-								User user2 = userBiz.getUserByCellPhone(cellPhone);
-								if(user2 == null){
-//									if(userBiz.sendSMS(cellPhone, user))
-//										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-//									else
-//										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-								} else{
-									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_SEND_SMS_REGISTERED);
-									result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_SEND_SMS_REGISTERED));
-								}
-							} else{
-								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_SEND_SMS_SELF);
-								result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_SEND_SMS_SELF));
-							}
-						} else{
-							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_SEND_SMS_USERID);
-							result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_SEND_SMS_USERID));
-						}
-					} else{
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_SEND_SMS_CELLPHONE_INVALID);
-						result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_SEND_SMS_CELLPHONE_INVALID));
-					}
-				} else{
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_SEND_SMS_USERID);
-					result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_SEND_SMS_USERID));
-				}
-			} else
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
-		} catch(UserNotLoginException e){
-			throw e;
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in sendSMS", t);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-		}
-		
-		return result;
-	}
-
-	@AjaxMethod(path = "present/gift.ajax")
-	public Map<Object, Object> sendGift(Map<String, String> params) {
-		Map<Object, Object> result = new HashMap<Object, Object>();
-		
-		try{
-			if(params.containsKey("userid") && params.containsKey("cellPhone") && params.containsKey("prize")){
-				long userid = NumberUtils.toLong(params.get("userid"), -1);
-				if(userid > 0){
-					User user = userBiz.getUserById(userid);
-					if(user != null){
-						long cellPhone = NumberUtils.toLong(params.get("cellPhone"), -1);
-						if(cellPhone > 0){
-							if(cellPhone != user.getCellPhone()){
-								User user2 = userBiz.getUserByCellPhone(cellPhone);
-								if(user2 != null){
-									int prize = NumberUtils.toInt(params.get("prize"), -1);
-									if(prize > 0){
-										if(user.getCurrentPrize() >= prize){
-											if(presentBiz.gift(user, user2, prize)){
-												user = userBiz.getUserById(userid);
-												Map<String, Object> data = new HashMap<String, Object>();
-												data.put("prize", user.getCurrentPrize());
-												result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-											} else
-												result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-										} else{
-											result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_GIFT_NOTENOUGHT_PRIZE);
-											result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_GIFT_NOTENOUGHT_PRIZE));
-										}
-									} else {
-										result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_GIFT_PRIZE_INVALID);
-										result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_GIFT_PRIZE_INVALID));
-									}
-								} else{
-									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_GIFT_CELLPHONE_NOTEXISTS);
-									result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_GIFT_CELLPHONE_NOTEXISTS));
-								}
-							} else{
-								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_GIFT_SELF);
-								result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_GIFT_SELF));
-							}
-						} else{
-							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_GIFT_CELLPHONE_NOTEXISTS);
-							result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_GIFT_CELLPHONE_NOTEXISTS));
-						}
-					} else{
-						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_GIFT_USERID);
-						result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_GIFT_USERID));
-					}
-				} else{
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_GIFT_USERID);
-					result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_GIFT_USERID));
-				}
-			} else
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
-		} catch(UserNotLoginException e){
-			throw e;
-		} catch(NotEnoughPrizeException e){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in getPresents", e);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_GIFT_NOTENOUGHT_PRIZE);
-			result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_GIFT_NOTENOUGHT_PRIZE));
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in getPresents", t);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-		}
-		
-		return result;
-	}
-
-	@AjaxMethod(path = "share.ajax")
-	public Map<Object, Object> shareExchange(Map<String, String> params) {
-		Map<Object, Object> result = new HashMap<Object, Object>();
-		
-		try{
-			if(params.containsKey("userid") && params.containsKey("type") && params.containsKey("target") && params.containsKey("msg")){
-				if(presentBiz.addShareExchange(NumberUtils.toLong(params.get("userid")), NumberUtils.toInt(params.get("type"), -1), NumberUtils.toInt(params.get("target"), -1), StringUtils.trimToEmpty(params.get("msg"))))
+					
+					result.put("data", data);
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-				else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else
 				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 		} catch(UserNotLoginException e){
 			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
-				logger.error("Exception in shareExchange", t);
+				logger.error("Exception in getLuck", t);
 			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 		}
-		
 		
 		return result;
 	}
 
-	@AjaxMethod(path = "present/list.ajax")
-	public Map<Object, Object> getPresents(Map<String, String> params) {
+	@AjaxMethod(path = "DEL/offline.ajax")
+	public Map<Object, Object> delOffline(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			List<Present> presents = presentBiz.getAllPresents(NumberUtils.toLong(params.get("userid"), -1));
-			result.put("data", parsePresents(presents));
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+			if(params.containsKey("adminid") && params.containsKey("id")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0){
+					if(presentBiz.delPresent(id, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
 		} catch(Throwable t){
 			if(logger.isErrorEnabled())
-				logger.error("Exception in getPresents", t);
+				logger.error("Exception in getBanks", t);
 			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
 		}
 		
+		return result;
+	}
+
+	@AjaxMethod(path = "ADD/offline.ajax")
+	public Map<Object, Object> addOffline(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("name")
+					 && params.containsKey("rank") && params.containsKey("prize")
+					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int prize = NumberUtils.toInt(params.get("prize"), -1);
+				int rank = NumberUtils.toInt(params.get("rank"), -1);
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				String name = StringUtils.trimToEmpty(params.get("name"));
+				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& prize > 0 && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+					Present present = new Present();
+					present.setName(name);
+					present.setPrize(prize);
+					present.setCount(1);
+					present.setType(Present.TYPE_OFFLINE);
+					present.setRank(rank);
+					present.setIconSmall(iconSmall);
+					present.setIconBig(iconBig);
+					present.setIsdel(isdel);
+					present.setLastModUserid(adminid);
+					
+					if(presentBiz.addPresent(present))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "MOD/offline.ajax")
+	public Map<Object, Object> modOffline(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
+					 && params.containsKey("rank") && params.containsKey("prize")
+					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				int prize = NumberUtils.toInt(params.get("prize"), -1);
+				int rank = NumberUtils.toInt(params.get("rank"), -1);
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				String name = StringUtils.trimToEmpty(params.get("name"));
+				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0 && prize > 0 && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+					Present present = new Present();
+					present.setId(id);
+					present.setName(name);
+					present.setPrize(prize);
+					present.setCount(1);
+					present.setType(Present.TYPE_OFFLINE);
+					present.setRank(rank);
+					present.setIconSmall(iconSmall);
+					present.setIconBig(iconBig);
+					present.setIsdel(isdel);
+					present.setLastModUserid(adminid);
+					
+					if(presentBiz.modPresent(present))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/offline.ajax")
+	public Map<Object, Object> getOffline(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("status")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int status = NumberUtils.toInt(params.get("status"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& status >= 0 && status <= 2){
+					List<Integer> stat = new ArrayList<Integer>();
+					if(status == 0 || status == 1)
+						stat.add(IWamiConstants.ACTIVE);
+					if(status == 0 || status == 2)
+						stat.add(IWamiConstants.INACTIVE);
+							
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_OFFLINE, stat);
+					result.put("data", parsePresents(presents));
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getLuck", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "DEL/online.ajax")
+	public Map<Object, Object> delOnline(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0){
+					if(presentBiz.delPresent(id, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "ADD/online.ajax")
+	public Map<Object, Object> addOnline(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("name")
+					 && params.containsKey("rank") && params.containsKey("prize")
+					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int prize = NumberUtils.toInt(params.get("prize"), -1);
+				int rank = NumberUtils.toInt(params.get("rank"), -1);
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				String name = StringUtils.trimToEmpty(params.get("name"));
+				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& prize > 0 && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+					Present present = new Present();
+					present.setName(name);
+					present.setPrize(prize);
+					present.setCount(1);
+					present.setType(Present.TYPE_ONLINE_EMS);
+					present.setRank(rank);
+					present.setIconSmall(iconSmall);
+					present.setIconBig(iconBig);
+					present.setIsdel(isdel);
+					present.setLastModUserid(adminid);
+					
+					if(presentBiz.addPresent(present))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "MOD/online.ajax")
+	public Map<Object, Object> modOnline(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
+					 && params.containsKey("rank") && params.containsKey("prize")
+					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				int prize = NumberUtils.toInt(params.get("prize"), -1);
+				int rank = NumberUtils.toInt(params.get("rank"), -1);
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				String name = StringUtils.trimToEmpty(params.get("name"));
+				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0 && prize > 0 && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+					Present present = new Present();
+					present.setId(id);
+					present.setName(name);
+					present.setPrize(prize);
+					present.setCount(1);
+					present.setType(Present.TYPE_ONLINE_EMS);
+					present.setRank(rank);
+					present.setIconSmall(iconSmall);
+					present.setIconBig(iconBig);
+					present.setIsdel(isdel);
+					present.setLastModUserid(adminid);
+					
+					if(presentBiz.modPresent(present))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/online.ajax")
+	public Map<Object, Object> getOnline(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("status")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int status = NumberUtils.toInt(params.get("status"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& status >= 0 && status <= 2){
+					List<Integer> stat = new ArrayList<Integer>();
+					if(status == 0 || status == 1)
+						stat.add(IWamiConstants.ACTIVE);
+					if(status == 0 || status == 2)
+						stat.add(IWamiConstants.INACTIVE);
+							
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_EMS, stat);
+					result.put("data", parsePresents(presents));
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getOnline", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "DEL/mobile.ajax")
+	public Map<Object, Object> delMobile(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0){
+					if(presentBiz.delPresent(id, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "ADD/mobile.ajax")
+	public Map<Object, Object> addMobile(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("name")
+					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("count")
+					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int prize = NumberUtils.toInt(params.get("prize"), -1);
+				int count = NumberUtils.toInt(params.get("count"), -1);
+				int rank = NumberUtils.toInt(params.get("rank"), -1);
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				String name = StringUtils.trimToEmpty(params.get("name"));
+				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& prize > 0 && count >= prize && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+					Present present = new Present();
+					present.setName(name);
+					present.setPrize(prize);
+					present.setCount(count);
+					present.setType(Present.TYPE_ONLINE_RECHARGE_MOBILE);
+					present.setRank(rank);
+					present.setIconSmall(iconSmall);
+					present.setIconBig(iconBig);
+					present.setIsdel(isdel);
+					present.setLastModUserid(adminid);
+					
+					if(presentBiz.addPresent(present))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "MOD/mobile.ajax")
+	public Map<Object, Object> modMobile(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
+					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("count")
+					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				int prize = NumberUtils.toInt(params.get("prize"), -1);
+				int count = NumberUtils.toInt(params.get("count"), -1);
+				int rank = NumberUtils.toInt(params.get("rank"), -1);
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				String name = StringUtils.trimToEmpty(params.get("name"));
+				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0 && prize > 0 && count >= prize && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+					Present present = new Present();
+					present.setId(id);
+					present.setName(name);
+					present.setPrize(prize);
+					present.setCount(count);
+					present.setType(Present.TYPE_ONLINE_RECHARGE_MOBILE);
+					present.setRank(rank);
+					present.setIconSmall(iconSmall);
+					present.setIconBig(iconBig);
+					present.setIsdel(isdel);
+					present.setLastModUserid(adminid);
+					
+					if(presentBiz.modPresent(present))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/mobile.ajax")
+	public Map<Object, Object> getMobile(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("status")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int status = NumberUtils.toInt(params.get("status"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& status >= 0 && status <= 2){
+					List<Integer> stat = new ArrayList<Integer>();
+					if(status == 0 || status == 1)
+						stat.add(IWamiConstants.ACTIVE);
+					if(status == 0 || status == 2)
+						stat.add(IWamiConstants.INACTIVE);
+							
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_RECHARGE_MOBILE, stat);
+					result.put("data", parsePresents(presents));
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getMobile", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "DEL/ali.ajax")
+	public Map<Object, Object> delAli(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0){
+					if(presentBiz.delPresent(id, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "MOD/ali.ajax")
+	public Map<Object, Object> modAli(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
+					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("count")
+					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				int prize = NumberUtils.toInt(params.get("prize"), -1);
+				int count = NumberUtils.toInt(params.get("count"), -1);
+				int rank = NumberUtils.toInt(params.get("rank"), -1);
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				String name = StringUtils.trimToEmpty(params.get("name"));
+				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0 && prize > 0 && count >= prize && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+					Present present = new Present();
+					present.setId(id);
+					present.setName(name);
+					present.setPrize(prize);
+					present.setCount(count);
+					present.setType(Present.TYPE_ONLINE_RECHARGE_ALIPAY);
+					present.setRank(rank);
+					present.setIconSmall(iconSmall);
+					present.setIconBig(iconBig);
+					present.setIsdel(isdel);
+					present.setLastModUserid(adminid);
+					
+					if(presentBiz.modPresent(present))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/ali.ajax")
+	public Map<Object, Object> getAli(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("status")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int status = NumberUtils.toInt(params.get("status"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& status >= 0 && status <= 2){
+					List<Integer> stat = new ArrayList<Integer>();
+					if(status == 0 || status == 1)
+						stat.add(IWamiConstants.ACTIVE);
+					if(status == 0 || status == 2)
+						stat.add(IWamiConstants.INACTIVE);
+							
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_RECHARGE_ALIPAY, stat);
+					result.put("data", parsePresents(presents));
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getAlis", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "DEL/bank.ajax")
+	public Map<Object, Object> delBank(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0){
+					if(presentBiz.delPresent(id, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+	
+	@AjaxMethod(path = "MOD/bank.ajax")
+	public Map<Object, Object> modBank(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
+					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("count")
+					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				int prize = NumberUtils.toInt(params.get("prize"), -1);
+				int count = NumberUtils.toInt(params.get("count"), -1);
+				int rank = NumberUtils.toInt(params.get("rank"), -1);
+				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
+				String name = StringUtils.trimToEmpty(params.get("name"));
+				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
+				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& id > 0 && prize > 0 && count >= prize && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+					Present present = new Present();
+					present.setId(id);
+					present.setName(name);
+					present.setPrize(prize);
+					present.setCount(count);
+					present.setType(Present.TYPE_ONLINE_RECHARGE_BANK);
+					present.setRank(rank);
+					present.setIconSmall(iconSmall);
+					present.setIconBig(iconBig);
+					present.setIsdel(isdel);
+					present.setLastModUserid(adminid);
+					
+					if(presentBiz.modPresent(present))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/bank.ajax")
+	public Map<Object, Object> getBank(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("status")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				int status = NumberUtils.toInt(params.get("status"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& status >= 0 && status <= 2){
+					List<Integer> stat = new ArrayList<Integer>();
+					if(status == 0 || status == 1)
+						stat.add(IWamiConstants.ACTIVE);
+					if(status == 0 || status == 2)
+						stat.add(IWamiConstants.INACTIVE);
+							
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_RECHARGE_BANK, stat);
+					result.put("data", parsePresents(presents));
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			throw e;
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getBanks", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
 		
 		return result;
 	}
@@ -750,6 +1270,10 @@ public class PresentAjax {
 				tmp.put("type", present.getType());
 				tmp.put("iconSmall", present.getIconSmall());
 				tmp.put("iconBig", present.getIconBig());
+				tmp.put("isdel", present.getIsdel());
+
+				tmp.put("lastModTime", IWamiUtils.getDateString(present.getLastModTime()));
+				tmp.put("lastModUserid", present.getLastModUserid());
 				
 				data.add(tmp);
 			}
@@ -779,6 +1303,14 @@ public class PresentAjax {
 
 	public void setLoginBiz(LoginBiz loginBiz) {
 		this.loginBiz = loginBiz;
+	}
+
+	public LuckyBiz getLuckyBiz() {
+		return luckyBiz;
+	}
+
+	public void setLuckyBiz(LuckyBiz luckyBiz) {
+		this.luckyBiz = luckyBiz;
 	}
 
 }

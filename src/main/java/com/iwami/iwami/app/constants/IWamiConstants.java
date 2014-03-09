@@ -40,6 +40,18 @@ public interface IWamiConstants {
 
 	public static final long USER_MANAGEMENT = 1;
 
+	public static final long EXCHANGE_BANK_MANAGEMENT = 2;
+
+	public static final long EXCHANGE_ALIPAY_MANAGEMENT = 4;
+
+	public static final long EXCHANGE_MOBILE_MANAGEMENT = 8;
+
+	public static final long EXCHANGE_ONLINE_MANAGEMENT = 16;
+
+	public static final long EXCHANGE_OFFLINE_MANAGEMENT = 32;
+
+	public static final long EXCHANGE_LUCKY_MANAGEMENT = 64;
+
 	public static final long TASK_MANAGEMENT = 128;
 
 	public static final long PUSH_MANAGEMENT = 256;
@@ -53,5 +65,7 @@ public interface IWamiConstants {
 	public static final long ADMIN_MANAGEMENT = 4096;
 
 	public static final long APK_MANAGEMENT = 8192;
+
+	public static final long PRESENT_MANAGEMENT = 16384;
 
 }

@@ -26,6 +26,11 @@ public class PushServiceImpl implements PushService {
 	}
 
 	@Override
+	public List<Push> getTodoPushTasks() {
+		return pushDao.getTodoPushTasks();
+	}
+
+	@Override
 	public Map<Long, Map<Integer, Integer>> getAllCntsByIds(List<Long> ids) {
 		return pushDao.getAllCntsByIds(ids);
 	}
@@ -43,6 +48,26 @@ public class PushServiceImpl implements PushService {
 	@Override
 	public boolean updatePush(int status, long id, long adminid) {
 		return pushDao.updatePush(status, id, adminid);
+	}
+
+	@Override
+	public boolean updatePush(int status, long id) {
+		return pushDao.updatePush(status, id);
+	}
+
+	@Override
+	public boolean updatePush(String cellPhone, int status, long id) {
+		return pushDao.updatePush(cellPhone, status, id);
+	}
+
+	@Override
+	public List<PushTask> getLimitedPushTaskById(long pushid, int limit) {
+		return pushDao.getLimitedPushTaskById(pushid, limit);
+	}
+
+	@Override
+	public boolean updatePushTask(int status, long id) {
+		return pushDao.updatePushTask(status, id);
 	}
 
 	// real jpush

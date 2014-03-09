@@ -3,36 +3,29 @@ package com.iwami.iwami.app.biz;
 import java.util.List;
 import java.util.Map;
 
-import com.iwami.iwami.app.exception.NotEnoughPrizeException;
+import com.iwami.iwami.app.model.Exchange;
 import com.iwami.iwami.app.model.ExchangeHistory;
 import com.iwami.iwami.app.model.Present;
-import com.iwami.iwami.app.model.User;
 
 public interface PresentBiz {
 
-	public List<Present> getAllPresents(long userid);
+	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status);
 
-	public boolean gift(User user, User user2, int prize) throws NotEnoughPrizeException;
-	
-	// only for transaction control, not open for other callers.
-	public void doGift(User user, User user2, int prize) throws NotEnoughPrizeException;
-	// end of transaction control
+	public boolean modPresent(Present present);
 
-	public boolean addShareExchange(long userid, int type, int target, String msg);
+	public boolean delPresent(long id, long adminid);
 
-	public Map<Long, Present> getPresentsByIds(List<Long> ids);
+	public boolean addPresent(Present present);
 
-	public boolean exchangeExpress(User user, Map<Present, Integer> presentCnts, long cellPhone, String address, String name) throws NotEnoughPrizeException;
+	public boolean seqPresent(Map<Long, Integer> data, long adminid);
 
-	public boolean exchangeAlipay(User user, Present present, int prize, String aliAccount);
+	public List<ExchangeHistory> getExchangeHistory(List<Integer> types, List<Integer> status);
 
-	public boolean exchangeBank(User user, Present present, int prize, String bankAccount, String bankName, long bankNo);
+	public List<ExchangeHistory> getExchangeHistoryByUser(List<Integer> types, long key);
 
-	public boolean exchangeMobile(User user, Present present, long cellPhone);
+	public List<ExchangeHistory> getExchangeHistoryByPresent( List<Integer> types, String key);
 
-	public List<ExchangeHistory> getExchangeHistory(long userid);
+	public Exchange getExchangeById(long id);
 
-	public Map<Long, Present> getOfflinePresentsByIds(List<Long> ids);
-
-	public boolean exchangeOffline(User user, Map<Present, Integer> presentCnts, String channel);
+	public boolean modExchange(String name, String no, long id, long adminid);
 }

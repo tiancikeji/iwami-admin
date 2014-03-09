@@ -55,9 +55,9 @@ public class OnstartDaoImpl extends JdbcDaoSupport implements OnstartDao{
 		if(cellPhones != null && cellPhones.size() > 0)
 			sql = sql + " cell_phone in (" + StringUtils.join(cellPhones.toArray(), ",") + ") or";
 		if(uuids != null && uuids.size() > 0)
-			sql = sql + " uuid in (" + StringUtils.join(uuids.toArray(), ",") + ") or";
+			sql = sql + " uuid in (\"" + StringUtils.join(uuids, "\",\"") + "\") or";
 		if(alias != null && alias.size() > 0)
-			sql = sql + " alias in (" + StringUtils.join(alias.toArray(), ",") + ")";
+			sql = sql + " alias in (\"" + StringUtils.join(alias, "\",\"") + "\")";
 		
 		sql = StringUtils.removeEnd(sql, "or");
 		

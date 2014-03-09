@@ -1,28 +1,32 @@
 package com.iwami.iwami.app.service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.iwami.iwami.app.model.Exchange;
 import com.iwami.iwami.app.model.Present;
-import com.iwami.iwami.app.model.Share;
 
 public interface PresentService {
 
-	public List<Present> getAllAvailablePresents();
+	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status);
 
-	public long addExchange(Exchange exchange);
+	public boolean modPresent(Present present);
 
-	public void updateExchangeStatus(long id, int status);
+	public boolean delPresent(long id, long adminid);
 
-	public boolean addShareExchange(Share share);
+	public boolean addPresent(Present present);
 
-	public Map<Long, Present> getPresentsByIds(List<Long> ids);
+	public boolean updatePresentURL(Present present);
 
-	public void updateExchangesStatus(List<Long> ids, int status);
+	public boolean seqPresent(Map<Long, Integer> data, long adminid);
 
-	public int getLuckyExchangeCount(long presentid, Date todayStart);
+	public List<Exchange> getExchangeHistory(List<Integer> types, List<Integer> status);
 
-	public List<Exchange> getAllExchanges(long userid);
+	public List<Exchange> getExchangeHistoryByUser(List<Integer> types, long type);
+
+	public List<Exchange> getExchangeHistoryByPresent(List<Integer> types, String type);
+
+	public Exchange getExchangeById(long id);
+
+	public boolean modExchange(String name, String no, long id, long adminid);
 }

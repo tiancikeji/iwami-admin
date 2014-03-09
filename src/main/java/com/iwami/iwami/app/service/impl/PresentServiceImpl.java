@@ -1,86 +1,70 @@
 package com.iwami.iwami.app.service.impl;
 
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.iwami.iwami.app.comparator.PresentRankComparator;
-import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.dao.PresentDao;
 import com.iwami.iwami.app.model.Exchange;
 import com.iwami.iwami.app.model.Present;
-import com.iwami.iwami.app.model.Share;
 import com.iwami.iwami.app.service.PresentService;
-import com.iwami.iwami.app.util.LocalCaches;
 
 public class PresentServiceImpl implements PresentService {
 	
 	private PresentDao presentDao;
-	
-	private long expireTime;
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public List<Present> getAllAvailablePresents() {
-		List<Present> presents = (List<Present>)LocalCaches.get(IWamiConstants.CACHE_PRESENT_KEY, System.currentTimeMillis(), expireTime);
-		
-		if(presents == null){
-			presents = presentDao.getAllPresents();
-			
-			if(presents != null && presents.size() > 0){
-				Collections.sort(presents, new PresentRankComparator());
-				for(int i = 0; i < presents.size(); i ++)
-					presents.get(i).setRank(i);
-				
-				LocalCaches.set(IWamiConstants.CACHE_PRESENT_KEY, presents, System.currentTimeMillis());
-			}
-		}
-		
-		return presents;
+	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status) {
+		return presentDao.getPresentsByTypeNStatus(type, status);
 	}
 
 	@Override
-	public long addExchange(Exchange exchange) {
-		return presentDao.addExchange(exchange);
+	public boolean modPresent(Present present) {
+		return presentDao.modPresent(present);
 	}
 
 	@Override
-	public void updateExchangeStatus(long id, int status) {
-		 presentDao.updateExchangeStatus(id, status);
+	public boolean addPresent(Present present) {
+		return presentDao.addPresent(present);
 	}
 
 	@Override
-	public boolean addShareExchange(Share share) {
-		return presentDao.addShareExchange(share);
+	public boolean updatePresentURL(Present present) {
+		return presentDao.updatePresentURL(present);
 	}
 
 	@Override
-	public Map<Long, Present> getPresentsByIds(List<Long> ids) {
-		return presentDao.getPresentsByIds(ids);
+	public boolean delPresent(long id, long adminid) {
+		return presentDao.delPresent(id, adminid);
 	}
 
 	@Override
-	public void updateExchangesStatus(List<Long> ids, int status) {
-		presentDao.updateExchangeStatus(ids, status);
+	public boolean seqPresent(Map<Long, Integer> data, long adminid) {
+		return presentDao.seqPresent(data, adminid);
 	}
 
 	@Override
-	public int getLuckyExchangeCount(long presentid, Date date) {
-		return presentDao.getLuckyExchangeCount(presentid, date);
+	public List<Exchange> getExchangeHistory(List<Integer> types, List<Integer> status) {
+		return presentDao.getExchangeHistory(types, status);
 	}
 
 	@Override
-	public List<Exchange> getAllExchanges(long userid) {
-		return presentDao.getAllExchanges(userid);
+	public List<Exchange> getExchangeHistoryByUser(List<Integer> types, long key) {
+		return presentDao.getExchangeHistoryByUser(types, key);
 	}
 
-	public long getExpireTime() {
-		return expireTime;
+	@Override
+	public List<Exchange> getExchangeHistoryByPresent(List<Integer> types, String key) {
+		return presentDao.getExchangeHistoryByPresent(types, key);
 	}
 
-	public void setExpireTime(long expireTime) {
-		this.expireTime = expireTime;
+	@Override
+	public Exchange getExchangeById(long id) {
+		return presentDao.getExchangeById(id);
+	}
+
+	@Override
+	public boolean modExchange(String name, String no, long id, long adminid) {
+		return presentDao.modExchange(name, no, id, adminid);
 	}
 
 	public PresentDao getPresentDao() {

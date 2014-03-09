@@ -1,3 +1,38 @@
+
+
+9. 用户登陆
+	9.1 登陆
+		路径：login.ajax
+		输入参数
+			loginname：String 用户名
+			password: String 密码
+		输出结果
+			status：0 返回成功
+							300 参数错误
+							400 系统错误
+			data： { --- 空数据代表登陆失败
+	   		userid: long 运营人员id
+	   		username：String 用户名称
+	   		loginname：String 登陆名称
+	   		cellPhone：long 用户手机
+	   		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖，第8位：其他所有权限
+ 		  		
+				lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
+				lastModUserid：long 上次修改人
+			}
+0. 上传本地文件：图片&APK
+	路径：ADD/file.ajax
+	输入参数
+		adminid:long 管理员id
+		
+		data：String 文件格式&文件内容
+		name：String 文件本身名字（专门为了APK的名字）
+	输出结果
+		status：0 返回成功
+						300 参数错误
+						400 系统错误
+		url：String 文件地址
+	
 1. 用户管理
 	1.1 查询用户
 		路径：GET/user.ajax
@@ -571,6 +606,7 @@
    		cellPhone：long 用户手机
    		password：String 密码 - 前端md5加密呗
    		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
+   		isdel: int 0/1 有效/无效
 		输出结果
 			status：0 返回成功
 							300 参数错误
@@ -586,6 +622,7 @@
    		cellPhone：long 用户手机
    		password：String 密码 - 前端md5加密呗
    		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
+   		isdel: int 0/1 有效/无效
 		输出结果
 			status：0 返回成功
 							300 参数错误
@@ -769,6 +806,7 @@
 							rank：int 顺序
 							iconSmall：String 小图url
 							iconBig：String 大图url
+   		  			isdel：int 0有效，1无效
 							
 							lastModTime：String 上次修改时间
 							lastModUserid：String 上次修改人
@@ -787,6 +825,7 @@
 					rank：int 顺序
 					iconSmall：String 小图url
 					iconBig：String 大图url
+					isdel：int 0有效，1无效
 				输出结果
 					status：0 返回成功
 									300 参数错误
@@ -823,6 +862,7 @@
 							rank：int 顺序
 							iconSmall：String 小图url
 							iconBig：String 大图url
+							isdel：int 0有效，1无效
 							
 							lastModTime：String 上次修改时间
 							lastModUserid：String 上次修改人
@@ -841,6 +881,7 @@
 					rank：int 顺序
 					iconSmall：String 小图url
 					iconBig：String 大图url
+					isdel：int 0有效，1无效
 				输出结果
 					status：0 返回成功
 									300 参数错误
@@ -876,6 +917,7 @@
 							rank：int 顺序
 							iconSmall：String 小图url
 							iconBig：String 大图url
+							isdel：int 0有效，1无效
 							
 							lastModTime：String 上次修改时间
 							lastModUserid：String 上次修改人
@@ -893,6 +935,7 @@
 					rank：int 顺序
 					iconSmall：String 小图url
 					iconBig：String 大图url
+					isdel：int 0有效，1无效
 				输出结果
 					status：0 返回成功
 									300 参数错误
@@ -909,6 +952,7 @@
 					rank：int 顺序
 					iconSmall：String 小图url
 					iconBig：String 大图url
+					isdel：int 0有效，1无效
 				输出结果
 					status：0 返回成功
 									300 参数错误
@@ -943,6 +987,7 @@
 							rank：int 顺序
 							iconSmall：String 小图url
 							iconBig：String 大图url
+							isdel：int 0有效，1无效
 							
 							lastModTime：String 上次修改时间
 							lastModUserid：String 上次修改人
@@ -959,6 +1004,7 @@
 					rank：int 顺序
 					iconSmall：String 小图url
 					iconBig：String 大图url
+					isdel：int 0有效，1无效
 				输出结果
 					status：0 返回成功
 									300 参数错误
@@ -974,6 +1020,7 @@
 					rank：int 顺序
 					iconSmall：String 小图url
 					iconBig：String 大图url
+					isdel：int 0有效，1无效
 				输出结果
 					status：0 返回成功
 									300 参数错误
@@ -999,8 +1046,7 @@
 					status：0 返回成功
 									300 参数错误
 									400 系统错误
-					data：[
-						{
+					data：{
 							id：long 唯一id
 							name：抽奖
 							type：int 0线上快递，1线上手机充值卡，2线上支付宝，3线上银行卡，4线下, 5抽奖
@@ -1008,6 +1054,7 @@
 							rank：int 顺序
 							iconSmall：String 小图url
 							iconBig：String 大图url
+							isdel：int 0有效，1无效
 							
 							lastModTime：String 上次修改时间
 							lastModUserid：String 上次修改人
@@ -1021,26 +1068,8 @@
 								},
 								...
 							]
-						},
-						...
-					]
-			2) 新增
-				路径：ADD/luck.ajax
-				输入参数：
-					adminid：long 管理员id
-					
-					prize：int 所需米粒
-					rank：int 顺序
-					iconSmall：String 小图url
-					iconBig：String 大图url
-					
-					gifts：奖品名称，以,分开
-					probs：中奖概率，以,分开
-					counts：每天上限，以,分开
-				输出结果
-					status：0 返回成功
-									300 参数错误
-									400 系统错误
+						}
+			2) 新增 ----- 页面上去掉新增
 			3) 修改
 				路径：MOD/luck.ajax
 				输入参数：
@@ -1053,9 +1082,11 @@
 					iconSmall：String 小图url
 					iconBig：String 大图url
 					
-					gifts：奖品名称，以,分开
-					probs：中奖概率，以,分开
-					counts：每天上限，以,分开
+					gifts：奖品名称，以,分开 - 必须有四个元素，第一个是一等奖，第二个是二等奖，第三个是三等奖，第四个是四等奖
+					probs：中奖概率，以,分开 - 必须有四个元素，第一个是一等奖，第二个是二等奖，第三个是三等奖，第四个是四等奖
+					counts：每天上限，以,分开 - 必须有四个元素(-1代表未设置上限)，第一个是一等奖，第二个是二等奖，第三个是三等奖，第四个是四等奖
+					
+					isdel：int 0有效，1无效
 				输出结果
 					status：0 返回成功
 									300 参数错误
@@ -1090,6 +1121,7 @@
 							rank：int 顺序
 							iconSmall：String 小图url
 							iconBig：String 大图url
+							isdel：int 0有效，1无效
 							
 							lastModTime：String 上次修改时间
 							lastModUserid：String 上次修改人
@@ -1106,6 +1138,7 @@
 					rank：int 顺序
 					iconSmall：String 小图url
 					iconBig：String 大图url
+					isdel：int 0有效，1无效
 				输出结果
 					status：0 返回成功
 									300 参数错误
@@ -1121,6 +1154,7 @@
 					rank：int 顺序
 					iconSmall：String 小图url
 					iconBig：String 大图url
+					isdel：int 0有效，1无效
 				输出结果
 					status：0 返回成功
 									300 参数错误
@@ -1169,6 +1203,10 @@
 									name：String 快递名称
 									expressName：String 快递名字
 									expressNo：String 快递单号
+									channel:String 渠道号
+							
+									lastModTime：String 上次修改时间
+									lastModUserid：String 上次修改人
 								},
 								...
 							]
@@ -1209,6 +1247,10 @@
 									name：String 快递名称
 									expressName：String 快递名字
 									expressNo：String 快递单号
+									channel:String 渠道号
+							
+									lastModTime：String 上次修改时间
+									lastModUserid：String 上次修改人
 								},
 								...
 							]
@@ -1247,6 +1289,10 @@
 									name：String 快递名称
 									expressName：String 快递名字
 									expressNo：String 快递单号
+									channel:String 渠道号
+							
+									lastModTime：String 上次修改时间
+									lastModUserid：String 上次修改人
 								},
 								...
 							]
@@ -1277,24 +1323,3 @@
 					status：0 返回成功
 									300 参数错误
 									400 系统错误
-
-9. 用户登陆
-	9.1 登陆
-		路径：login.ajax
-		输入参数
-			loginname：String 用户名
-			password: String 密码
-		输出结果
-			status：0 返回成功
-							300 参数错误
-							400 系统错误
-			data： { --- 空数据代表登陆失败
-	   		userid: long 运营人员id
-	   		username：String 用户名称
-	   		loginname：String 登陆名称
-	   		cellPhone：long 用户手机
-	   		roles：long 二进制某位0/1代表无权限/有权限 从低位开始，第一位：用户管理，第二位：兑换-银行卡提现，第三位：兑换-支付宝提现，第四位：兑换-手机充值卡，第五位：兑换-线上礼品，第六位：兑换-线下礼品，第七位：兑换-抽奖
- 		  		
-				lastModTime：String 上次修改时间 yyyy-MM-dd HH:mm:ss
-				lastModUserid：long 上次修改人
-			}
