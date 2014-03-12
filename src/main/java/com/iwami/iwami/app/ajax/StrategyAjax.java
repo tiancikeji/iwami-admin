@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.iwami.iwami.app.biz.LoginBiz;
 import com.iwami.iwami.app.biz.StrategyBiz;
+import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
 import com.iwami.iwami.app.constants.IWamiConstants;
@@ -22,6 +23,7 @@ import com.iwami.iwami.app.model.StrategyInfo;
 import com.iwami.iwami.app.model.StrategyRate;
 import com.iwami.iwami.app.util.IWamiUtils;
 
+@AjaxClass
 public class StrategyAjax {
 	
 	private Log logger = LogFactory.getLog(getClass());
