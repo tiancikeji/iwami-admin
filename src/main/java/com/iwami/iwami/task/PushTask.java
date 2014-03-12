@@ -10,6 +10,8 @@ import java.util.concurrent.Future;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.iwami.iwami.app.constants.IWamiConstants;
 import com.iwami.iwami.app.model.Push;
@@ -19,6 +21,8 @@ import com.iwami.iwami.app.service.TaskService;
 import com.iwami.iwami.app.util.IWamiUtils;
 
 public class PushTask implements Runnable {
+	
+	private Log logger = LogFactory.getLog(getClass());
 	
 	private ExecutorService executorService;
 	
@@ -53,7 +57,6 @@ public class PushTask implements Runnable {
 					}
 			}
 		} else{
-			System.out.println("slepp................");
 			long tmp = 0;
 			if(hour < startHour)
 				tmp = DateUtils.truncate(DateUtils.setHours(now, startHour), Calendar.HOUR_OF_DAY).getTime() - now.getTime();
@@ -61,11 +64,12 @@ public class PushTask implements Runnable {
 				tmp = DateUtils.truncate(DateUtils.setHours(DateUtils.addDays(now, 1), startHour), Calendar.HOUR_OF_DAY).getTime() - now.getTime();
 			
 			try {
+				logger.info("slepp................ " + tmp);
+				logger.info("get up.....................");
 				Thread.sleep(tmp);
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
-			System.out.println("get up.....................");
 		}
 	}
 
