@@ -29,14 +29,25 @@ public class PushDaoImpl extends JdbcDaoSupport implements PushDao {
 
 	@Override
 	public List<Push> getUnFinishedPushTasks() {
-		return getJdbcTemplate().query("select id, `interval`, msg, status, cell_phone, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PUSH + " where isdel = 0 and status in (0, 3, 4)", 
+		return getJdbcTemplate().query("select id, `interval`, msg, status, cell_phone, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PUSH + " where isdel = 0 and status in (0, 1, 3)", 
 				new PushRowMapper());
 	}
 
 	@Override
 	public List<Push> getTodoPushTasks() {
-		return getJdbcTemplate().query("select id, `interval`, msg, status, cell_phone, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PUSH + " where isdel = 0 and status in (0, 1, 3)", 
+		return getJdbcTemplate().query("select id, `interval`, msg, status, cell_phone, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PUSH + " where isdel = 0 and status in (0, 3, 4)", 
 				new PushRowMapper());
+	}
+
+	@Override
+	public Push getPushById(long id) {
+		return getJdbcTemplate().queryForObject("select id, `interval`, msg, status, cell_phone, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_PUSH + " where isdel = 0 and id = ?", 
+				new Object[]{id}, new PushRowMapper());
+	}
+
+	@Override
+	public int getAllCntsById(long id) {
+		return getJdbcTemplate().queryForInt("select count(1) from " + SqlConstants.TABLE_PUSH_TASK + " where push_id = ?", new Object[]{id});
 	}
 
 	@Override

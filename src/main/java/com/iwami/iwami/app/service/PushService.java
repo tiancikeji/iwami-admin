@@ -30,4 +30,8 @@ public interface PushService {
 
 	public boolean updatePushTask(int status, long id);
 
+	public Push getPushById(long id);
+
+	public int getAllCntsById(long id);
+
 }

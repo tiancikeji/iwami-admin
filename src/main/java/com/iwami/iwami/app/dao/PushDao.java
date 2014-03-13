@@ -28,4 +28,8 @@ public interface PushDao {
 
 	public List<PushTask> getLimitedPushTaskById(long pushid, int limit);
 
+	public Push getPushById(long id);
+
+	public int getAllCntsById(long id);
+
 }

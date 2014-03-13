@@ -70,6 +70,16 @@ public class PushServiceImpl implements PushService {
 		return pushDao.updatePushTask(status, id);
 	}
 
+	@Override
+	public Push getPushById(long id) {
+		return pushDao.getPushById(id);
+	}
+
+	@Override
+	public int getAllCntsById(long id) {
+		return pushDao.getAllCntsById(id);
+	}
+
 	// real jpush
 	@Override
 	public boolean pushUserMsg(String alias, String msg) {

@@ -3,6 +3,8 @@ package com.iwami.iwami.task;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -25,67 +27,75 @@ public class TaskNotificationTask implements Runnable {
 	
 	private SMSService smsService;
 	
+	private static Lock lock = new ReentrantLock();
+	
 	@Override
 	public void run() {
-		try{
-			List<Long> cellPhones = splitCellPhones(taskService.getSMSNo());
-			if(cellPhones != null && cellPhones.size() > 0){
-				List<Task> tasks = taskService.getFinishedTasks();
-				
-				if(tasks != null && tasks.size() > 0){
-					Date now = new Date();
+		if(lock.tryLock()){
+			try{
+				List<Long> cellPhones = splitCellPhones(taskService.getSMSNo());
+				if(cellPhones != null && cellPhones.size() > 0){
+					List<Task> tasks = taskService.getFinishedTasks();
 					
-					List<TaskNotification> notis = new ArrayList<TaskNotification>();
-					for(Task task : tasks){
-						TaskNotification noti = new TaskNotification();
-						noti.setTaskId(task.getId());
-						noti.setStatus(TaskNotification.STATUS_NEW);
+					if(tasks != null && tasks.size() > 0){
+						Date now = new Date();
 						
-						StringBuilder sms = new StringBuilder("任务");
-						if(task.getEndTime() != null && now.after(task.getEndTime()))
-							sms.append("\"").append(task.getName()).append("\"").append("已经到期（")
-							.append(IWamiUtils.getDateString(task.getStartTime())).append("~").append(task.getEndTime()).append("），")
-							.append("设定数量").append(task.getMaxPrize()).append("，实际完成").append(task.getCurrentPrize());
-						else if(task.getMaxPrize() != -1 && task.getCurrentPrize() >= task.getMaxPrize())
-							sms.append("\"").append(task.getName()).append("\"").append("已于")
-							.append(IWamiUtils.getDateString(task.getLastModTime())).append("完成，原定时间为（")
-							.append(IWamiUtils.getDateString(task.getStartTime())).append("~").append(task.getEndTime()).append("）");
-						noti.setSms(sms.toString());
+						List<TaskNotification> notis = new ArrayList<TaskNotification>();
+						for(Task task : tasks){
+							TaskNotification noti = new TaskNotification();
+							noti.setTaskId(task.getId());
+							noti.setStatus(TaskNotification.STATUS_NEW);
+
+							noti.setSmsName(task.getName());
+							noti.setSmsStartDate(task.getStartTime());
+							noti.setSmsEndDate(task.getEndTime());
+							noti.setSmsCount(task.getCurrentPrize());
+							noti.setSmsTotal(task.getMaxPrize());
+							
+							if(task.getEndTime() != null && now.after(task.getEndTime()))
+								noti.setSmsReason("到期");
+							else if(task.getMaxPrize() != -1 && task.getCurrentPrize() >= task.getMaxPrize())
+								noti.setSmsReason("完成");
+							
+							noti.setSms(noti.getSmsName() + "#" + noti.getSmsReason() + "#" + noti.getSmsStartDate() + "#" + noti.getSmsEndDate() + "#" + noti.getSmsTotal() + "#" + noti.getSmsCount());
+							
+							notis.add(noti);
+						}
 						
-						notis.add(noti);
-					}
-					
-					if(cellPhones.size() > 1){
-						List<TaskNotification> tmps = new ArrayList<TaskNotification>();
-						for(long cellPhone : cellPhones)
-							for(TaskNotification tn : notis){
-								TaskNotification tmp = new TaskNotification();
-								BeanUtils.copyProperties(tn, tmp);
-								tmp.setCellPhone(cellPhone);
-								tmps.add(tmp);
-							}
+						if(cellPhones.size() > 1){
+							List<TaskNotification> tmps = new ArrayList<TaskNotification>();
+							for(long cellPhone : cellPhones)
+								for(TaskNotification tn : notis){
+									TaskNotification tmp = new TaskNotification();
+									BeanUtils.copyProperties(tn, tmp);
+									tmp.setCellPhone(cellPhone);
+									tmps.add(tmp);
+								}
+							
+							notis.clear();
+							notis.addAll(tmps);
+						}
 						
-						notis.clear();
-						notis.addAll(tmps);
-					}
-					
-					if(taskService.addTaskNotifications(notis)){
-						for(TaskNotification noti : notis){
-							try{
-								if(smsService.sendSMS("" + noti.getCellPhone(), noti.getSms()))
-									taskService.updateTaskNotificationStatus(noti.getTaskId(), noti.getCellPhone(), TaskNotification.STATUS_SMS);
-							} catch(Throwable t){
-								if(logger.isErrorEnabled())
-									logger.error("Error in sending sms >> ", t);
+						if(taskService.addTaskNotifications(notis)){
+							for(TaskNotification noti : notis){
+								try{
+									if(smsService.sendTaskSMS("" + noti.getCellPhone(), noti.getSmsName(), noti.getSmsReason(), noti.getSmsStartDate(), noti.getSmsEndDate(), noti.getSmsTotal(), noti.getSmsCount()))
+										taskService.updateTaskNotificationStatus(noti.getTaskId(), noti.getCellPhone(), TaskNotification.STATUS_SMS);
+								} catch(Throwable t){
+									if(logger.isErrorEnabled())
+										logger.error("Error in sending sms >> ", t);
+								}
 							}
 						}
 					}
 				}
+			} catch(Throwable t){
+				if(logger.isErrorEnabled())
+					logger.error("Error in task notification >> ", t);
+			} finally{
+				lock.unlock();
 			}
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Error in task notification >> ", t);
-		}
+		} 
 	}
 
 	private List<Long> splitCellPhones(String smsNo) {
@@ -115,5 +125,4 @@ public class TaskNotificationTask implements Runnable {
 	public void setSmsService(SMSService smsService) {
 		this.smsService = smsService;
 	}
-
 }

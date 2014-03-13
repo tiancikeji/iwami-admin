@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -35,40 +37,48 @@ public class PushTask implements Runnable {
 	private int startHour;
 	
 	private int endHour;
+	
+	private static Lock lock = new ReentrantLock();
 
 	@Override
 	public void run() {
-		Date now = new Date();
-		long hour = DateUtils.getFragmentInHours(now, Calendar.DAY_OF_YEAR);
-		
-		if(hour >= startHour && hour < endHour){
-			List<Push> pushes = pushService.getTodoPushTasks();
-			if(pushes != null && pushes.size() > 0){
-				List<Long> cellPhones = splitCellPhones(taskService.getSMSNo());
-				List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
-				for(Push push : pushes)
-					futures.add(executorService.submit(new JPushTask(pushService, smsService, push, cellPhones)));
+		if(lock.tryLock()){
+			try{
+				Date now = new Date();
+				long hour = DateUtils.getFragmentInHours(now, Calendar.DAY_OF_YEAR);
 				
-				for(Future<Integer> future : futures)
+				if(hour >= startHour && hour < endHour){
+					List<Push> pushes = pushService.getTodoPushTasks();
+					if(pushes != null && pushes.size() > 0){
+						List<Long> cellPhones = splitCellPhones(taskService.getSMSNo());
+						List<Future<Integer>> futures = new ArrayList<Future<Integer>>();
+						for(Push push : pushes)
+							futures.add(executorService.submit(new JPushTask(pushService, smsService, push, cellPhones)));
+						
+						for(Future<Integer> future : futures)
+							try {
+								future.get();
+							} catch (Throwable t) {
+								t.printStackTrace();
+							}
+					}
+				} else{
+					long tmp = 0;
+					if(hour < startHour)
+						tmp = DateUtils.truncate(DateUtils.setHours(now, startHour), Calendar.HOUR_OF_DAY).getTime() - now.getTime();
+					else if(hour >= endHour)
+						tmp = DateUtils.truncate(DateUtils.setHours(DateUtils.addDays(now, 1), startHour), Calendar.HOUR_OF_DAY).getTime() - now.getTime();
+					
 					try {
-						future.get();
+						logger.info("slepp................ " + tmp);
+						Thread.sleep(tmp);
+						logger.info("get up.....................");
 					} catch (Throwable t) {
 						t.printStackTrace();
 					}
-			}
-		} else{
-			long tmp = 0;
-			if(hour < startHour)
-				tmp = DateUtils.truncate(DateUtils.setHours(now, startHour), Calendar.HOUR_OF_DAY).getTime() - now.getTime();
-			else if(hour >= endHour)
-				tmp = DateUtils.truncate(DateUtils.setHours(DateUtils.addDays(now, 1), startHour), Calendar.HOUR_OF_DAY).getTime() - now.getTime();
-			
-			try {
-				logger.info("slepp................ " + tmp);
-				logger.info("get up.....................");
-				Thread.sleep(tmp);
-			} catch (Throwable t) {
-				t.printStackTrace();
+				}
+			} finally{
+				lock.unlock();
 			}
 		}
 	}

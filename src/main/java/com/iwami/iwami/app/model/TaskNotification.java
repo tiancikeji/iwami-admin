@@ -26,6 +26,18 @@ public class TaskNotification {
 	
 	private Date lastModTime;
 
+	private String smsName;
+	
+	private String smsReason;
+	
+	private Date smsStartDate;
+	
+	private Date smsEndDate;
+	
+	private int smsTotal;
+	
+	private int smsCount;
+
 	public int getId() {
 		return id;
 	}
@@ -95,6 +107,54 @@ public class TaskNotification {
 
 	public void setSms(String sms) {
 		this.sms = sms;
+	}
+
+	public String getSmsName() {
+		return smsName;
+	}
+
+	public void setSmsName(String smsName) {
+		this.smsName = smsName;
+	}
+
+	public String getSmsReason() {
+		return smsReason;
+	}
+
+	public void setSmsReason(String smsReason) {
+		this.smsReason = smsReason;
+	}
+
+	public Date getSmsStartDate() {
+		return smsStartDate;
+	}
+
+	public void setSmsStartDate(Date smsStartDate) {
+		this.smsStartDate = smsStartDate;
+	}
+
+	public Date getSmsEndDate() {
+		return smsEndDate;
+	}
+
+	public void setSmsEndDate(Date smsEndDate) {
+		this.smsEndDate = smsEndDate;
+	}
+
+	public int getSmsTotal() {
+		return smsTotal;
+	}
+
+	public void setSmsTotal(int smsTotal) {
+		this.smsTotal = smsTotal;
+	}
+
+	public int getSmsCount() {
+		return smsCount;
+	}
+
+	public void setSmsCount(int smsCount) {
+		this.smsCount = smsCount;
 	}
 
 }
