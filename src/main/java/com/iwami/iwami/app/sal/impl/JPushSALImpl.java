@@ -18,8 +18,8 @@ public class JPushSALImpl implements JPushSAL {
 	
 	@Override
 	public int sendCustomMessageWithAlias(int sendNo, String alias, String title, String content) {
-		if(logger.isDebugEnabled())
-			logger.debug("sendCustomMessageWithAlias : <" + sendNo + "," + alias + "," + title + "," + content + ">");
+		if(logger.isInfoEnabled())
+			logger.info("sendCustomMessageWithAlias : <" + sendNo + "," + alias + "," + title + "," + content + ">");
 		
 		CustomMessageParams params = new CustomMessageParams();
 		params.setReceiverType(ReceiverTypeEnum.ALIAS);
@@ -27,8 +27,8 @@ public class JPushSALImpl implements JPushSAL {
 		
 		MessageResult result = jpush.sendCustomMessage(title, content, params, null);
 		
-		if(logger.isDebugEnabled())
-			logger.debug("received >> " + result.responseResult.responseContent);
+		if(logger.isInfoEnabled())
+			logger.info("received >> " + result.responseResult.responseContent);
 		
 		int status = -1;
 		if (result.isResultOK()) {
