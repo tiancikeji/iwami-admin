@@ -109,8 +109,15 @@ public class StrategyBizImpl implements StrategyBiz {
 	}
 
 	@Override
+	@Transactional(rollbackFor=Exception.class, value="txManager")
 	public boolean delStrategy(long id, long adminid) {
-		return strategyService.delStrategy(id, adminid);
+		if(strategyService.delStrategy(id, adminid))
+			if(strategyService.delInfos(id, adminid))
+				return true;
+			else
+				throw new RuntimeException("exception in delStrategy, so rollback");
+		else
+			return false;
 	}
 
 	@Override
@@ -156,6 +163,11 @@ public class StrategyBizImpl implements StrategyBiz {
 	@Override
 	public boolean delInfo(long id, long adminid) {
 		return strategyService.delInfo(id, adminid);
+	}
+
+	@Override
+	public boolean delInfos(long id, long adminid) {
+		return strategyService.delInfos(id, adminid);
 	}
 
 	public StrategyService getStrategyService() {

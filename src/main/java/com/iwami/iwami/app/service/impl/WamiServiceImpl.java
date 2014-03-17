@@ -37,6 +37,16 @@ public class WamiServiceImpl implements WamiService{
 		return wamiDao.getOngoingWami(userid);
 	}
 
+	@Override
+	public List<Wami> getWamis(Date start, Date end) {
+		return wamiDao.getWamis(start, end);
+	}
+
+	@Override
+	public List<Wami> getWamisByIds(List<Long> ids, Date start, Date end) {
+		return wamiDao.getWamisByIds(ids, start, end);
+	}
+
 	public WamiDao getWamiDao() {
 		return wamiDao;
 	}

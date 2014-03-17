@@ -189,6 +189,12 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 	}
 
 	@Override
+	public boolean delInfos(long id, long adminid) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_INFO + " set isdel = ?, lastmod_time = now(), lastmod_userid = ? where strategy_id = ?", new Object[]{IWamiConstants.INACTIVE, adminid, id});
+		return count > 0;
+	}
+
+	@Override
 	public boolean addInfo(final StrategyInfo info) {
 		KeyHolder holder = new GeneratedKeyHolder();
 		int count = getJdbcTemplate().update(new PreparedStatementCreator() {

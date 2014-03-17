@@ -128,6 +128,11 @@ public class StrategyServiceImpl implements StrategyService {
 		return strategyDao.delInfo(id, adminid);
 	}
 
+	@Override
+	public boolean delInfos(long id, long adminid) {
+		return strategyDao.delInfos(id, adminid);
+	}
+
 	public StrategyDao getStrategyDao() {
 		return strategyDao;
 	}

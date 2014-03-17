@@ -30,7 +30,7 @@ public class FileBizImpl implements FileBiz {
 		if(StringUtils.isNotBlank(data)){
 			FileOutputStream fs = null;
 			try {
-				String[] splits = StringUtils.split(data, ";");
+//				String[] splits = StringUtils.split(data, ";");
 				result = System.currentTimeMillis() + "." + name;
 				String tmp = localDir + result;
 				
@@ -39,7 +39,7 @@ public class FileBizImpl implements FileBiz {
 					dir.mkdirs();
 				
 				fs = new FileOutputStream(tmp);
-			    fs.write(Base64.decode(splits[1].split(",")[1])); 
+			    fs.write(Base64.decode(data/*splits[1].split(",")[1]*/)); 
 			} catch (Throwable t) {
 				t.printStackTrace();
 			} finally{

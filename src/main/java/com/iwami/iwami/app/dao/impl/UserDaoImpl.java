@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -151,8 +152,20 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 
 	@Override
 	public boolean modAdminRole(UserRole role) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_USERROLE + " set password = ?, name = ?, role = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where userid = ?", 
-				new Object[]{role.getPassword(), role.getName(), role.getRole(), role.getLastModUserid(), role.getIsdel(), role.getUserid()});
+		String sql = "update " + SqlConstants.TABLE_USERROLE + " set name = ?, role = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ?";
+		List<Object> params = new ArrayList<Object>();
+		params.add(role.getName());
+		params.add(role.getRole());
+		params.add(role.getLastModUserid());
+		params.add(role.getIsdel());
+		if(StringUtils.isNotBlank(role.getPassword())){
+			sql += ", password = ?";
+			params.add(role.getPassword());
+		}
+		sql += " where userid = ?";
+		params.add(role.getUserid());
+		
+		int count = getJdbcTemplate().update(sql, params.toArray());
 		if(count > 0)
 			return true;
 		else
@@ -253,6 +266,13 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 		});
 		
 		return result;
+	}
+
+	@Override
+	public List<User> getUsers(Date start, Date end) {
+		return getJdbcTemplate().query("select id, current_prize, exchange_prize, last_cell_phone_1, last_alipay_account, last_bank_account, "
+				+ "last_bank_name, last_bank_no, last_address, last_cell_phone_2, last_name, name, uuid, alias, cell_phone, age, gender, job, address, add_time, b.lastmod_time as lastmod_time, b.lastmod_userid as lastmod_userid, b.isdel as isdel from " 
+				+ SqlConstants.TABLE_USER + " a join " + SqlConstants.TABLE_USERINFO + " b on a.id = b.userid where a.isdel = 0 and b.isdel = 0 and add_time between ? and ?", new Object[]{start, end}, new UserRowMapper());
 	}
 
 }

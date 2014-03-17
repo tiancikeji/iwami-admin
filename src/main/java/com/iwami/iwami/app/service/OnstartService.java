@@ -15,4 +15,6 @@ public interface OnstartService {
 
 	public Map<Long, Date> getCreateTimes(List<User> users);
 
+	public List<Onstart> getOnstarts(Date start, Date end);
+
 }

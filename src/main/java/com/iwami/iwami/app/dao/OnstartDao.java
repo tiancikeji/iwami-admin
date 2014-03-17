@@ -13,4 +13,6 @@ public interface OnstartDao {
 	public Map<Long, Date> getLastLogins(List<Long> userids);
 
 	public List<Onstart> getOnstartsByUser(List<Long> cellPhones,List<String> uuids, List<String> alias);
+
+	public List<Onstart> getOnstarts(Date start, Date end);
 }

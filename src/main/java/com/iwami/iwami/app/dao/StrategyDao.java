@@ -52,6 +52,8 @@ public interface StrategyDao {
 
 	public boolean delInfo(long id, long adminid);
 
+	public boolean delInfos(long id, long adminid);
+
 	public boolean addInfo(StrategyInfo info);
 
 	public boolean modInfo(StrategyInfo info);

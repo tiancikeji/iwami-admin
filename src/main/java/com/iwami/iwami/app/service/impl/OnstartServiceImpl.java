@@ -76,6 +76,11 @@ public class OnstartServiceImpl implements OnstartService {
 		return result;
 	}
 
+	@Override
+	public List<Onstart> getOnstarts(Date start, Date end) {
+		return onstartDao.getOnstarts(start, end);
+	}
+
 	public OnstartDao getOnstartDao() {
 		return onstartDao;
 	}

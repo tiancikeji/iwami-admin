@@ -54,6 +54,8 @@ public interface StrategyService {
 
 	public boolean delInfo(long id, long adminid);
 
+	public boolean delInfos(long id, long adminid);
+
 	public boolean modInfo(StrategyInfo info);
 
 	public boolean updateInfoUrl(StrategyInfo info);

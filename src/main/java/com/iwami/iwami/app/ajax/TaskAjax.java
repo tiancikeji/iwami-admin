@@ -378,12 +378,12 @@ public class TaskAjax {
 		try{
 			if(params.containsKey("adminid")
 					&& params.containsKey("type") && params.containsKey("attr")
-					&& params.containsKey("startL")&& params.containsKey("startR")
+					/*&& params.containsKey("startL")&& params.containsKey("startR")
 					&& params.containsKey("endL") && params.containsKey("endR")
 					&& params.containsKey("maxL") && params.containsKey("maxR")
 					&& params.containsKey("prizeL") && params.containsKey("prizeR")
 					&& params.containsKey("currL") && params.containsKey("currR")
-					&& params.containsKey("leftL") && params.containsKey("leftR")){
+					&& params.containsKey("leftL") && params.containsKey("leftR")*/){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.TASK_MANAGEMENT)){
@@ -393,17 +393,17 @@ public class TaskAjax {
 					Date startR = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("startR")));
 					Date endL = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("endL")));
 					Date endR = IWamiUtils.getDate(StringUtils.trimToEmpty(params.get("endR")));
-					int maxL = NumberUtils.toInt(params.get("maxL"), -2);
-					int maxR = NumberUtils.toInt(params.get("maxR"), -2);
-					int prizeL = NumberUtils.toInt(params.get("prizeL"), -2);
-					int prizeR = NumberUtils.toInt(params.get("prizeR"), -2);
-					int currL = NumberUtils.toInt(params.get("currL"), -2);
-					int currR = NumberUtils.toInt(params.get("currR"), -2);
-					int leftL = NumberUtils.toInt(params.get("leftL"), -2);
-					int leftR = NumberUtils.toInt(params.get("leftR"), -2);
+					int maxL = NumberUtils.toInt(params.get("maxL"), -1);
+					int maxR = NumberUtils.toInt(params.get("maxR"), -1);
+					int prizeL = NumberUtils.toInt(params.get("prizeL"), -1);
+					int prizeR = NumberUtils.toInt(params.get("prizeR"), -1);
+					int currL = NumberUtils.toInt(params.get("currL"), -1);
+					int currR = NumberUtils.toInt(params.get("currR"), -1);
+					int leftL = NumberUtils.toInt(params.get("leftL"), -1);
+					int leftR = NumberUtils.toInt(params.get("leftR"), -1);
 					
 					if((type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5)
-							&& (attr == 0 || attr == 1 || attr == 2 || attr == 3) 
+							&& (attr == 0 || attr == 1 || attr == 2 || attr == 3 || attr == 4) 
 							&& maxL >= -1 && maxR >= -1 && maxR >= maxL
 							&& prizeL >= -1 && prizeR >= -1 && prizeR >=prizeL
 							&& currL >= -1 && currR >= -1 && currR >= currL

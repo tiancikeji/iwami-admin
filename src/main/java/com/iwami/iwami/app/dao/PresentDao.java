@@ -1,10 +1,12 @@
 package com.iwami.iwami.app.dao;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.iwami.iwami.app.model.Exchange;
 import com.iwami.iwami.app.model.Present;
+import com.iwami.iwami.app.model.Share;
 
 public interface PresentDao {
 	
@@ -29,5 +31,9 @@ public interface PresentDao {
 	public Exchange getExchangeById(long id);
 
 	public boolean modExchange(String name, String no, long id, long adminid);
+
+	public List<Exchange> getExchanges(Date start, Date end);
+
+	public List<Share> getShares(Date start, Date end);
 
 }

@@ -12,8 +12,6 @@ import com.iwami.iwami.app.service.TaskService;
 public class TaskServiceImpl implements TaskService {
 
 	private TaskDao taskDao;
-	
-	private long expireTime;
 
 	@Override
 	public TreasureConfig getTreasureConfig() {
@@ -92,19 +90,21 @@ public class TaskServiceImpl implements TaskService {
 		taskDao.incrTaskRankByType(type);
 	}
 
+	@Override
+	public List<Long> getTopTaskIds() {
+		return taskDao.getTopTaskIds();
+	}
+
+	@Override
+	public List<Long> getTreasureTaskIds() {
+		return taskDao.getTreasureTaskIds();
+	}
+
 	public TaskDao getTaskDao() {
 		return taskDao;
 	}
 
 	public void setTaskDao(TaskDao taskDao) {
 		this.taskDao = taskDao;
-	}
-
-	public long getExpireTime() {
-		return expireTime;
-	}
-
-	public void setExpireTime(long expireTime) {
-		this.expireTime = expireTime;
 	}
 }

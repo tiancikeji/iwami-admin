@@ -40,5 +40,9 @@ public interface TaskDao {
 	public void incrTaskRankByType(int type);
 
 	public boolean updateTaskUrl(Task task);
+
+	public List<Long> getTopTaskIds();
+
+	public List<Long> getTreasureTaskIds();
 	
 }

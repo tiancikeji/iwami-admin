@@ -63,6 +63,12 @@ public class OnstartDaoImpl extends JdbcDaoSupport implements OnstartDao{
 		
 		return getJdbcTemplate().query(sql, new OnstartRowMapper());
 	}
+
+	@Override
+	public List<Onstart> getOnstarts(Date start, Date end) {
+		return getJdbcTemplate().query("select userid, cell_phone, uuid, gps, alias, type, version, add_time, lastmod_time from " + SqlConstants.TABLE_ONSTART + " where userid <= 0 and lastmod_time between ? and ?", 
+				new Object[]{start, end}, new OnstartRowMapper());
+	}
 }
 
 class OnstartRowMapper implements RowMapper<Onstart> {
@@ -75,7 +81,7 @@ class OnstartRowMapper implements RowMapper<Onstart> {
 		os.setUuid(rs.getString("uuid"));
 		os.setGps(rs.getString("gps"));
 		os.setAlias(rs.getString("alias"));
-		os.setVersion(rs.getString("vesion"));
+		os.setVersion(rs.getString("version"));
 		os.setType(rs.getInt("type"));
 		Timestamp ts = rs.getTimestamp("add_time");
 		if(ts != null)

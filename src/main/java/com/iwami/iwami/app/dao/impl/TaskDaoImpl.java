@@ -139,7 +139,7 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 
 	@Override
 	public boolean delUnstartedTask(long taskid, long adminid) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_TASK + " set isdel = ?, lastmod_time = now(), lastmod_userid = ? where id = ? and isdel = ? and start_time < now()", new Object[]{IWamiConstants.INACTIVE, adminid, taskid, IWamiConstants.ACTIVE});
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_TASK + " set isdel = ?, lastmod_time = now(), lastmod_userid = ? where id = ? and isdel = ? and start_time > now()", new Object[]{IWamiConstants.INACTIVE, adminid, taskid, IWamiConstants.ACTIVE});
 		return count > 0;
 	}
 
@@ -261,6 +261,30 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 			return nos.get(0);
 		else
 			return "";
+	}
+
+	@Override
+	public List<Long> getTopTaskIds() {
+		return getJdbcTemplate().query("select id from " + SqlConstants.TABLE_TASK + " where type & 8 > 0", new RowMapper<Long>(){
+
+			@Override
+			public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getLong("id");
+			}
+			
+		});
+	}
+
+	@Override
+	public List<Long> getTreasureTaskIds() {
+		return getJdbcTemplate().query("select id from " + SqlConstants.TABLE_TASK + " where type & 2 > 0", new RowMapper<Long>(){
+
+			@Override
+			public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getLong("id");
+			}
+			
+		});
 	}
 }
 

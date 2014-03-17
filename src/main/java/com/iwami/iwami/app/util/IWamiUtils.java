@@ -95,4 +95,31 @@ public class IWamiUtils {
 		
 		return null;
 	}
+
+	public static Date getMonthDate(String date) {
+		try {
+			return new SimpleDateFormat("yyyy-MM").parse(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+	public static Date getDayDate(String date) {
+		try {
+			return new SimpleDateFormat("yyyy-MM-dd").parse(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+	public static String getDayDateString(Date date) {
+		if(date != null)
+			return new SimpleDateFormat("yyyy-MM-dd").format(date);
+		else
+			return StringUtils.EMPTY;
+	}
 }

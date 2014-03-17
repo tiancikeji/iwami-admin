@@ -32,6 +32,36 @@ public class StrategyAjax {
 	
 	private LoginBiz loginBiz;
 
+	@AjaxMethod(path = "DEL/infos.ajax")
+	public Map<Object, Object> delInfos(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		try{
+			if(params.containsKey("adminid") && params.containsKey("id")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				long id = NumberUtils.toLong(params.get("id"), -1);
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT) && id > 0){
+					if(strategyBiz.delInfos(id, adminid))
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else{
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR_STRATEGY_NOT_EXISTS);
+					result.put(ErrorCodeConstants.MSG_KEY, ErrorCodeConstants.ERROR_MSG_MAP.get(ErrorCodeConstants.STATUS_ERROR_STRATEGY_NOT_EXISTS));
+				}
+			} else{
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			}
+		} catch(UserNotLoginException e){
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getStrategyDetail", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
 	@AjaxMethod(path = "DEL/info.ajax")
 	public Map<Object, Object> delInfo(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
@@ -408,7 +438,7 @@ public class StrategyAjax {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			if(params.containsKey("adminid") && params.containsKey("key")){
+			if(params.containsKey("adminid")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				String key = StringUtils.trimToEmpty(params.get("key"));
 				
@@ -500,7 +530,7 @@ public class StrategyAjax {
 						if(tmp != null && tmp.length > 0)
 							for(String _tmp : tmp){
 								int _rank = NumberUtils.toInt(_tmp, -1);
-								if(_rank > 0)
+								if(_rank >= 0)
 									lRanks.add(_rank);
 							}
 						

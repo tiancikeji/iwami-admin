@@ -7,6 +7,18 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class Wami {
+	
+	public static int TYPE_START = 0;
+	
+	public static int TYPE_DOWNLOAD_START = 1;
+	
+	public static int TYPE_DOWNLOAD_FINISH = 2;
+	
+	public static int TYPE_INSTALL = 3;
+	
+	public static int TYPE_RUN = 4;
+	
+	public static int TYPE_FINISH = 5;
 
 	private long id;
 	

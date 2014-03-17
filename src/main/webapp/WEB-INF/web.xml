@@ -57,6 +57,18 @@
 		<servlet-name>ajax servlet</servlet-name>
 		<url-pattern>/client/*</url-pattern>
 	</servlet-mapping>
+	
+	<!-- report -->
+	<servlet>
+		<servlet-name>reportservlet</servlet-name>
+		<servlet-class>
+			org.springframework.web.context.support.HttpRequestHandlerServlet
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>reportservlet</servlet-name>
+		<url-pattern>/report</url-pattern>
+	</servlet-mapping>
 	<!-- *****************************************************servlet end**************************************************** -->
 	
 </web-app>

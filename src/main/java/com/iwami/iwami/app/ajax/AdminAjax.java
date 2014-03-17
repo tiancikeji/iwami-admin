@@ -76,7 +76,7 @@ public class AdminAjax {
 				long roles = NumberUtils.toLong(params.get("roles"), -1);
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.ADMIN_MANAGEMENT) && userid > 0 && IWamiUtils.validatePhone("" + cellPhone) && StringUtils.isNotBlank(username)
-						&& StringUtils.isNotBlank(password) && roles >= 0 && isdel >= 0){
+						&& /*StringUtils.isNotBlank(password) &&*/ roles >= 0 && isdel >= 0){
 					
 					User user = new User();
 					user.setId(userid);

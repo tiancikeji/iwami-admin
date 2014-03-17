@@ -58,6 +58,14 @@
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 	
+	<bean name="logDao" class="com.iwami.iwami.app.dao.impl.LogDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
+	<bean name="wamiDao" class="com.iwami.iwami.app.dao.impl.WamiDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	
 	<bean id="txManager"
 		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />

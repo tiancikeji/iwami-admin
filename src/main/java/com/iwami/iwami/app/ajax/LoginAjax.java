@@ -3,6 +3,8 @@ package com.iwami.iwami.app.ajax;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,6 +13,7 @@ import com.iwami.iwami.app.biz.LoginBiz;
 import com.iwami.iwami.app.biz.UserBiz;
 import com.iwami.iwami.app.common.dispatch.AjaxClass;
 import com.iwami.iwami.app.common.dispatch.AjaxMethod;
+import com.iwami.iwami.app.common.dispatch.DispatchServlet;
 import com.iwami.iwami.app.constants.ErrorCodeConstants;
 import com.iwami.iwami.app.exception.UserNotLoginException;
 import com.iwami.iwami.app.model.User;
@@ -43,6 +46,10 @@ public class LoginAjax {
 					
 					result.put("data", parseAdminInfo(user, role));
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+					
+					if(user != null && DispatchServlet.RESPONSE != null){
+						DispatchServlet.RESPONSE.addCookie(new Cookie("adminid", "" + user.getId()));
+					}
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 			} else

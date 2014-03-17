@@ -1,5 +1,6 @@
 package com.iwami.iwami.app.dao;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -50,5 +51,7 @@ public interface UserDao {
 	public Login getLogin(long adminid);
 
 	public Map<Long, String> getAllAlias();
+
+	public List<User> getUsers(Date start, Date end);
 
 }

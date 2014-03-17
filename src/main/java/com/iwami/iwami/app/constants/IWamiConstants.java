@@ -68,4 +68,6 @@ public interface IWamiConstants {
 
 	public static final long PRESENT_MANAGEMENT = 16384;
 
+	public static final long DOWNLOAD_MANAGEMENT = 32768;
+
 }

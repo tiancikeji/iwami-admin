@@ -157,6 +157,11 @@
 			<artifactId>quartz</artifactId>
 			<version>1.7.3</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.9</version>
+		</dependency>
 
 		<!-- Test -->
 		<dependency>

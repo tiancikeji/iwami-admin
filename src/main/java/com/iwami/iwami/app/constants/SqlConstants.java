@@ -55,4 +55,6 @@ public interface SqlConstants {
 	public static final String TABLE_PUSH = DATABASE + ".`push`";
 
 	public static final String TABLE_PUSH_TASK = DATABASE + ".`push_task`";
+
+	public static final String TABLE_REQUEST_LOG = DATABASE + ".`request_log`";
 }

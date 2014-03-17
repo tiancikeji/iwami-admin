@@ -41,4 +41,8 @@ public interface TaskService {
 
 	public void incrTaskRankByType(int type);
 
+	public List<Long> getTopTaskIds();
+
+	public List<Long> getTreasureTaskIds();
+
 }

@@ -24,6 +24,7 @@ import com.iwami.iwami.app.constants.SqlConstants;
 import com.iwami.iwami.app.dao.PresentDao;
 import com.iwami.iwami.app.model.Exchange;
 import com.iwami.iwami.app.model.Present;
+import com.iwami.iwami.app.model.Share;
 
 public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 
@@ -142,6 +143,36 @@ public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_EXCHANGE + " set status = ?, express_name = ?, express_no = ?, lastmod_time = now(), lastmod_userid = ? where id = ?",
 				new Object[]{Exchange.STATUS_FINISH, name, no, adminid, id});
 		return count > 0;
+	}
+
+	@Override
+	public List<Exchange> getExchanges(Date start, Date end) {
+		return getJdbcTemplate().query("select id, userid, presentid, present_name, present_prize, present_type, `count`, prize, status, cell_phone, alipay_account, bank_account, bank_no, bank_name, address, name, express_name, express_no, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_EXCHANGE + " where isdel = 0 and (status = ? or status = ?) and add_time between ? and ?", 
+				new Object[]{Exchange.STATUS_READY, Exchange.STATUS_FINISH, start, end}, new ExchangeRowMapper());
+	}
+
+	@Override
+	public List<Share> getShares(Date start, Date end) {
+		return getJdbcTemplate().query("select id, userid, type, target, msg, lastmod_time from " + SqlConstants.TABLE_SHARE + " where lastmod_time between ? and ?",
+				new Object[]{start, end}, new RowMapper<Share>(){
+
+					@Override
+					public Share mapRow(ResultSet rs, int rowNum) throws SQLException {
+						Share share = new Share();
+						
+						share.setId(rs.getLong("id"));
+						share.setUserid(rs.getLong("userid"));
+						share.setType(rs.getInt("type"));
+						share.setTarget(rs.getInt("target"));
+						share.setMsg(rs.getString("msg"));
+						Timestamp ts = rs.getTimestamp("lastmod_time");
+						if(ts != null)
+							share.setLastModTime(new Date(ts.getTime()));
+						
+						return share;
+					}
+			
+		});
 	}
 }
 

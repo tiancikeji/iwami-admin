@@ -127,7 +127,16 @@
 		<property name="userService" ref="userService" />
 	</bean>
 	<bean name="fileBiz" class="com.iwami.iwami.app.biz.impl.FileBizImpl">
-		<!-- <property name="cdnService" ref="cdnService" /> -->
+		<property name="cdnService" ref="cdnService" />
+	</bean>
+	<bean name="reportBiz" class="com.iwami.iwami.app.biz.impl.ReportBizImpl">
+		<property name="loginService" ref="loginService" />
+		<property name="logService" ref="logService" />
+		<property name="taskService" ref="taskService" />
+		<property name="wamiService" ref="wamiService" />
+		<property name="presentService" ref="presentService" />
+		<property name="onStartService" ref="onstartService" />
+		<property name="userService" ref="userService" />
 	</bean>
 	
 	<!-- service -->
@@ -168,6 +177,14 @@
 	<bean name="smsService" class="com.iwami.iwami.app.service.impl.SMSServiceImpl">
 		<property name="smsSAL" ref="smsSAL" />
 	</bean>
+	<bean name="cdnService" class="com.iwami.iwami.app.service.impl.CDNServiceImpl">
+	</bean>
+	<bean name="logService" class="com.iwami.iwami.app.service.impl.LogServiceImpl">
+		<property name="logDao" ref="logDao" />
+	</bean>
+	<bean name="wamiService" class="com.iwami.iwami.app.service.impl.WamiServiceImpl">
+		<property name="wamiDao" ref="wamiDao" />
+	</bean>
 	
 	<!-- sal -->
 	<bean name="pushSAL" class="com.iwami.iwami.app.sal.impl.JPushSALImpl">
@@ -196,5 +213,10 @@
 	<!-- common beans -->
 	<bean name="expireTime" class="java.lang.Long">
 		<constructor-arg><value>#[cache.defaultExpireTime]</value></constructor-arg>
+	</bean>
+	
+	<!-- report -->
+	<bean name="reportservlet" class="com.iwami.iwami.app.report.servlet.ReportServlet">
+	
 	</bean>
 </beans>

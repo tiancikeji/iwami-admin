@@ -1,5 +1,6 @@
 package com.iwami.iwami.app.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -108,6 +109,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Map<Long, String> getAllAlias() {
 		return userDao.getAllAlias();
+	}
+
+	@Override
+	public List<User> getUsers(Date start, Date end) {
+		return userDao.getUsers(start, end);
 	}
 
 }
