@@ -26,6 +26,8 @@ public class Log {
 	
 	private int type;
 	
+	private String msg;
+	
 	private Date addTime;
 
 	public int getType() {
@@ -65,6 +67,14 @@ public class Log {
 
 	public void setUserid(long userid) {
 		this.userid = userid;
+	}
+
+	public String getMsg() {
+		return msg;
+	}
+
+	public void setMsg(String msg) {
+		this.msg = msg;
 	}
 
 }

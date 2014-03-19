@@ -46,4 +46,6 @@ public interface UserService {
 	public Map<Long, String> getAllAlias();
 
 	public List<User> getUsers(Date start, Date end);
+
+	List<User> getChangedUsers(Date start, Date end);
 }

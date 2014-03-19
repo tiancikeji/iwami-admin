@@ -152,6 +152,12 @@ public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 	}
 
 	@Override
+	public List<Exchange> getGifts(Date start, Date end) {
+		return getJdbcTemplate().query("select id, userid, presentid, present_name, present_prize, present_type, `count`, prize, status, cell_phone, alipay_account, bank_account, bank_no, bank_name, address, name, express_name, express_no, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_EXCHANGE + " where isdel = 0 and (status = ? or status = ?) and add_time between ? and ?", 
+				new Object[]{Exchange.STATUS_FAILED, Exchange.STATUS_FINISH, start, end}, new ExchangeRowMapper());
+	}
+
+	@Override
 	public List<Share> getShares(Date start, Date end) {
 		return getJdbcTemplate().query("select id, userid, type, target, msg, lastmod_time from " + SqlConstants.TABLE_SHARE + " where lastmod_time between ? and ?",
 				new Object[]{start, end}, new RowMapper<Share>(){

@@ -43,8 +43,18 @@ public class WamiServiceImpl implements WamiService{
 	}
 
 	@Override
+	public List<Wami> getWamis(Date start, Date end, String channel) {
+		return wamiDao.getWamis(start, end, channel);
+	}
+
+	@Override
 	public List<Wami> getWamisByIds(List<Long> ids, Date start, Date end) {
 		return wamiDao.getWamisByIds(ids, start, end);
+	}
+
+	@Override
+	public List<Wami> getWamisById(long id) {
+		return wamiDao.getWamisById(id);
 	}
 
 	public WamiDao getWamiDao() {

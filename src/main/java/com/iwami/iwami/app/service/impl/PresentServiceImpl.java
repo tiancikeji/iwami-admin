@@ -75,6 +75,11 @@ public class PresentServiceImpl implements PresentService {
 	}
 
 	@Override
+	public List<Exchange> getGifts(Date start, Date end) {
+		return presentDao.getGifts(start, end);
+	}
+
+	@Override
 	public List<Share> getShares(Date start, Date end) {
 		return presentDao.getShares(start, end);
 	}

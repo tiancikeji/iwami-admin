@@ -2,6 +2,7 @@ package com.iwami.iwami.app.dao;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import com.iwami.iwami.app.model.Task;
 import com.iwami.iwami.app.model.TaskNotification;
@@ -44,5 +45,7 @@ public interface TaskDao {
 	public List<Long> getTopTaskIds();
 
 	public List<Long> getTreasureTaskIds();
+
+	public List<Task> getTasksByIds(Set<Long> taskIds);
 	
 }

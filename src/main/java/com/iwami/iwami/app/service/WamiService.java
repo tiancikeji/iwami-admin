@@ -22,4 +22,8 @@ public interface WamiService{
 
 	public List<Wami> getWamisByIds(List<Long> ids, Date start, Date end);
 
+	public List<Wami> getWamisById(long id);
+
+	public List<Wami> getWamis(Date start, Date end, String key);
+
 }

@@ -54,4 +54,6 @@ public interface UserDao {
 
 	public List<User> getUsers(Date start, Date end);
 
+	List<User> getChangedUsers(Date start, Date end);
+
 }

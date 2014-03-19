@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.nuxeo.common.utils.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
@@ -77,9 +77,23 @@ public class WamiDaoImpl extends JdbcDaoSupport implements WamiDao {
 	}
 
 	@Override
+	public List<Wami> getWamis(Date start, Date end, String channel) {
+		String sql = "select id, userid, task_id, type, prize, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_WAMI + " where isdel = ? and lastmod_time between ? and ?";
+		if(StringUtils.isNotBlank(channel))
+			sql += " and channel like '" + channel + "%'";
+		return getJdbcTemplate().query(sql, new Object[]{0, start, end}, new WamiRowMapper());
+	}
+
+	@Override
 	public List<Wami> getWamisByIds(List<Long> ids, Date start, Date end) {
 		return getJdbcTemplate().query("select id, userid, task_id, type, prize, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_WAMI + " where isdel = ? and type = ? and lastmod_time between ? and ? and task_id in (" + StringUtils.join(ids.toArray(), ",") + ")", 
 				new Object[]{0, Wami.TYPE_START, start, end}, new WamiRowMapper());
+	}
+
+	@Override
+	public List<Wami> getWamisById(long id) {
+		return getJdbcTemplate().query("select id, userid, task_id, type, prize, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_WAMI + " where isdel = ? and task_id = ?", 
+				new Object[]{0, id}, new WamiRowMapper());
 	}
 
 }

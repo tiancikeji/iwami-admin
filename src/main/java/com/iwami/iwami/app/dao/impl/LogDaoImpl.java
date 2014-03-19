@@ -16,7 +16,7 @@ import com.iwami.iwami.app.model.Log;
 public class LogDaoImpl extends JdbcDaoSupport implements LogDao {
 	
 	public List<Log> getLogs(Date start, Date end){
-		return getJdbcTemplate().query("select userid, type, add_time from " + SqlConstants.TABLE_REQUEST_LOG + " where add_time between ? and ?", 
+		return getJdbcTemplate().query("select userid, type, msg, add_time from " + SqlConstants.TABLE_REQUEST_LOG + " where add_time between ? and ?", 
 				new Object[]{start, end}, new RowMapper<Log>(){
 
 			@Override
@@ -24,6 +24,7 @@ public class LogDaoImpl extends JdbcDaoSupport implements LogDao {
 				Log log = new Log();
 				log.setType(rs.getInt("type"));
 				log.setUserid(rs.getLong("userid"));
+				log.setMsg(rs.getString("msg"));
 				Timestamp ts = rs.getTimestamp("add_time");
 				if(ts != null)
 					log.setAddTime(new Date(ts.getTime()));
@@ -34,7 +35,7 @@ public class LogDaoImpl extends JdbcDaoSupport implements LogDao {
 	}
 	
 	public List<Log> getLogsByType(int type, Date start, Date end){
-		return getJdbcTemplate().query("select userid, type, add_time from " + SqlConstants.TABLE_REQUEST_LOG + " where type = ? and add_time between ? and ?", 
+		return getJdbcTemplate().query("select userid, type, msg, add_time from " + SqlConstants.TABLE_REQUEST_LOG + " where type = ? and add_time between ? and ?", 
 				new Object[]{type, start, end}, new RowMapper<Log>(){
 
 			@Override
@@ -42,6 +43,7 @@ public class LogDaoImpl extends JdbcDaoSupport implements LogDao {
 				Log log = new Log();
 				log.setType(rs.getInt("type"));
 				log.setUserid(rs.getLong("userid"));
+				log.setMsg(rs.getString("msg"));
 				Timestamp ts = rs.getTimestamp("add_time");
 				if(ts != null)
 					log.setAddTime(new Date(ts.getTime()));

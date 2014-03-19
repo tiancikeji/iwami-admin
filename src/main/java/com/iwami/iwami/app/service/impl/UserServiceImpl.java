@@ -116,4 +116,9 @@ public class UserServiceImpl implements UserService {
 		return userDao.getUsers(start, end);
 	}
 
+	@Override
+	public List<User> getChangedUsers(Date start, Date end) {
+		return userDao.getChangedUsers(start, end);
+	}
+
 }

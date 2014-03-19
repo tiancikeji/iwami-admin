@@ -9,7 +9,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
@@ -285,6 +287,11 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 			}
 			
 		});
+	}
+
+	@Override
+	public List<Task> getTasksByIds(Set<Long> taskIds) {
+		return getJdbcTemplate().query("select id, name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_TASK + " where id in (" + StringUtils.join(taskIds, ",") + ")", new TaskRowMapper());
 	}
 }
 

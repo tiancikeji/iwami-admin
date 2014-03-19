@@ -2,6 +2,7 @@ package com.iwami.iwami.app.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import com.iwami.iwami.app.dao.TaskDao;
 import com.iwami.iwami.app.model.Task;
@@ -98,6 +99,11 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public List<Long> getTreasureTaskIds() {
 		return taskDao.getTreasureTaskIds();
+	}
+
+	@Override
+	public List<Task> getTasksByIds(Set<Long> taskIds) {
+		return taskDao.getTasksByIds(taskIds);
 	}
 
 	public TaskDao getTaskDao() {
