@@ -91,6 +91,22 @@ public class ReportBizTest extends TestCase {
 		}
 	}
 
+	public void testGenTaskHistoryReport() throws FileNotFoundException, IOException{
+		if(flag){
+			ReportBiz reportBiz = getBiz();
+			
+			ReportParam param = new ReportParam();
+			param.setType(ReportParam.TYPE_TASK_HISTORY);
+			param.setStart("2014-02-01");
+			param.setEnd("2014-03-31");
+			param.setKey("");
+			long adminid = 11;
+			
+			HSSFWorkbook book = reportBiz.genReport(param, adminid);
+			book.write(new FileOutputStream("C:\\material\\tmp\\20140317\\" + System.currentTimeMillis() + ".xls"));
+		}
+	}
+
 	public void testGenExchangeReport() throws FileNotFoundException, IOException{
 		if(flag){
 			ReportBiz reportBiz = getBiz();

@@ -100,7 +100,13 @@ public class ReportBizImpl implements ReportBiz {
 				else
 					throw new RuntimeException("not recognized param >> " + param);
 			} else if(param.getType() == ReportParam.TYPE_TASK_HISTORY){
+				Date start = IWamiUtils.getDayDate(param.getStart());
+				Date end = IWamiUtils.getDayDate(param.getEnd());
 				
+				if(start != null && end != null && !start.after(end))
+					book = genTaskHisotryReport(start, end);
+				else
+					throw new RuntimeException("not recognized param >> " + param);
 			} else if(param.getType() == ReportParam.TYPE_EXCHANGE){
 				Date start = IWamiUtils.getDayDate(param.getStart());
 				Date end = IWamiUtils.getDayDate(param.getEnd());
@@ -851,6 +857,158 @@ public class ReportBizImpl implements ReportBiz {
 			cell = row.createCell(columnIndex++);
 			cell.setCellValue(exchange.getId());
 		}
+		
+		return book;
+	}
+
+	private HSSFWorkbook genTaskHisotryReport(Date start, Date end) {
+		end = DateUtils.addSeconds(DateUtils.addDays(end, 1), -1);
+		HSSFWorkbook book = new HSSFWorkbook();
+		HSSFSheet sheet = book.createSheet(ReportParam.TYPE_TITLES.get(ReportParam.TYPE_TASK_WAMI));
+		
+		// taskid - userid - historys
+		Map<Long, Map<Long, List<UserWamiHistory>>> tWamis = new HashMap<Long, Map<Long, List<UserWamiHistory>>>();
+
+		List<Wami> wamis = wamiService.getWamis(start, end);
+		if(wamis != null && wamis.size() > 0)
+			for(Wami wami : wamis){
+				Collections.sort(wamis, new Comparator<Wami>() {
+
+					@Override
+					public int compare(Wami o1, Wami o2) {
+						int result = (int)(o1.getTaskId() - o2.getTaskId());
+						if(result == 0)
+							result = (int)(o1.getUserid() - o2.getUserid());
+						if(result == 0)
+							result = o1.getType() - o2.getType();
+						if(result == 0)
+							result = (o1.getLastmodTime().before(o2.getLastmodTime()) ? -1 : 1);
+						return result;
+					}
+				});
+				
+				if(wami.getType() == (Wami.TYPE_RUN + 100) || wami.getType() == (Wami.TYPE_FINISH + 100)){
+					Map<Long, List<UserWamiHistory>> _tWamis = tWamis.get(wami.getTaskId());
+					if(_tWamis == null){
+						_tWamis = new HashMap<Long, List<UserWamiHistory>>();
+						tWamis.put(wami.getTaskId(), _tWamis);
+					}
+					
+					List<UserWamiHistory> _tWami = _tWamis.get(wami.getUserid());
+					if(_tWami == null){
+						_tWami = new ArrayList<UserWamiHistory>();
+						_tWamis.put(wami.getUserid(), _tWami);
+					}
+					
+					if(wami.getType() == (Wami.TYPE_RUN + 100)){
+						UserWamiHistory _h = new UserWamiHistory();
+						_h.taskid = wami.getTaskId();
+						_h.userid = wami.getUserid();
+						_h.run = wami.getAddTime();
+						_h.cRun = wami.getLastmodTime();
+						
+						_tWami.add(_h);
+					}
+					
+					if(wami.getType() == (Wami.TYPE_FINISH + 100)){
+						UserWamiHistory _h = null;
+						if(_tWami.size() > 0)
+							_h = _tWami.get(_tWami.size() - 1);
+						
+						if(_h == null || _h.finish != null){
+							_h = new UserWamiHistory();
+							_h.taskid = wami.getTaskId();
+							_h.userid = wami.getUserid();
+						}
+						
+						_h.finish = wami.getAddTime();
+						_h.cFinish = wami.getLastmodTime();
+						
+						_tWami.add(_h);
+					}
+				}
+			}
+		
+		int rowindex = 0;
+		HSSFRow row = sheet.createRow(rowindex++);
+		
+		int columnIndex = 0;
+		HSSFCell cell = row.createCell(columnIndex++);
+		cell.setCellValue("开始日期");
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue(IWamiUtils.getDayDateString(start));
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("结束日期");
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue(IWamiUtils.getDayDateString(end));
+
+		row = sheet.createRow(rowindex++);
+		
+		row = sheet.createRow(rowindex++);
+		columnIndex = 0;
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("服务器时间");
+		
+		row = sheet.createRow(rowindex++);
+		columnIndex = 0;
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("APP ID");
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("用户ID");
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("启动运行时间");
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("结束运行时间");
+		cell = row.createCell(columnIndex++);
+		
+		for(Long appid : tWamis.keySet())
+			for(Long userid : tWamis.get(appid).keySet())
+				for(UserWamiHistory h : tWamis.get(appid).get(userid)){
+					row = sheet.createRow(rowindex++);
+					columnIndex = 0;
+					cell = row.createCell(columnIndex++);
+					cell.setCellValue(h.taskid);
+					cell = row.createCell(columnIndex++);
+					cell.setCellValue(h.userid);
+					cell = row.createCell(columnIndex++);
+					cell.setCellValue(IWamiUtils.getDateString(h.run));
+					cell = row.createCell(columnIndex++);
+					cell.setCellValue(IWamiUtils.getDateString(h.finish));
+				}
+
+		row = sheet.createRow(rowindex++);
+		
+		row = sheet.createRow(rowindex++);
+		columnIndex = 0;
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("客户端时间");
+		
+		row = sheet.createRow(rowindex++);
+		columnIndex = 0;
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("APP ID");
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("用户ID");
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("启动运行时间");
+		cell = row.createCell(columnIndex++);
+		cell.setCellValue("结束运行时间");
+		cell = row.createCell(columnIndex++);
+		
+		for(Long appid : tWamis.keySet())
+			for(Long userid : tWamis.get(appid).keySet())
+				for(UserWamiHistory h : tWamis.get(appid).get(userid)){
+					row = sheet.createRow(rowindex++);
+					columnIndex = 0;
+					cell = row.createCell(columnIndex++);
+					cell.setCellValue(h.taskid);
+					cell = row.createCell(columnIndex++);
+					cell.setCellValue(h.userid);
+					cell = row.createCell(columnIndex++);
+					cell.setCellValue(IWamiUtils.getDateString(h.cRun));
+					cell = row.createCell(columnIndex++);
+					cell.setCellValue(IWamiUtils.getDateString(h.cFinish));
+				}
 		
 		return book;
 	}

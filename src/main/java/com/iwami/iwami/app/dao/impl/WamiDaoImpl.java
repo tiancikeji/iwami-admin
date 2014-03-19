@@ -72,7 +72,7 @@ public class WamiDaoImpl extends JdbcDaoSupport implements WamiDao {
 
 	@Override
 	public List<Wami> getWamis(Date start, Date end) {
-		return getJdbcTemplate().query("select id, userid, task_id, type, prize, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_WAMI + " where isdel = ? and lastmod_time between ? and ?", 
+		return getJdbcTemplate().query("select id, userid, task_id, type, prize, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_WAMI + " where isdel = ? and lastmod_time between ? and ? order by lastmod_time", 
 				new Object[]{0, start, end}, new WamiRowMapper());
 	}
 
