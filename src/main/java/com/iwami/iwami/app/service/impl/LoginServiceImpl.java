@@ -25,16 +25,18 @@ public class LoginServiceImpl implements LoginService {
 			login = userDao.getLogin(adminid);
 			
 			if(login != null){
-				long left = expireTime - (System.currentTimeMillis() - login.getAddTime().getTime());
-				if(login != null && left > 0){
-					LocalCaches.set(IWamiConstants.CACHE_LOGIN_KEY + login.getUserid(), login, left);
-					return true;
-				} else
-					return false;
+//				long left = expireTime - (System.currentTimeMillis() - login.getAddTime().getTime());
+//				if(login != null && left > 0){
+				LocalCaches.set(IWamiConstants.CACHE_LOGIN_KEY + login.getUserid(), login, expireTime);
+				return true;
+//				} else
+//					return false;
 			} else
 				return false;
-		} else
+		} else {
+			LocalCaches.set(IWamiConstants.CACHE_LOGIN_KEY + login.getUserid(), login, expireTime);
 			return true;
+		}
 	}
 
 	@Override
