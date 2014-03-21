@@ -9,6 +9,11 @@ import com.iwami.iwami.app.service.ApkService;
 public class ApkServiceImpl implements ApkService {
 
 	private ApkDao apkDao;
+	
+	@Override
+	public Apk getApk() {
+		return apkDao.getApk();
+	}
 
 	@Override
 	public List<Apk> getApks() {

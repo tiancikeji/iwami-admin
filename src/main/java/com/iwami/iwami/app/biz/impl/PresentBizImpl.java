@@ -135,4 +135,9 @@ public class PresentBizImpl implements PresentBiz {
 	public void setFileBiz(FileBiz fileBiz) {
 		this.fileBiz = fileBiz;
 	}
+
+	@Override
+	public List<Present> getPresents() {
+		return presentService.getPresents();
+	}
 }

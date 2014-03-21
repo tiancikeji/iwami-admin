@@ -14,6 +14,7 @@ import com.iwami.iwami.app.model.StrategyImage;
 import com.iwami.iwami.app.model.StrategyInfo;
 import com.iwami.iwami.app.model.Task;
 import com.iwami.iwami.app.service.CDNService;
+import com.iwami.iwami.app.util.AnalysisApk;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 public class FileBizImpl implements FileBiz {
@@ -38,8 +39,15 @@ public class FileBizImpl implements FileBiz {
 				if(!(dir.exists() && dir.isDirectory()))
 					dir.mkdirs();
 				
-				fs = new FileOutputStream(tmp);
+				File _file = new File(tmp);
+				fs = new FileOutputStream(_file);
 			    fs.write(Base64.decode(data/*splits[1].split(",")[1]*/)); 
+			    try{
+				if(StringUtils.endsWith(name, ".apk"))
+					_file.renameTo(new File(localDir + "." + System.currentTimeMillis() + "." + AnalysisApk.unZip(tmp)[1] + ".apk"));
+			    } catch(Throwable t){
+			    	t.printStackTrace();
+			    }
 			} catch (Throwable t) {
 				t.printStackTrace();
 			} finally{

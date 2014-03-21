@@ -38,4 +38,6 @@ public interface PresentDao {
 
 	public List<Exchange> getGifts(Date start, Date end);
 
+	public List<Present> getPresents();
+
 }

@@ -11,4 +11,6 @@ public interface ApkBiz {
 	public boolean addApk(Apk apk);
 
 	public boolean modApk(Apk apk);
+
+	public Apk getApk();
 }

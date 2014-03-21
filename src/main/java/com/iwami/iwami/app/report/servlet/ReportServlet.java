@@ -30,14 +30,14 @@ public class ReportServlet implements HttpRequestHandler {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		OutputStream out = null;
 		try {
-			long adminid = -1;
-			Cookie[] cookies = request.getCookies();
+			long adminid = NumberUtils.toLong(request.getParameter("adminid"), -1);
+			/*Cookie[] cookies = request.getCookies();
 			if(cookies != null && cookies.length > 0)
 				for(Cookie cookie : cookies)
 					if(StringUtils.equals("adminid", cookie.getName())){
 						adminid = NumberUtils.toLong(cookie.getValue(), 0);
 						break;
-					}
+					}*/
 			
 			
 			int type = NumberUtils.toInt(request.getParameter("type"), 0);

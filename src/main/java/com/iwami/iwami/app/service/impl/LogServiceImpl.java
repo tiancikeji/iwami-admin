@@ -12,6 +12,11 @@ public class LogServiceImpl implements LogService {
 	private LogDao logDao;
 
 	@Override
+	public void log(Log log) {
+		logDao.log(log);
+	}
+
+	@Override
 	public List<Log> getLogs(Date start, Date end){
 		return logDao.getLogs(start, end);
 	}

@@ -217,6 +217,12 @@
 	
 	<!-- report -->
 	<bean name="reportservlet" class="com.iwami.iwami.app.report.servlet.ReportServlet">
+		<property name="reportBiz" ref="reportBiz" />
+	</bean>
 	
+	<!-- download -->
+	<bean name="downloadservlet" class="com.iwami.iwami.app.report.servlet.DownloadServlet">
+		<property name="apkBiz" ref="apkBiz" />
+		<property name="logService" ref="logService" />
 	</bean>
 </beans>

@@ -35,6 +35,11 @@ public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 	}
 
 	@Override
+	public List<Present> getPresents() {
+		return getJdbcTemplate().query("select id, name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_PRESENT + " where isdel = 0", new PresentRowMapper());
+	}
+
+	@Override
 	public boolean modPresent(Present present) {
 		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_PRESENT + " set name = ?, prize = ?, `count` = ?, type = ?, rank =?, lastmod_time = now(), lastmod_userid = ?, isdel = ?, icon_small = ?, icon_big = ? where id = ?", 
 				new Object[]{present.getName(), present.getPrize(), present.getCount(), present.getType(), present.getRank(), present.getLastModUserid(), present.getIsdel(), present.getIconSmall(), present.getIconBig(), present.getId()});

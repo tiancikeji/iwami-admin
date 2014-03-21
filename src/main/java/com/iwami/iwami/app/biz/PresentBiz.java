@@ -28,4 +28,6 @@ public interface PresentBiz {
 	public Exchange getExchangeById(long id);
 
 	public boolean modExchange(String name, String no, long id, long adminid);
+
+	public List<Present> getPresents();
 }

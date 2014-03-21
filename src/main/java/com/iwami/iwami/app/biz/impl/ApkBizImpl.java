@@ -16,6 +16,11 @@ public class ApkBizImpl implements ApkBiz {
 	private FileBiz fileBiz;
 
 	@Override
+	public Apk getApk() {
+		return apkService.getApk();
+	}
+
+	@Override
 	public List<Apk> getApks() {
 		return apkService.getApks();
 	}

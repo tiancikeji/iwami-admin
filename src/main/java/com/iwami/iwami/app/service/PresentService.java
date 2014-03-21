@@ -37,4 +37,6 @@ public interface PresentService {
 	public List<Share> getShares(Date start, Date end);
 
 	public List<Exchange> getGifts(Date start, Date end);
+
+	public List<Present> getPresents();
 }

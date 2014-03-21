@@ -92,4 +92,9 @@ public class PresentServiceImpl implements PresentService {
 		this.presentDao = presentDao;
 	}
 
+	@Override
+	public List<Present> getPresents() {
+		return presentDao.getPresents();
+	}
+
 }

@@ -23,6 +23,31 @@ import com.iwami.iwami.app.model.Apk;
 public class ApkDaoImpl extends JdbcDaoSupport implements ApkDao {
 
 	@Override
+	public Apk getApk() {
+		List<Apk> apks = getJdbcTemplate().query("select id, version, url, `force`, `desc`, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_APK + " where isdel = 0 order by lastmod_time desc limit 1", new RowMapper<Apk>() {
+			@Override
+			public Apk mapRow(ResultSet rs, int index) throws SQLException {
+				Apk apk = new Apk();
+				apk.setId(rs.getLong("id"));
+				apk.setVersion(rs.getString("version"));
+				apk.setUrl(rs.getString("url"));
+				apk.setForce(rs.getInt("force"));
+				apk.setDesc(rs.getString("desc"));
+				Timestamp ts = rs.getTimestamp("lastmod_time");
+				if(ts != null)
+					apk.setLastmodTime(new Date(ts.getTime()));
+				apk.setLastmodUserid(rs.getLong("lastmod_userid"));
+				return apk;
+			}
+		});
+		
+		if(apks != null && apks.size() > 0)
+			return apks.get(0);
+		else
+			return null;
+	}
+
+	@Override
 	public List<Apk> getApks() {
 		return getJdbcTemplate().query("select id, version, url, `force`, `desc`, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_APK, new RowMapper<Apk>() {
 			@Override

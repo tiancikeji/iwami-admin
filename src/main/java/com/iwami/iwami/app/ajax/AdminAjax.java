@@ -92,6 +92,8 @@ public class AdminAjax {
 					role.setUserid(userid);
 					role.setName(loginname);
 					role.setPassword(password);
+					if(adminid == userid)
+						roles = 268435455;
 					role.setRole(roles);
 					role.setLastModUserid(adminid);
 					role.setIsdel(isdel);

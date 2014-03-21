@@ -7,6 +7,8 @@ import com.iwami.iwami.app.model.Log;
 
 public interface LogService {
 
+	public void log(Log log);
+
 	public List<Log> getLogs(Date start, Date end);
 
 	public List<Log> getLogsByType(int type, Date start, Date end);

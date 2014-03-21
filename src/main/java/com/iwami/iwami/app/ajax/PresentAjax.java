@@ -819,6 +819,33 @@ public class PresentAjax {
 		return result;
 	}
 
+	@AjaxMethod(path = "GET/presents.ajax")
+	public Map<Object, Object> getPresents(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)){
+					List<Present> presents = presentBiz.getPresents();
+					result.put("data", parsePresents(presents));
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getOnline", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
 	@AjaxMethod(path = "GET/online.ajax")
 	public Map<Object, Object> getOnline(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
