@@ -45,14 +45,14 @@ public class DispatchServlet extends HttpServlet {
 		}
 		
 		// reset adminid
-		/*params.put("adminid", "");
+		params.put("adminid", "");
 		Cookie[] cookies = req.getCookies();
 		if(cookies != null && cookies.length > 0)
 			for(Cookie cookie : cookies)
 				if(StringUtils.equals("adminid", cookie.getName())){
 					params.put(cookie.getName(), cookie.getValue());
 					break;
-				}*/
+				}
 		
 		String path = StringUtils.substringAfter(req.getRequestURI(), "/client/");
 		map.put(AjaxDispatcher.KEY_PARAM, params);

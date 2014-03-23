@@ -31,13 +31,13 @@ public class ReportServlet implements HttpRequestHandler {
 		OutputStream out = null;
 		try {
 			long adminid = NumberUtils.toLong(request.getParameter("adminid"), -1);
-			/*Cookie[] cookies = request.getCookies();
+			Cookie[] cookies = request.getCookies();
 			if(cookies != null && cookies.length > 0)
 				for(Cookie cookie : cookies)
 					if(StringUtils.equals("adminid", cookie.getName())){
 						adminid = NumberUtils.toLong(cookie.getValue(), 0);
 						break;
-					}*/
+					}
 			
 			
 			int type = NumberUtils.toInt(request.getParameter("type"), 0);

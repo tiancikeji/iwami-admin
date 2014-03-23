@@ -90,7 +90,7 @@ public class IWamiUtils {
 		try {
 			return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
 		} catch (ParseException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		
 		return null;
@@ -100,7 +100,7 @@ public class IWamiUtils {
 		try {
 			return new SimpleDateFormat("yyyy-MM").parse(date);
 		} catch (ParseException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		
 		return null;
@@ -110,7 +110,7 @@ public class IWamiUtils {
 		try {
 			return new SimpleDateFormat("yyyy-MM-dd").parse(date);
 		} catch (ParseException e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 		}
 		
 		return null;
