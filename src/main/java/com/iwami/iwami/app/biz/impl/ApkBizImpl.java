@@ -5,15 +5,12 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.iwami.iwami.app.biz.ApkBiz;
-import com.iwami.iwami.app.biz.FileBiz;
 import com.iwami.iwami.app.model.Apk;
 import com.iwami.iwami.app.service.ApkService;
 
 public class ApkBizImpl implements ApkBiz {
 
 	private ApkService apkService;
-	
-	private FileBiz fileBiz;
 
 	@Override
 	public Apk getApk() {
@@ -30,11 +27,7 @@ public class ApkBizImpl implements ApkBiz {
 	public boolean addApk(Apk apk) {
 		apkService.delAllApks();
 		if(apkService.addApk(apk)){
-			fileBiz.uploadApkResource(apk);
-			if(apkService.updateApkUrl(apk))
-				return true;
-			else
-				throw new RuntimeException("failed in addApk, so rollback.");
+			return true;
 		} else
 			throw new RuntimeException("failed in addApk, so rollback.");
 	}
@@ -43,7 +36,6 @@ public class ApkBizImpl implements ApkBiz {
 	public boolean modApk(Apk apk) {
 		if(apk.getIsdel() == 0)
 			apkService.delAllApks();
-		fileBiz.uploadApkResource(apk);
 		return apkService.modApk(apk);
 	}
 	
@@ -54,13 +46,4 @@ public class ApkBizImpl implements ApkBiz {
 	public void setApkService(ApkService apkService) {
 		this.apkService = apkService;
 	}
-
-	public FileBiz getFileBiz() {
-		return fileBiz;
-	}
-
-	public void setFileBiz(FileBiz fileBiz) {
-		this.fileBiz = fileBiz;
-	}
-
 }

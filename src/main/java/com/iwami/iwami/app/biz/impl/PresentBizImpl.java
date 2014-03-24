@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import com.iwami.iwami.app.biz.FileBiz;
 import com.iwami.iwami.app.biz.PresentBiz;
 import com.iwami.iwami.app.comparator.ExchangeHistoryComparator;
 import com.iwami.iwami.app.model.Exchange;
@@ -20,8 +19,6 @@ public class PresentBizImpl implements PresentBiz {
 	
 	private PresentService presentService;
 	
-	private FileBiz fileBiz;
-	
 	@Override
 	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status) {
 		return presentService.getPresentsByTypeNStatus(type, status);
@@ -29,7 +26,6 @@ public class PresentBizImpl implements PresentBiz {
 
 	@Override
 	public boolean modPresent(Present present) {
-		fileBiz.uploadPresentResource(present);
 		return presentService.modPresent(present);
 	}
 
@@ -37,11 +33,7 @@ public class PresentBizImpl implements PresentBiz {
 	@Transactional(rollbackFor=Exception.class, value="txManager")
 	public boolean addPresent(Present present) {
 		if(presentService.addPresent(present)){
-			fileBiz.uploadPresentResource(present);
-			if(presentService.updatePresentURL(present))
-				return true;
-			else
-				throw new RuntimeException("error in updating url, so rollback...");
+			return true;
 		} else
 			return false;
 	}
@@ -126,14 +118,6 @@ public class PresentBizImpl implements PresentBiz {
 
 	public void setPresentService(PresentService presentService) {
 		this.presentService = presentService;
-	}
-
-	public FileBiz getFileBiz() {
-		return fileBiz;
-	}
-
-	public void setFileBiz(FileBiz fileBiz) {
-		this.fileBiz = fileBiz;
 	}
 
 	@Override

@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import com.iwami.iwami.app.biz.FileBiz;
 import com.iwami.iwami.app.biz.TaskBiz;
 import com.iwami.iwami.app.model.Task;
 import com.iwami.iwami.app.model.TreasureConfig;
@@ -19,8 +18,6 @@ public class TaskBizImpl implements TaskBiz {
 	private TaskService taskService;
 	
 	private WamiService wamiService;
-	
-	private FileBiz fileBiz;
 	
 	@Override
 	public TreasureConfig getTreasureConfig() {
@@ -92,8 +89,6 @@ public class TaskBizImpl implements TaskBiz {
 	@Override
 	@Transactional(rollbackFor=Exception.class, value="txManager")
 	public boolean modTask(Task task) {
-		fileBiz.uploadTaskResource(task);
-		
 		if(task.getType() == Task.TYPE_GOLD && task.getRank() == Task.RANK_GOLD_DEFAULT)
 			taskService.incrTaskRankByType(Task.TYPE_GOLD);
 		return taskService.modTask(task);
@@ -117,11 +112,7 @@ public class TaskBizImpl implements TaskBiz {
 	@Override
 	@Transactional(rollbackFor=Exception.class, value="txManager")
 	public boolean addTask(Task task) {
-		if(taskService.addTask(task)){
-			fileBiz.uploadTaskResource(task);
-			return taskService.updateTaskUrl(task);
-		} else
-			return false;
+		return taskService.addTask(task);
 	}
 
 	public TaskService getTaskService() {
@@ -138,13 +129,5 @@ public class TaskBizImpl implements TaskBiz {
 
 	public void setWamiService(WamiService wamiService) {
 		this.wamiService = wamiService;
-	}
-
-	public FileBiz getFileBiz() {
-		return fileBiz;
-	}
-
-	public void setFileBiz(FileBiz fileBiz) {
-		this.fileBiz = fileBiz;
 	}
 }

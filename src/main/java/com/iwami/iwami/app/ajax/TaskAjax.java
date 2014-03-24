@@ -105,7 +105,7 @@ public class TaskAjax {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			if(params.containsKey("adminid") && params.containsKey("url")
+			if(params.containsKey("adminid") && params.containsKey("url") && params.containsKey("packageName")
 					 && params.containsKey("name") && params.containsKey("rank") && params.containsKey("intr")
 					 && params.containsKey("appintr") && params.containsKey("prize") && params.containsKey("type")
 					 && params.containsKey("attr") && params.containsKey("time") && params.containsKey("startTime")
@@ -119,6 +119,7 @@ public class TaskAjax {
 					int rank = NumberUtils.toInt(params.get("rank"), -1);
 					String intr = StringUtils.trimToEmpty(params.get("intr"));
 					String appintr = StringUtils.trimToEmpty(params.get("appintr"));
+					String packageName = StringUtils.trimToEmpty(params.get("packageName"));
 					int prize = NumberUtils.toInt(params.get("prize"), -1);
 					int type = NumberUtils.toInt(params.get("type"), -1);
 					int attr = NumberUtils.toInt(params.get("attr"), -1);
@@ -134,7 +135,7 @@ public class TaskAjax {
 					
 					int defApp = NumberUtils.toInt(params.get("default"), -1);
 					
-					if(StringUtils.isNotBlank(name) && rank >= 0 && StringUtils.isNotBlank(intr) && StringUtils.isNotBlank(appintr)
+					if(StringUtils.isNotBlank(name) && rank >= 0 && StringUtils.isNotBlank(intr) && StringUtils.isNotBlank(appintr) && StringUtils.isNotBlank(packageName)
 						&& prize > 0 && maxPrize > -2 && currentPrize > -2
 						&& (type == 1 || type == 2 || (type == 3 && StringUtils.isNotBlank(iconBig)) || type == 5)
 						&& (attr == 1 || attr == 2 || attr == 3)
@@ -150,6 +151,7 @@ public class TaskAjax {
 							task.setRank(rank);
 						task.setIntr(intr);
 						task.setAppIntr(appintr);
+						task.setPackageName(packageName);
 						task.setPrize(prize);
 						
 						task.setType(type);
@@ -174,7 +176,6 @@ public class TaskAjax {
 						task.setEndTime(endTime);
 						task.setCurrentPrize(currentPrize);
 						task.setMaxPrize(maxPrize);
-						//TODO upload icon & url
 						task.setIconSmall(iconSmall);
 						task.setIconBig(iconBig);
 						task.setUrl(url);
@@ -209,7 +210,7 @@ public class TaskAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("taskid") && params.containsKey("url")
-					 && params.containsKey("name") && params.containsKey("rank") && params.containsKey("intr")
+					 && params.containsKey("name") && params.containsKey("rank") && params.containsKey("intr") && params.containsKey("packageName") 
 					 && params.containsKey("appintr") && params.containsKey("prize") && params.containsKey("type")
 					 && params.containsKey("attr") && params.containsKey("time") && params.containsKey("startTime")
 					 && params.containsKey("endTime") && params.containsKey("addCurrentPrize") && params.containsKey("maxPrize")
@@ -227,6 +228,7 @@ public class TaskAjax {
 						int rank = NumberUtils.toInt(params.get("rank"), -1);
 						String intr = StringUtils.trimToEmpty(params.get("intr"));
 						String appintr = StringUtils.trimToEmpty(params.get("appintr"));
+						String packageName = StringUtils.trimToEmpty(params.get("packageName"));
 						int prize = NumberUtils.toInt(params.get("prize"), -1);
 						int attr = NumberUtils.toInt(params.get("attr"), -1);
 						int time = NumberUtils.toInt(params.get("time"), -1);
@@ -241,7 +243,7 @@ public class TaskAjax {
 						int defApp = NumberUtils.toInt(params.get("default"), -1);
 						
 						if(StringUtils.isNotBlank(name) && rank >= 0 && StringUtils.isNotBlank(intr) && StringUtils.isNotBlank(appintr)
-							&& prize > 0 && maxPrize > -2 && addCurrentPrize != Integer.MAX_VALUE
+							&& prize > 0 && maxPrize > -2 && addCurrentPrize != Integer.MAX_VALUE && StringUtils.isNotBlank(packageName)
 							&& (type == 1 || type == 2 || (type == 3 && StringUtils.isNotBlank(iconBig)) || type == 4 || type == 5)
 							&& (attr == 1 || attr == 2 || attr == 3 || attr == 4)
 							&& time >= 0 && startTime != null
@@ -256,6 +258,7 @@ public class TaskAjax {
 								task.setRank(rank);
 							task.setIntr(intr);
 							task.setAppIntr(appintr);
+							task.setPackageName(packageName);
 							task.setPrize(prize);
 							
 							task.setType(type);
@@ -278,7 +281,6 @@ public class TaskAjax {
 							task.setEndTime(endTime);
 							task.setCurrentPrize(addCurrentPrize);
 							task.setMaxPrize(maxPrize);
-							//TODO upload icon & url
 							task.setIconSmall(iconSmall);
 							task.setIconBig(iconBig);
 							task.setUrl(url);
@@ -442,6 +444,7 @@ public class TaskAjax {
 					tmp.put("rank", task.getRank());
 					tmp.put("intr", StringUtils.trimToEmpty(task.getIntr()));
 					tmp.put("appintr", StringUtils.trimToEmpty(task.getAppIntr()));
+					tmp.put("appintr", StringUtils.trimToEmpty(task.getPackageName()));
 					tmp.put("prize", task.getPrize());
 					tmp.put("url", StringUtils.trimToEmpty(task.getUrl()));
 					

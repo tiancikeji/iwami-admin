@@ -80,10 +80,6 @@
 		<property name="userBiz" ref="userBiz" />
 		<property name="pushBiz" ref="pushBiz" />
 	</bean>
-	<bean name="fileAjax" class="com.iwami.iwami.app.ajax.FileAjax">
-		<property name="loginBiz" ref="loginBiz" />
-		<property name="fileBiz" ref="fileBiz" />
-	</bean>
 	<bean name="adminAjax" class="com.iwami.iwami.app.ajax.AdminAjax">
 		<property name="loginBiz" ref="loginBiz" />
 		<property name="userBiz" ref="userBiz" />
@@ -92,7 +88,6 @@
 	<!-- biz -->
 	<bean name="apkBiz" class="com.iwami.iwami.app.biz.impl.ApkBizImpl">
 		<property name="apkService" ref="apkService" />
-		<property name="fileBiz" ref="fileBiz" />
 	</bean>
 	<bean name="contactBiz" class="com.iwami.iwami.app.biz.impl.ContactBizImpl">
 		<property name="contactService" ref="contactService" />
@@ -109,15 +104,12 @@
 	</bean>
 	<bean name="strategyBiz" class="com.iwami.iwami.app.biz.impl.StrategyBizImpl">
 		<property name="strategyService" ref="strategyService" />
-		<property name="fileBiz" ref="fileBiz" />
 	</bean>
 	<bean name="taskBiz" class="com.iwami.iwami.app.biz.impl.TaskBizImpl">
 		<property name="taskService" ref="taskService" />
-		<property name="fileBiz" ref="fileBiz" />
 	</bean>
 	<bean name="presentBiz" class="com.iwami.iwami.app.biz.impl.PresentBizImpl">
 		<property name="presentService" ref="presentService" />
-		<property name="fileBiz" ref="fileBiz" />
 	</bean>
 	<bean name="loginBiz" class="com.iwami.iwami.app.biz.impl.LoginBizImpl">
 		<property name="loginService" ref="loginService" />
@@ -125,9 +117,6 @@
 	<bean name="pushBiz" class="com.iwami.iwami.app.biz.impl.PushBizImpl">
 		<property name="pushService" ref="pushService" />
 		<property name="userService" ref="userService" />
-	</bean>
-	<bean name="fileBiz" class="com.iwami.iwami.app.biz.impl.FileBizImpl">
-		<property name="cdnService" ref="cdnService" />
 	</bean>
 	<bean name="reportBiz" class="com.iwami.iwami.app.biz.impl.ReportBizImpl">
 		<property name="loginService" ref="loginService" />
@@ -176,8 +165,6 @@
 	</bean>
 	<bean name="smsService" class="com.iwami.iwami.app.service.impl.SMSServiceImpl">
 		<property name="smsSAL" ref="smsSAL" />
-	</bean>
-	<bean name="cdnService" class="com.iwami.iwami.app.service.impl.CDNServiceImpl">
 	</bean>
 	<bean name="logService" class="com.iwami.iwami.app.service.impl.LogServiceImpl">
 		<property name="logDao" ref="logDao" />

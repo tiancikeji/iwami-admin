@@ -46,6 +46,8 @@ public class Task {
 	
 	private String appIntr;
 	
+	private String packageName;
+	
 	private int prize;
 	
 	private String url;
@@ -307,6 +309,14 @@ public class Task {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
 	}
 	
 }

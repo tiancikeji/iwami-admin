@@ -55,7 +55,7 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 			int maxL, int maxR, int prizeL, int prizeR, int currL, int currR,
 			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR) {
 		List<Object> params = new ArrayList<Object>();
-		StringBuilder sql = new StringBuilder("select id, name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from ");
+		StringBuilder sql = new StringBuilder("select id, name, rank, size, intr, appintr, packagename, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from ");
 		sql.append(SqlConstants.TABLE_TASK);
 		sql.append(" where type & ? > 0");
 		params.add(type);
@@ -131,7 +131,7 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 
 	@Override
 	public Task getTaskById(long taskid) {
-		List<Task> tasks = getJdbcTemplate().query("select id, name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_TASK + " where id = ?", 
+		List<Task> tasks = getJdbcTemplate().query("select id, name, rank, size, intr, appintr, packagename, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_TASK + " where id = ?", 
 				new Object[]{taskid}, new TaskRowMapper());
 		if(tasks != null && tasks.size() > 0)
 			return tasks.get(0);
@@ -153,8 +153,8 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 
 	@Override
 	public boolean modTask(Task task) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_TASK + " set name = ?, rank = ?, size = ?, intr = ?, appintr = ?, prize = ?, type = ?, background = ?, time = ?, register = ?, reputation = ?, star = ?, start_time = ?, end_time = ?, current_prize = current_prize + ?, max_prize = ?, url = ?, icon_gray = ?, icon_small = ?, icon_big = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where id = ?",
-				new Object[]{task.getName(), task.getRank(), task.getSize(), task.getIntr(), task.getAppIntr(), task.getPrize(), task.getType(), task.getBackground(), task.getTime(), task.getRegister(), task.getReputation(), task.getStar(), task.getStartTime(), task.getEndTime(), task.getCurrentPrize(), task.getMaxPrize(), task.getUrl(), task.getIconGray(), task.getIconSmall(), task.getIconBig(), task.getLastModUserid(), task.getIsdel(), task.getId()});
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_TASK + " set name = ?, rank = ?, size = ?, intr = ?, appintr = ?, packagename = ?, prize = ?, type = ?, background = ?, time = ?, register = ?, reputation = ?, star = ?, start_time = ?, end_time = ?, current_prize = current_prize + ?, max_prize = ?, url = ?, icon_gray = ?, icon_small = ?, icon_big = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where id = ?",
+				new Object[]{task.getName(), task.getRank(), task.getSize(), task.getIntr(), task.getAppIntr(), task.getPackageName(), task.getPrize(), task.getType(), task.getBackground(), task.getTime(), task.getRegister(), task.getReputation(), task.getStar(), task.getStartTime(), task.getEndTime(), task.getCurrentPrize(), task.getMaxPrize(), task.getUrl(), task.getIconGray(), task.getIconSmall(), task.getIconBig(), task.getLastModUserid(), task.getIsdel(), task.getId()});
 		return count > 0;
 	}
 
@@ -177,29 +177,30 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 			
 			@Override
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_TASK + "(name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, ?, ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?, ?, ?,  ?, now(), ?,  ?)", Statement.RETURN_GENERATED_KEYS);
+				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_TASK + "(name, rank, size, intr, appintr, packagename, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, ?, ?,  ?,  ?,  ?,  ?,  ?,  ?, ?,  ?,  ?,  ?,  ?,  ?, ?, ?,  ?, now(), ?,  ?)", Statement.RETURN_GENERATED_KEYS);
 				ps.setObject(1, task.getName());
 				ps.setObject(2, task.getRank());
 				ps.setObject(3, task.getSize());
 				ps.setObject(4, task.getIntr());
 				ps.setObject(5, task.getAppIntr());
-				ps.setObject(6, task.getPrize());
-				ps.setObject(7, task.getType());
-				ps.setObject(8, task.getBackground());
-				ps.setObject(9, task.getTime());
-				ps.setObject(10, task.getRegister());
-				ps.setObject(11, task.getReputation());
-				ps.setObject(12, task.getStar());
-				ps.setObject(13, task.getStartTime());
-				ps.setObject(14, task.getEndTime());
-				ps.setObject(15, task.getCurrentPrize());
-				ps.setObject(16, task.getMaxPrize());
-				ps.setObject(17, task.getUrl());
-				ps.setObject(18, task.getIconGray());
-				ps.setObject(19, task.getIconSmall());
-				ps.setObject(20, task.getIconBig());
-				ps.setObject(21, task.getLastModUserid());
-				ps.setObject(22, task.getIsdel());
+				ps.setObject(6, task.getPackageName());
+				ps.setObject(7, task.getPrize());
+				ps.setObject(8, task.getType());
+				ps.setObject(9, task.getBackground());
+				ps.setObject(10, task.getTime());
+				ps.setObject(11, task.getRegister());
+				ps.setObject(12, task.getReputation());
+				ps.setObject(13, task.getStar());
+				ps.setObject(14, task.getStartTime());
+				ps.setObject(15, task.getEndTime());
+				ps.setObject(16, task.getCurrentPrize());
+				ps.setObject(17, task.getMaxPrize());
+				ps.setObject(18, task.getUrl());
+				ps.setObject(19, task.getIconGray());
+				ps.setObject(20, task.getIconSmall());
+				ps.setObject(21, task.getIconBig());
+				ps.setObject(22, task.getLastModUserid());
+				ps.setObject(23, task.getIsdel());
 				return ps;
 			}
 		}, holder);
@@ -213,7 +214,7 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 
 	@Override
 	public List<Task> getFinishedTasks() {
-		return getJdbcTemplate().query("select id, name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_TASK + " where isdel = ? and ((max_prize > -1 and current_prize >= max_prize) or (end_time is not null and end_time <= now())) and id not in (select distinct task_id from " + SqlConstants.TABLE_TASK_NOTIFICATION + " where status = ?)", 
+		return getJdbcTemplate().query("select id, name, rank, size, intr, appintr, packagename, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_TASK + " where isdel = ? and ((max_prize > -1 and current_prize >= max_prize) or (end_time is not null and end_time <= now())) and id not in (select distinct task_id from " + SqlConstants.TABLE_TASK_NOTIFICATION + " where status = ?)", 
 				new Object[]{IWamiConstants.ACTIVE, TaskNotification.STATUS_SMS}, new TaskRowMapper());
 	}
 
@@ -291,7 +292,7 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 
 	@Override
 	public List<Task> getTasksByIds(Set<Long> taskIds) {
-		return getJdbcTemplate().query("select id, name, rank, size, intr, appintr, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_TASK + " where id in (" + StringUtils.join(taskIds, ",") + ")", new TaskRowMapper());
+		return getJdbcTemplate().query("select id, name, rank, size, intr, appintr, packagename, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_TASK + " where id in (" + StringUtils.join(taskIds, ",") + ")", new TaskRowMapper());
 	}
 }
 
@@ -323,6 +324,7 @@ class TaskRowMapper implements RowMapper<Task>{
 		task.setSize(rs.getDouble("size"));
 		task.setIntr(rs.getString("intr"));
 		task.setAppIntr(rs.getString("appintr"));
+		task.setPackageName(rs.getString("packagename"));
 		task.setPrize(rs.getInt("prize"));
 		task.setType(rs.getInt("type"));
 		task.setBackground(rs.getInt("background"));

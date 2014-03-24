@@ -38,7 +38,7 @@ public class AdminAjax {
 			if(params.containsKey("adminid") && params.containsKey("userid")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long userid = NumberUtils.toLong(params.get("userid"), -1);
-				//TODO check admin id
+				// check admin id
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.ADMIN_MANAGEMENT) && userid > 0){
 					
 					if(userBiz.delAdmin(userid, adminid))

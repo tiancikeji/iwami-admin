@@ -188,6 +188,7 @@ status:500 是用户未登录
 						rank：int 显示顺序
 						intr：String 任务简介
 						appintr：String app简介
+						packageName: String app package name
 						prize：int 任务米粒数
 						url: String apk下载地址
 						type：int 1普通任务，2红包任务，3金榜任务，4分享任务，5线下任务
@@ -244,6 +245,7 @@ status:500 是用户未登录
 			rank：int 显示顺序
 			intr：String 任务简介
 			appintr：String app简介
+			packageName: String app package name
 			prize：int 任务米粒数
 			url: String apk下载地址
 			type：int 1普通任务，2红包任务，3金榜任务，4分享任务，5线下任务
@@ -273,6 +275,7 @@ status:500 是用户未登录
 			rank：int 显示顺序
 			intr：String 任务简介
 			appintr：String app简介
+			packageName: String app package name
 			prize：int 任务米粒数
 			url: String apk下载地址
 			type：int 1普通任务，2红包任务，3金榜任务，5线下任务
