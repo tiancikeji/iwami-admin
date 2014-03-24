@@ -444,7 +444,7 @@ public class TaskAjax {
 					tmp.put("rank", task.getRank());
 					tmp.put("intr", StringUtils.trimToEmpty(task.getIntr()));
 					tmp.put("appintr", StringUtils.trimToEmpty(task.getAppIntr()));
-					tmp.put("appintr", StringUtils.trimToEmpty(task.getPackageName()));
+					tmp.put("packageName", StringUtils.trimToEmpty(task.getPackageName()));
 					tmp.put("prize", task.getPrize());
 					tmp.put("url", StringUtils.trimToEmpty(task.getUrl()));
 					
