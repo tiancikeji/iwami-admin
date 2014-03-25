@@ -83,6 +83,10 @@
 	<bean name="adminAjax" class="com.iwami.iwami.app.ajax.AdminAjax">
 		<property name="loginBiz" ref="loginBiz" />
 		<property name="userBiz" ref="userBiz" />
+	</bean>	
+	<bean name="fileAjax" class="com.iwami.iwami.app.ajax.FileAjax">
+		<property name="loginBiz" ref="loginBiz" />
+		<property name="fileBiz" ref="fileBiz" />
 	</bean>
 	
 	<!-- biz -->
@@ -127,6 +131,7 @@
 		<property name="onStartService" ref="onstartService" />
 		<property name="userService" ref="userService" />
 	</bean>
+	<bean name="fileBiz" class="com.iwami.iwami.app.biz.impl.FileBizImpl" />
 	
 	<!-- service -->
 	<bean name="apkService" class="com.iwami.iwami.app.service.impl.ApkServiceImpl">

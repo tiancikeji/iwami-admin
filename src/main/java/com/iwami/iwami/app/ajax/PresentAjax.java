@@ -299,15 +299,21 @@ public class PresentAjax {
 				tmp.put("count", exchange.getCount());
 				tmp.put("prize", exchange.getPrize());
 				tmp.put("status", exchange.getStatus());
-				tmp.put("cellPhone", exchange.getCellPhone());
-				tmp.put("alipayAccount", exchange.getAlipayAccount());
-				tmp.put("bankAccount", exchange.getBankAccount());
-				tmp.put("bankName", exchange.getBankName());
-				tmp.put("bankNo", exchange.getBankNo());
-				tmp.put("address", exchange.getAddress());
-				tmp.put("name", exchange.getName());
-				tmp.put("expressName", exchange.getExpressName());
-				tmp.put("expressNo", exchange.getExpressNo());
+				if(exchange.getCellPhone() > 0)
+					tmp.put("cellPhone", exchange.getCellPhone());
+				else
+					tmp.put("cellPhone", StringUtils.EMPTY);
+				tmp.put("alipayAccount", StringUtils.trimToEmpty(exchange.getAlipayAccount()));
+				tmp.put("bankAccount", StringUtils.trimToEmpty(exchange.getBankAccount()));
+				tmp.put("bankName", StringUtils.trimToEmpty(exchange.getBankName()));
+				if(exchange.getBankNo() > 0)
+					tmp.put("bankNo", exchange.getBankNo());
+				else
+					tmp.put("bankNo", StringUtils.EMPTY);
+				tmp.put("address", StringUtils.trimToEmpty(exchange.getAddress()));
+				tmp.put("name", StringUtils.trimToEmpty(exchange.getName()));
+				tmp.put("expressName", StringUtils.trimToEmpty(exchange.getExpressName()));
+				tmp.put("expressNo", StringUtils.trimToEmpty(exchange.getExpressNo()));
 				tmp.put("channel", exchange.getChannel());
 
 				tmp.put("lastModTime", IWamiUtils.getDateString(exchange.getLastModTime()));
@@ -397,14 +403,14 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id")
 					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("gifts") && params.containsKey("probs") && params.containsKey("counts")
-					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+					  && params.containsKey("iconSmall") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				int prize = NumberUtils.toInt(params.get("prize"), -1);
 				int rank = NumberUtils.toInt(params.get("rank"), -1);
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
-				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
 				
 				String[] gifts = StringUtils.split(StringUtils.trimToEmpty(params.get("gifts")), IWamiConstants.SEPARATOR_PRESENT);
 				String[] probs = StringUtils.split(StringUtils.trimToEmpty(params.get("probs")), IWamiConstants.SEPARATOR_PRESENT);
@@ -412,7 +418,7 @@ public class PresentAjax {
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
 						&& id > 0 && prize > 0 && (isdel == 0 || isdel == 1)
-						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)
+						 && StringUtils.isNotBlank(iconSmall) 
 						 && gifts != null && gifts.length == 4 && probs != null && probs.length == 4 &&  counts != null && counts.length == 4){
 					
 					List<LuckyRule> rules = new ArrayList<LuckyRule>();
@@ -443,7 +449,7 @@ public class PresentAjax {
 						present.setType(Present.TYPE_LUCK);
 						present.setRank(rank);
 						present.setIconSmall(iconSmall);
-						present.setIconBig(iconBig);
+						
 						present.setIsdel(isdel);
 						present.setLastModUserid(adminid);
 					
@@ -561,18 +567,18 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("name")
 					 && params.containsKey("rank") && params.containsKey("prize")
-					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+					  && params.containsKey("iconSmall") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				int prize = NumberUtils.toInt(params.get("prize"), -1);
 				int rank = NumberUtils.toInt(params.get("rank"), -1);
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
-				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
 						&& prize > 0 && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
-						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+						 && StringUtils.isNotBlank(iconSmall) ){
 					Present present = new Present();
 					present.setName(name);
 					present.setPrize(prize);
@@ -580,7 +586,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_OFFLINE);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
-					present.setIconBig(iconBig);
+					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
 					
@@ -610,7 +616,7 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
 					 && params.containsKey("rank") && params.containsKey("prize")
-					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+					  && params.containsKey("iconSmall") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				int prize = NumberUtils.toInt(params.get("prize"), -1);
@@ -618,11 +624,11 @@ public class PresentAjax {
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
-				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
 						&& id > 0 && prize > 0 && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
-						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+						 && StringUtils.isNotBlank(iconSmall) ){
 					Present present = new Present();
 					present.setId(id);
 					present.setName(name);
@@ -631,7 +637,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_OFFLINE);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
-					present.setIconBig(iconBig);
+					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
 					
@@ -726,18 +732,18 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("name")
 					 && params.containsKey("rank") && params.containsKey("prize")
-					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+					  && params.containsKey("iconSmall") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				int prize = NumberUtils.toInt(params.get("prize"), -1);
 				int rank = NumberUtils.toInt(params.get("rank"), -1);
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
-				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
 						&& prize > 0 && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
-						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+						 && StringUtils.isNotBlank(iconSmall) ){
 					Present present = new Present();
 					present.setName(name);
 					present.setPrize(prize);
@@ -745,7 +751,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_ONLINE_EMS);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
-					present.setIconBig(iconBig);
+					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
 					
@@ -775,7 +781,7 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
 					 && params.containsKey("rank") && params.containsKey("prize")
-					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+					  && params.containsKey("iconSmall") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				int prize = NumberUtils.toInt(params.get("prize"), -1);
@@ -783,11 +789,11 @@ public class PresentAjax {
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
-				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
 						&& id > 0 && prize > 0 && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
-						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+						 && StringUtils.isNotBlank(iconSmall) ){
 					Present present = new Present();
 					present.setId(id);
 					present.setName(name);
@@ -796,7 +802,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_ONLINE_EMS);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
-					present.setIconBig(iconBig);
+					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
 					
@@ -918,7 +924,7 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("name")
 					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("count")
-					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+					  && params.containsKey("iconSmall") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				int prize = NumberUtils.toInt(params.get("prize"), -1);
 				int count = NumberUtils.toInt(params.get("count"), -1);
@@ -926,11 +932,11 @@ public class PresentAjax {
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
-				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
-						&& prize > 0 && count >= prize && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
-						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+						&& prize > 0 && /*count >= prize &&*/ StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) ){
 					Present present = new Present();
 					present.setName(name);
 					present.setPrize(prize);
@@ -938,7 +944,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_ONLINE_RECHARGE_MOBILE);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
-					present.setIconBig(iconBig);
+					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
 					
@@ -968,7 +974,7 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
 					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("count")
-					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+					  && params.containsKey("iconSmall") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				int prize = NumberUtils.toInt(params.get("prize"), -1);
@@ -977,11 +983,11 @@ public class PresentAjax {
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
-				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
-						&& id > 0 && prize > 0 && count >= prize && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
-						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+						&& id > 0 && prize > 0 && /*count >= prize &&*/ StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
+						 && StringUtils.isNotBlank(iconSmall) ){
 					Present present = new Present();
 					present.setId(id);
 					present.setName(name);
@@ -990,7 +996,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_ONLINE_RECHARGE_MOBILE);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
-					present.setIconBig(iconBig);
+					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
 					
@@ -1085,7 +1091,7 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
 					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("count")
-					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+					  && params.containsKey("iconSmall") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				int prize = NumberUtils.toInt(params.get("prize"), -1);
@@ -1094,11 +1100,11 @@ public class PresentAjax {
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
-				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
 						&& id > 0 && prize > 0 && count >= prize && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
-						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+						 && StringUtils.isNotBlank(iconSmall) ){
 					Present present = new Present();
 					present.setId(id);
 					present.setName(name);
@@ -1107,7 +1113,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_ONLINE_RECHARGE_ALIPAY);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
-					present.setIconBig(iconBig);
+					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
 					
@@ -1202,7 +1208,7 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
 					 && params.containsKey("rank") && params.containsKey("prize") && params.containsKey("count")
-					 && params.containsKey("iconBig") && params.containsKey("iconSmall") && params.containsKey("isdel")){
+					  && params.containsKey("iconSmall") && params.containsKey("isdel")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				int prize = NumberUtils.toInt(params.get("prize"), -1);
@@ -1211,11 +1217,11 @@ public class PresentAjax {
 				int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
-				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
+				
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
 						&& id > 0 && prize > 0 && count >= prize && StringUtils.isNotBlank(name) && (isdel == 0 || isdel == 1)
-						 && StringUtils.isNotBlank(iconSmall) && StringUtils.isNotBlank(iconBig)){
+						 && StringUtils.isNotBlank(iconSmall) ){
 					Present present = new Present();
 					present.setId(id);
 					present.setName(name);
@@ -1224,7 +1230,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_ONLINE_RECHARGE_BANK);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
-					present.setIconBig(iconBig);
+					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
 					
@@ -1296,7 +1302,6 @@ public class PresentAjax {
 				tmp.put("rank", present.getRank());
 				tmp.put("type", present.getType());
 				tmp.put("iconSmall", present.getIconSmall());
-				tmp.put("iconBig", present.getIconBig());
 				tmp.put("isdel", present.getIsdel());
 
 				tmp.put("lastModTime", IWamiUtils.getDateString(present.getLastModTime()));

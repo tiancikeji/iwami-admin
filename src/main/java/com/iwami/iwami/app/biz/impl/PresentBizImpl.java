@@ -2,6 +2,7 @@ package com.iwami.iwami.app.biz.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,6 +123,17 @@ public class PresentBizImpl implements PresentBiz {
 
 	@Override
 	public List<Present> getPresents() {
-		return presentService.getPresents();
+		List<Present> presents = presentService.getPresents();
+		
+		if(presents != null && presents.size() > 0)
+			Collections.sort(presents, new Comparator<Present>() {
+
+				@Override
+				public int compare(Present o1, Present o2) {
+					return o1.getRank() - o2.getRank();
+				}
+			});
+		
+		return presents;
 	}
 }
