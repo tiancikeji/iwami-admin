@@ -53,7 +53,7 @@ public class JPushTask implements Callable<Integer>{
 			
 			if(tasks == null || tasks.size() < batchSize){
 				// 1. update status
-				pushService.updatePush(Push.STATUS_SENT, push.getId());
+				pushService.updatePush(Push.STATUS_PUSHED, push.getId());
 				Push tmp = pushService.getPushById(push.getId());
 				int count = pushService.getAllCntsById(push.getId());
 				// 2. send sms
@@ -61,7 +61,7 @@ public class JPushTask implements Callable<Integer>{
 					for(Long cellPhone : cellPhones)
 						smsService.sendJPushSMS("" + cellPhone, tmp.getId(), tmp.getAddTime(), tmp.getLastModTime(), count);
 				// 3. update status
-				pushService.updatePush(StringUtils.join(cellPhones.toArray(), IWamiConstants.SEPARATOR_CELLPHONE), Push.STATUS_PUSHED, push.getId());
+				pushService.updatePush(StringUtils.join(cellPhones.toArray(), IWamiConstants.SEPARATOR_CELLPHONE), Push.STATUS_SENT, push.getId());
 			}
 		}
 		
