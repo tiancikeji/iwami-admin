@@ -32,8 +32,8 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	public List<Task> getTasks(int type, int background, int register,
 			int maxL, int maxR, int prizeL, int prizeR, int currL, int currR,
-			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR) {
-		return taskDao.getTasks(type, background, register, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR);
+			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR, int status) {
+		return taskDao.getTasks(type, background, register, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status);
 	}
 
 	@Override

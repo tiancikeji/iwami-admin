@@ -53,7 +53,7 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 	@Override
 	public List<Task> getTasks(int type, int background, int register,
 			int maxL, int maxR, int prizeL, int prizeR, int currL, int currR,
-			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR) {
+			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR, int status) {
 		List<Object> params = new ArrayList<Object>();
 		StringBuilder sql = new StringBuilder("select id, name, rank, size, intr, appintr, packagename, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from ");
 		sql.append(SqlConstants.TABLE_TASK);
@@ -124,6 +124,13 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 		if(endR != null){
 			sql.append(" and (end_time is null or end_time <= ?)");
 			params.add(endR);
+		}
+		if(status == 1){
+			sql.append(" and (start_time > now())");
+		} else if(status == 2){
+			sql.append(" and ((max_prize = -1 or (max_prize - current_prize) > 0) and start_time <= now() and (end_time is null or end_time >= now()))");
+		} else if(status == 3){
+			sql.append(" and ((end_time is not null and end_time <= now()) or (max_prize - current_prize) <= 0)");
 		}
 		
 		return getJdbcTemplate().query(sql.toString(), params.toArray(),new TaskRowMapper());

@@ -18,7 +18,7 @@ public interface TaskDao {
 
 	public List<Task> getTasks(int type, int background, int register,
 			int maxL, int maxR, int prizeL, int prizeR, int currL, int currR,
-			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR);
+			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR, int status);
 
 	public Task getTaskById(long taskid);
 

@@ -12,7 +12,7 @@ public interface TaskBiz {
 
 	public boolean modTreasureConfig(TreasureConfig config);
 	
-	public List<Task> getTasks(int type, int attr, int maxL, int maxR, int prizeL, int prizeR, int currL, int currR, int leftL, int leftR, Date startL, Date startR, Date endL, Date endR);
+	public List<Task> getTasks(int type, int attr, int maxL, int maxR, int prizeL, int prizeR, int currL, int currR, int leftL, int leftR, Date startL, Date startR, Date endL, Date endR, int status);
 
 	public Task getTaskById(long taskid);
 
