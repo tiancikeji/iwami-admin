@@ -82,11 +82,11 @@ public class PresentBizImpl implements PresentBiz {
 		
 		if(exchanges != null && exchanges.size() > 0)
 			for(Exchange exchange : exchanges){
-				int status = ExchangeHistory.STATUS_NEW;
+				int status = 1;
 				if(exchange.getStatus() == Exchange.STATUS_FINISH)
-					status = ExchangeHistory.STATUS_SENT;
+					status = 2;
 				if(exchange.getPresentType() == Present.TYPE_OFFLINE)
-					status = ExchangeHistory.STATUS_OFFLINE;
+					status = 3;
 				exchange.setStatus(status);
 				
 				ExchangeHistory history = result.get(exchange.getUserid());
