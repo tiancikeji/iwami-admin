@@ -410,7 +410,7 @@ public class TaskAjax {
 							&& maxL >= -1 && maxR >= -1 && maxR >= maxL
 							&& prizeL >= -1 && prizeR >= -1 && prizeR >=prizeL
 							&& currL >= -1 && currR >= -1 && currR >= currL
-							&& leftL >= -1 && leftR >= -1 && leftR >= leftL && (status == 0 || status == 1 || status == 2)){
+							&& leftL >= -1 && leftR >= -1 && leftR >= leftL && (status == 0 || status == 1 || status == 2 || status == 3)){
 						List<Task> tasks = taskBiz.getTasks(type, attr, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status);
 						result.put("data", parseTasks(tasks));
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
