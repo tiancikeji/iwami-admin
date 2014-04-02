@@ -71,7 +71,7 @@
 	</servlet-mapping>
 	
 	<!-- download -->
-	<servlet>
+	<!-- <servlet>
 		<servlet-name>downloadservlet</servlet-name>
 		<servlet-class>
 			org.springframework.web.context.support.HttpRequestHandlerServlet
@@ -80,7 +80,7 @@
 	<servlet-mapping>
 		<servlet-name>downloadservlet</servlet-name>
 		<url-pattern>/download</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping> -->
 	<!-- *****************************************************servlet end**************************************************** -->
 	
 </web-app>

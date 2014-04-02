@@ -43,6 +43,8 @@ public class Present {
 	private long lastModUserid;
 	
 	private int isdel;
+	
+	private String channel;
 
 	public long getId() {
 		return id;
@@ -145,6 +147,14 @@ public class Present {
 
 	public void setIsdel(int isdel) {
 		this.isdel = isdel;
+	}
+
+	public String getChannel() {
+		return channel;
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
 	}
 	
 }

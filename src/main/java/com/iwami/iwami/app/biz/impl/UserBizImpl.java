@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,10 @@ public class UserBizImpl implements UserBiz {
 	
 	public User getUserById(long userid){
 		return userService.getUserById(userid);
+	}
+
+	public List<User> getUserByIds(Set<Long> uids){
+		return userService.getUserByIds(uids);
 	}
 
 	public User getAdminById(long adminid) {
@@ -125,8 +130,8 @@ public class UserBizImpl implements UserBiz {
 
 	// admin user here...
 	@Override
-	public List<User> getAdminUsers() {
-		return userService.getAdminUsers();
+	public List<User> getAdminUsers(String key) {
+		return userService.getAdminUsers(key);
 	}
 
 	@Override
@@ -157,6 +162,11 @@ public class UserBizImpl implements UserBiz {
 				throw new RuntimeException("failed mod admin, so rollback");
 		else
 			return false;
+	}
+
+	@Override
+	public boolean modRole(UserRole role){
+		return userService.modAdminRole(role);
 	}
 
 	@Override

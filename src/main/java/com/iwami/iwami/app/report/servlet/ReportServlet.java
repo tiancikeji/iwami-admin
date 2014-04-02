@@ -6,11 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,17 +29,9 @@ public class ReportServlet implements HttpRequestHandler {
 		OutputStream out = null;
 		try {
 			long adminid = NumberUtils.toLong(request.getParameter("adminid"), -1);
-			Cookie[] cookies = request.getCookies();
-			if(cookies != null && cookies.length > 0)
-				for(Cookie cookie : cookies)
-					if(StringUtils.equals("adminid", cookie.getName())){
-						adminid = NumberUtils.toLong(cookie.getValue(), 0);
-						break;
-					}
-			
 			
 			int type = NumberUtils.toInt(request.getParameter("type"), 0);
-			if(type > 0 && type < 16 && adminid > 0){
+			if(type > 0 && type < 16){
 				response.setHeader("Content-Type", "application/msexcel");
 				
 				String oriFileName = ReportParam.TYPE_TITLES.get(type) + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
@@ -59,7 +49,11 @@ public class ReportServlet implements HttpRequestHandler {
 				param.setStart(request.getParameter("start"));
 				param.setEnd(request.getParameter("end"));
 				param.setKey(request.getParameter("key"));
-				reportBiz.genReport(param, adminid).write(response.getOutputStream());
+				
+				logger.info("[Report] " + param);
+				
+				out = response.getOutputStream();
+				reportBiz.genReport(param, adminid).write(out);
 			} else
 				response.sendRedirect(request.getContextPath() + "/" + DOWNLOAD_ERROR);
 		} catch (Exception e) {

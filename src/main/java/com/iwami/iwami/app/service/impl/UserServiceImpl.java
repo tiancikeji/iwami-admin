@@ -3,6 +3,7 @@ package com.iwami.iwami.app.service.impl;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.iwami.iwami.app.dao.UserDao;
 import com.iwami.iwami.app.model.User;
@@ -16,6 +17,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User getUserById(long id) {
 		return userDao.getUserById(id);
+	}
+
+	@Override
+	public List<User> getUserByIds(Set<Long> uids){
+		return userDao.getUserByIds(uids);
 	}
 
 	@Override
@@ -52,8 +58,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<User> getAdminUsers() {
-		return userDao.getAdminUsers();
+	public List<User> getAdminUsers(String key) {
+		return userDao.getAdminUsers(key);
 	}
 
 	@Override

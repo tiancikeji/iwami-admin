@@ -34,7 +34,7 @@ public class TaskBizImpl implements TaskBiz {
 	@Override
 	public List<Task> getTasks(int type, int attr, int maxL, int maxR,
 			int prizeL, int prizeR, int currL, int currR, int leftL, int leftR,
-			Date startL, Date startR, Date endL, Date endR, int status) {
+			Date startL, Date startR, Date endL, Date endR, int status, int start, int step) {
 		int ttype = 31;
 		if(type == 1)
 			ttype = 1;
@@ -58,7 +58,7 @@ public class TaskBizImpl implements TaskBiz {
 			register = 1;
 		}
 		
-		List<Task> tasks = taskService.getTasks(ttype, background, register, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status);
+		List<Task> tasks = taskService.getTasks(ttype, background, register, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status, start, step);
 		
 		if(tasks != null && tasks.size() > 0){
 			Collections.sort(tasks, new Comparator<Task>() {
@@ -84,6 +84,36 @@ public class TaskBizImpl implements TaskBiz {
 		}
 		
 		return tasks;
+	}
+
+	@Override
+	public int getTaskCount(int type, int attr, int maxL, int maxR,
+			int prizeL, int prizeR, int currL, int currR, int leftL, int leftR,
+			Date startL, Date startR, Date endL, Date endR, int status) {
+		int ttype = 31;
+		if(type == 1)
+			ttype = 1;
+		else if(type == 2)
+			ttype = 2;
+		else if(type == 3)
+			ttype = 8;
+		else if(type == 4)
+			ttype = 4;
+		else if(type == 5)
+			ttype = 16;
+		
+		int background = -1;
+		int register = -1;
+		if(attr == 1)
+			background = 1;
+		else if(attr == 2)
+			background = 0;
+		else if(attr == 3){
+			background = 1;
+			register = 1;
+		}
+		
+		return taskService.getTaskCount(ttype, background, register, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status);
 	}
 
 	@Override

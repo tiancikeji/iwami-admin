@@ -80,7 +80,7 @@ public class UserAjax {
 				tmp.put("lastModUserid", user.getLastmodUserid());
 				tmp.put("isdel", user.getIsdel());
 				
-				if(user.getCreateTime() != null)
+				if(user.getCreateTime() != null && user.getCreateTime().before(user.getAddTime()))
 					tmp.put("createTime", IWamiUtils.getDateString(user.getCreateTime()));
 				else
 					tmp.put("createTime", IWamiUtils.getDateString(user.getAddTime()));

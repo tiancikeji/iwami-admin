@@ -404,15 +404,18 @@ public class TaskAjax {
 					int leftL = NumberUtils.toInt(params.get("leftL"), -1);
 					int leftR = NumberUtils.toInt(params.get("leftR"), -1);
 					int status = NumberUtils.toInt(params.get("status"), 0);
+					int start = NumberUtils.toInt(params.get("start"), 0);
+					int step = NumberUtils.toInt(params.get("step"), 20);
 					
-					if((type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5)
+					if((type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5) && start >= 0 && step > 0
 							&& (attr == 0 || attr == 1 || attr == 2 || attr == 3 || attr == 4) 
 							&& maxL >= -1 && maxR >= -1 && maxR >= maxL
 							&& prizeL >= -1 && prizeR >= -1 && prizeR >=prizeL
 							&& currL >= -1 && currR >= -1 && currR >= currL
 							&& leftL >= -1 && leftR >= -1 && leftR >= leftL && (status == 0 || status == 1 || status == 2 || status == 3)){
-						List<Task> tasks = taskBiz.getTasks(type, attr, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status);
+						List<Task> tasks = taskBiz.getTasks(type, attr, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status, start, step);
 						result.put("data", parseTasks(tasks));
+						result.put("count", taskBiz.getTaskCount(type, attr, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status));
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 					} else
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);

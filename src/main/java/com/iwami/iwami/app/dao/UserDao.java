@@ -3,6 +3,7 @@ package com.iwami.iwami.app.dao;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.iwami.iwami.app.model.Login;
 import com.iwami.iwami.app.model.User;
@@ -11,6 +12,8 @@ import com.iwami.iwami.app.model.UserRole;
 public interface UserDao {
 	
 	public User getUserById(long id);
+
+	public List<User> getUserByIds(Set<Long> uids);
 
 	public User getUserByCellPhone(long cellPhone);
 
@@ -22,7 +25,7 @@ public interface UserDao {
 
 	public User getAdminById(long adminid);
 
-	public List<User> getAdminUsers();
+	public List<User> getAdminUsers(String key);
 
 	public Map<Long, UserRole> getUserRoles(List<Long> ids);
 

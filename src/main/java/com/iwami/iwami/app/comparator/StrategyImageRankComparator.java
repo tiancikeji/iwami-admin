@@ -16,7 +16,12 @@ public class StrategyImageRankComparator implements Comparator<StrategyImage> {
 		if(i2 != null)
 			rank2 = i2.getRank();
 		
-		return rank1 - rank2;
+		int result = rank1 - rank2;
+		
+		if(result == 0){
+			return i1.getLastModTime().before(i2.getLastModTime()) ? 1 : -1;
+		} else
+			return result;
 	}
 
 }

@@ -60,6 +60,51 @@ public class AdminAjax {
 		return result;
 	}
 
+	@AjaxMethod(path = "password.ajax")
+	public Map<Object, Object> password(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("oldpassword") && params.containsKey("password1") && params.containsKey("password2")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				String oldpassword = StringUtils.trimToEmpty(params.get("oldpassword"));
+				String password1 = StringUtils.trimToEmpty(params.get("password1"));
+				String password2 = StringUtils.trimToEmpty(params.get("password2"));
+				if(adminid > 0 && loginBiz.checkLogin(adminid) 
+						&& StringUtils.isNotBlank(oldpassword)
+						&& StringUtils.isNotBlank(password1) && StringUtils.isNotBlank(password2) && StringUtils.equals(password1, password2)){
+					List<Long> ids = new ArrayList<Long>();
+					ids.add(adminid);
+					
+					Map<Long, UserRole> roles = userBiz.getUserRoles(ids);
+					if(roles != null && roles.containsKey(adminid)){
+						UserRole role = roles.get(adminid);
+						if(role != null && StringUtils.equals(role.getPassword(), oldpassword)){
+							role.setPassword(password1);
+							if(userBiz.modRole(role))
+								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+							else
+								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+						} else
+							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+					}
+					else
+						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getUserinfo", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
 	@AjaxMethod(path = "MOD/admin.ajax")
 	public Map<Object, Object> modAdmin(Map<String, String> params) {
 		Map<Object, Object> result = new HashMap<Object, Object>();
@@ -171,9 +216,9 @@ public class AdminAjax {
 			if(params.containsKey("adminid")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.ADMIN_MANAGEMENT)){
-					Map<Long, UserRole> roles = null;
-					List<User> users = userBiz.getAdminUsers();
+					List<User> users = userBiz.getAdminUsers(StringUtils.trimToEmpty(params.get("key")));
 					
+					Map<Long, UserRole> roles = null;
 					if(users != null && users.size() > 0){
 						List<Long> ids = new ArrayList<Long>();
 						for(User user : users)

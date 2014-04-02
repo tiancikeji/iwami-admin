@@ -11,7 +11,7 @@ public class LuckyRuleComparator implements Comparator<LuckyRule> {
 		if(rule1 != null && rule2 != null){
 			int lev1 = rule1.getIndexLevel();
 			int lev2 = rule2.getIndexLevel();
-			return lev2 - lev1;
+			return lev1 - lev2;
 		}
 		return 0;
 	}

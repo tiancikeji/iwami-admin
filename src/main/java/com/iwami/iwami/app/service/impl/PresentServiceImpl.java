@@ -15,8 +15,23 @@ public class PresentServiceImpl implements PresentService {
 	private PresentDao presentDao;
 
 	@Override
-	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status) {
-		return presentDao.getPresentsByTypeNStatus(type, status);
+	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status, int start, int step) {
+		return presentDao.getPresentsByTypeNStatus(type, status, start, step);
+	}
+
+	@Override
+	public int getPresentCountByTypeNStatus(int type, List<Integer> status){
+		return presentDao.getPresentCountByTypeNStatus(type, status);
+	}
+
+	@Override
+	public List<Present> getPresentsByChannel(int type, String channel, int start, int step){
+		return presentDao.getPresentsByChannel(type, channel, start, step);
+	}
+		
+	@Override
+	public int getPresentCountByChannel(int type, String channel){
+		return presentDao.getPresentCountByTypeNStatus(type, channel);
 	}
 
 	@Override

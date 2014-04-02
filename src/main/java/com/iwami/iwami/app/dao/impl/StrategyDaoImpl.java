@@ -32,7 +32,7 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 	// image
 	@Override
 	public List<StrategyImage> getAllImages() {
-		return getJdbcTemplate().query("select id, rank, icon_url, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_STRATEGY_IMAGES, new StrategyImageRowMapper());
+		return getJdbcTemplate().query("select id, rank, icon_url, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_STRATEGY_IMAGES + " where isdel = 0", new StrategyImageRowMapper());
 	}
 
 	@Override
@@ -100,9 +100,9 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 	// strategy
 	@Override
 	public List<Strategy> getStrategies(String key) {
-		String sql = "select id, name, subname, intr, rank, icon_small, icon_big, isdel, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_STRATEGY_LIST;
+		String sql = "select id, name, subname, intr, rank, icon_small, icon_big, isdel, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_STRATEGY_LIST + " where isdel = 0 ";
 		if(StringUtils.isNotBlank(key)){
-			sql += " where id = ? or name = ?";
+			sql += " and (id = ? or name = ?)";
 			return getJdbcTemplate().query(sql, new Object[]{key, key}, new StrategyRowMapper());
 		}
 		return getJdbcTemplate().query(sql, new StrategyRowMapper());

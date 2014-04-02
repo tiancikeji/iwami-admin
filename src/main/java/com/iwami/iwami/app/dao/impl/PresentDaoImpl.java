@@ -29,20 +29,60 @@ import com.iwami.iwami.app.model.Share;
 public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 
 	@Override
-	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status) {
-		return getJdbcTemplate().query("select id, name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_PRESENT + " where type = ? and isdel in (" + StringUtils.join(status.toArray(), ",") + ")", 
-				new Object[]{type}, new PresentRowMapper());
+	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status, int start, int step) {
+		return getJdbcTemplate().query("select id, name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel, channel from " + SqlConstants.TABLE_PRESENT + " where type = ? and isdel in (" + StringUtils.join(status.toArray(), ",") + ") order by channel limit ?, ?", 
+				new Object[]{type, start, step}, new PresentRowMapper());
+	}
+
+	@Override
+	public int getPresentCountByTypeNStatus(int type, List<Integer> status){
+		return getJdbcTemplate().queryForInt("select count(1) from " + SqlConstants.TABLE_PRESENT + " where type = ? and isdel in (" + StringUtils.join(status.toArray(), ",") + ")", 
+				new Object[]{type});
+	}
+
+	@Override
+	public List<Present> getPresentsByChannel(int type, String channel, int start, int step){
+		String sql = "select id, name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel, channel from " + SqlConstants.TABLE_PRESENT + " where type = ? ";
+		
+		List<Object> params = new ArrayList<Object>();
+		params.add(type);
+		
+		if(StringUtils.isNotBlank(channel)){
+			sql += " and channel = ?";
+			params.add(channel);
+		}
+		
+		sql += " order by channel limit ?, ?";
+		params.add(start);
+		params.add(step);
+		
+		return getJdbcTemplate().query(sql, params.toArray(), new PresentRowMapper());
+	}
+
+	@Override
+	public int getPresentCountByTypeNStatus(int type, String channel){
+		String sql = "select count(1) from " + SqlConstants.TABLE_PRESENT + " where type = ? ";
+		
+		List<Object> params = new ArrayList<Object>();
+		params.add(type);
+		
+		if(StringUtils.isNotBlank(channel)){
+			sql += " and channel = ?";
+			params.add(channel);
+		}
+		
+		return getJdbcTemplate().queryForInt(sql, params.toArray());
 	}
 
 	@Override
 	public List<Present> getPresents() {
-		return getJdbcTemplate().query("select id, name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_PRESENT + " where isdel = 0", new PresentRowMapper());
+		return getJdbcTemplate().query("select id, name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel, channel from " + SqlConstants.TABLE_PRESENT + " where isdel = 0", new PresentRowMapper());
 	}
 
 	@Override
 	public boolean modPresent(Present present) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_PRESENT + " set name = ?, prize = ?, `count` = ?, type = ?, rank =?, lastmod_time = now(), lastmod_userid = ?, isdel = ?, icon_small = ?, icon_big = ? where id = ?", 
-				new Object[]{present.getName(), present.getPrize(), present.getCount(), present.getType(), present.getRank(), present.getLastModUserid(), present.getIsdel(), present.getIconSmall(), present.getIconBig(), present.getId()});
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_PRESENT + " set name = ?, prize = ?, `count` = ?, type = ?, rank =?, lastmod_time = now(), lastmod_userid = ?, isdel = ?, icon_small = ?, icon_big = ?, channel = ? where id = ?", 
+				new Object[]{present.getName(), present.getPrize(), present.getCount(), present.getType(), present.getRank(), present.getLastModUserid(), present.getIsdel(), present.getIconSmall(), present.getIconBig(), present.getChannel(), present.getId()});
 		
 		return count > 0;
 	}
@@ -62,7 +102,7 @@ public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 			
 			@Override
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_PRESENT + "(name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, ?, ?, ?, ?, now(), ?, ?)", Statement.RETURN_GENERATED_KEYS);
+				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_PRESENT + "(name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel, channel) values(?, ?, ?, ?, ?, ?, ?, now(), ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 				ps.setObject(1, present.getName());
 				ps.setObject(2, present.getPrize());
 				ps.setObject(3, present.getCount());
@@ -72,6 +112,7 @@ public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 				ps.setObject(7, present.getIconBig());
 				ps.setObject(8, present.getLastModUserid());
 				ps.setObject(9, present.getIsdel());
+				ps.setObject(10, present.getChannel());
 				return ps;
 			}
 		}, holder);
@@ -122,8 +163,8 @@ public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 
 	@Override
 	public List<Exchange> getExchangeHistoryByUser(List<Integer> types, long key) {
-		return getJdbcTemplate().query("select id, userid, presentid, present_name, present_prize, present_type, `count`, prize, status, cell_phone, alipay_account, bank_account, bank_no, bank_name, address, name, express_name, express_no, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_EXCHANGE + " where isdel = 0 and presentid > 0 and present_type in (" + StringUtils.join(types.toArray(), ",") + ") and (userid = ? or cell_phone = ?)", 
-				new Object[]{key, key}, new ExchangeRowMapper());
+		return getJdbcTemplate().query("select id, userid, presentid, present_name, present_prize, present_type, `count`, prize, status, cell_phone, alipay_account, bank_account, bank_no, bank_name, address, name, express_name, express_no, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_EXCHANGE + " where isdel = 0 and presentid > 0 and present_type in (" + StringUtils.join(types.toArray(), ",") + ") and userid = ?", 
+				new Object[]{key}, new ExchangeRowMapper());
 	}
 
 	@Override
@@ -201,6 +242,7 @@ class PresentRowMapper implements RowMapper<Present>{
 		present.setType(rs.getInt("type"));
 		present.setIconSmall(rs.getString("icon_small"));
 		present.setIconBig(rs.getString("icon_big"));
+		present.setChannel(rs.getString("channel"));
 		Timestamp ts = rs.getTimestamp("lastmod_time");
 		if(ts != null)
 			present.setLastModTime(new Date(ts.getTime()));

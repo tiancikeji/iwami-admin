@@ -9,7 +9,13 @@ import com.iwami.iwami.app.model.Present;
 
 public interface PresentBiz {
 
-	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status);
+	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status, int start, int step);
+
+	public int getPresentCountByTypeNStatus(int type, List<Integer> status);
+
+	public List<Present> getPresentsByChannel(int type, String channel, int start, int step);
+
+	public int getPresentCountByChannel(int type, String channel);
 
 	public boolean modPresent(Present present);
 

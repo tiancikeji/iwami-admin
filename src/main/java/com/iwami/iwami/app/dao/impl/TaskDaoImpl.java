@@ -53,7 +53,7 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 	@Override
 	public List<Task> getTasks(int type, int background, int register,
 			int maxL, int maxR, int prizeL, int prizeR, int currL, int currR,
-			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR, int status) {
+			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR, int status, int start, int step) {
 		List<Object> params = new ArrayList<Object>();
 		StringBuilder sql = new StringBuilder("select id, name, rank, size, intr, appintr, packagename, prize, type, background, time, register, reputation, star, start_time, end_time, current_prize, max_prize, url, icon_gray, icon_small, icon_big, lastmod_time, lastmod_userid, isdel from ");
 		sql.append(SqlConstants.TABLE_TASK);
@@ -133,7 +133,97 @@ public class TaskDaoImpl extends JdbcDaoSupport implements TaskDao {
 			sql.append(" and ((end_time is not null and end_time <= now()) or (max_prize - current_prize) <= 0)");
 		}
 		
+		sql.append(" limit ?, ?");
+		params.add(start);
+		params.add(step);
+		
 		return getJdbcTemplate().query(sql.toString(), params.toArray(),new TaskRowMapper());
+	}
+
+	@Override
+	public int getTaskCount(int type, int background, int register,
+			int maxL, int maxR, int prizeL, int prizeR, int currL, int currR,
+			int leftL, int leftR, Date startL, Date startR, Date endL, Date endR, int status) {
+		List<Object> params = new ArrayList<Object>();
+		StringBuilder sql = new StringBuilder("select count(1) from ");
+		sql.append(SqlConstants.TABLE_TASK);
+		sql.append(" where type & ? > 0");
+		params.add(type);
+		sql.append(" and isdel in (?, ?) ");
+		params.add(0);
+		params.add(1);
+		
+		if(background >= 0){
+			sql.append(" and background = ?");
+			params.add(background);
+		}
+		if(register >= 0){
+			sql.append(" and register = ?");
+			params.add(register);
+		}
+		
+		if(maxL >= 0){
+			sql.append(" and (max_prize = -1 or max_prize >= ?)");
+			params.add(maxL);
+		}
+		if(maxR >= 0 && maxR >= maxL){
+			sql.append(" and (max_prize = -1 or max_prize <= ?)");
+			params.add(maxR);
+		}
+		
+		if(prizeL >= 0){
+			sql.append(" and prize >= ?");
+			params.add(prizeL);
+		}
+		if(prizeR >= 0 && prizeR >= prizeL){
+			sql.append(" and prize <= ?");
+			params.add(prizeR);
+		}
+		
+		if(currL >= 0){
+			sql.append(" and current_prize >= ?");
+			params.add(currL);
+		}
+		if(currR >= 0 && currR >= currL){
+			sql.append(" and current_prize <= ?");
+			params.add(currR);
+		}
+		
+		if(leftL >= 0){
+			sql.append(" and (max_prize = -1 or (max_prize - current_prize) >= ?)");
+			params.add(leftL);
+		}
+		if(leftR >= 0 && leftR >= leftL){
+			sql.append(" and (max_prize = -1 or (max_prize - current_prize) <= ?)");
+			params.add(leftR);
+		}
+		
+		if(startL != null){
+			sql.append(" and start_time >= ?");
+			params.add(startL);
+		}
+		if(startR != null){
+			sql.append(" and start_time <= ?");
+			params.add(startR);
+		}
+		
+		if(endL != null){
+			sql.append(" and (end_time is null or end_time >= ?)");
+			params.add(endL);
+		}
+		if(endR != null){
+			sql.append(" and (end_time is null or end_time <= ?)");
+			params.add(endR);
+		}
+		if(status == 1){
+			sql.append(" and (start_time > now())");
+		} else if(status == 2){
+			sql.append(" and ((max_prize = -1 or (max_prize - current_prize) > 0) and start_time <= now() and (end_time is null or end_time >= now()))");
+		} else if(status == 3){
+			sql.append(" and ((end_time is not null and end_time <= now()) or (max_prize - current_prize) <= 0)");
+		}
+		
+		return getJdbcTemplate().queryForInt(sql.toString(), params.toArray());
 	}
 
 	@Override

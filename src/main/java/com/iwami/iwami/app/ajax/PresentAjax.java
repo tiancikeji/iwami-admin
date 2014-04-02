@@ -2,8 +2,10 @@ package com.iwami.iwami.app.ajax;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -23,6 +25,7 @@ import com.iwami.iwami.app.model.Exchange;
 import com.iwami.iwami.app.model.ExchangeHistory;
 import com.iwami.iwami.app.model.LuckyRule;
 import com.iwami.iwami.app.model.Present;
+import com.iwami.iwami.app.model.User;
 import com.iwami.iwami.app.model.UserRole;
 import com.iwami.iwami.app.util.IWamiUtils;
 
@@ -121,8 +124,22 @@ public class PresentAjax {
 						
 						if(types != null && types.size() > 0){
 							List<ExchangeHistory> history = presentBiz.getExchangeHistoryByPresent(types, key);
+
+							Map<Long, User> users = new HashMap<Long, User>();
+							if(history != null && history.size() > 0){
+								Set<Long> uids = new HashSet<Long>();
+
+								for(ExchangeHistory eh : history)
+									uids.add(eh.getUserid());
+								
+								List<User> tmps = userBiz.getUserByIds(uids);
+								if(tmps != null && tmps.size() > 0)
+									for(User tmp : tmps)
+										users.put(tmp.getId(), tmp);
+							}
+							
 							Map<String, Object> data = new HashMap<String, Object>();
-							data.put("list", parseExchangeHistory(history));
+							data.put("list", parseExchangeHistory(history, users));
 							result.put("data", data);
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						} else
@@ -175,9 +192,26 @@ public class PresentAjax {
 							types.add(Present.TYPE_LUCK);
 						
 						if(types != null && types.size() > 0){
+							User user = userBiz.getUserByCellPhone(key);
+							if(user != null)
+								key = user.getId();
 							List<ExchangeHistory> history = presentBiz.getExchangeHistoryByUser(types, key);
+
+							Map<Long, User> users = new HashMap<Long, User>();
+							if(history != null && history.size() > 0){
+								Set<Long> uids = new HashSet<Long>();
+
+								for(ExchangeHistory eh : history)
+									uids.add(eh.getUserid());
+								
+								List<User> tmps = userBiz.getUserByIds(uids);
+								if(tmps != null && tmps.size() > 0)
+									for(User tmp : tmps)
+										users.put(tmp.getId(), tmp);
+							}
+							
 							Map<String, Object> data = new HashMap<String, Object>();
-							data.put("list", parseExchangeHistory(history));
+							data.put("list", parseExchangeHistory(history, users));
 							result.put("data", data);
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						} else
@@ -246,8 +280,22 @@ public class PresentAjax {
 								stats.add(Exchange.STATUS_FINISH);
 							
 							List<ExchangeHistory> history = presentBiz.getExchangeHistory(types, stats);
+							
+							Map<Long, User> users = new HashMap<Long, User>();
+							if(history != null && history.size() > 0){
+								Set<Long> uids = new HashSet<Long>();
+
+								for(ExchangeHistory eh : history)
+									uids.add(eh.getUserid());
+								
+								List<User> tmps = userBiz.getUserByIds(uids);
+								if(tmps != null && tmps.size() > 0)
+									for(User user : tmps)
+										users.put(user.getId(), user);
+							}
+							
 							Map<String, Object> data = new HashMap<String, Object>();
-							data.put("list", parseExchangeHistory(history));
+							data.put("list", parseExchangeHistory(history, users));
 							result.put("data", data);
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						} else
@@ -269,7 +317,7 @@ public class PresentAjax {
 		return result;
 	}
 
-	private Object parseExchangeHistory(List<ExchangeHistory> history) {
+	private Object parseExchangeHistory(List<ExchangeHistory> history, Map<Long, User> users) {
 		List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
 		
 		if(history != null && history.size() > 0)
@@ -277,14 +325,14 @@ public class PresentAjax {
 				if(tmp != null && tmp.getExchange() != null){
 					Map<String, Object> data = new HashMap<String, Object>();
 					data.put("userid", tmp.getUserid());
-					data.put("presents", parseExchange(tmp.getExchange()));
+					data.put("presents", parseExchange(tmp.getExchange(), users.get(tmp.getUserid()).getCellPhone()));
 					
 					list.add(data);
 				}
 		return list;
 	}
 
-	private List<Map<String, Object>> parseExchange(List<Exchange> exchanges) {
+	private List<Map<String, Object>> parseExchange(List<Exchange> exchanges, long cellPhone) {
 		List<Map<String, Object>> result = new ArrayList<Map<String,Object>>();
 		
 		if(exchanges != null && exchanges.size() > 0)
@@ -292,6 +340,7 @@ public class PresentAjax {
 				Map<String, Object> tmp = new HashMap<String, Object>();
 				
 				tmp.put("id", exchange.getId());
+				tmp.put("userCellPhone", cellPhone);
 				tmp.put("presentId", exchange.getPresentId());
 				tmp.put("presentName", exchange.getPresentName());
 				tmp.put("presentPrize", exchange.getPresentId());
@@ -314,8 +363,9 @@ public class PresentAjax {
 				tmp.put("name", StringUtils.trimToEmpty(exchange.getName()));
 				tmp.put("expressName", StringUtils.trimToEmpty(exchange.getExpressName()));
 				tmp.put("expressNo", StringUtils.trimToEmpty(exchange.getExpressNo()));
-				tmp.put("channel", exchange.getChannel());
+				tmp.put("channel", StringUtils.trimToEmpty(exchange.getChannel()));
 
+				tmp.put("addTime", IWamiUtils.getDateString(exchange.getAddTime()));
 				tmp.put("lastModTime", IWamiUtils.getDateString(exchange.getLastModTime()));
 				tmp.put("lastModUserid", exchange.getLastModUserid());
 				
@@ -491,7 +541,7 @@ public class PresentAjax {
 					if(status == 0 || status == 2)
 						stat.add(IWamiConstants.INACTIVE);
 							
-					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_LUCK, stat);
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_LUCK, stat, 0, Integer.MAX_VALUE);
 					List<LuckyRule> rules = luckyBiz.getLuckyRules();
 					
 					List<Map<String, Object>> data = parsePresents(presents);
@@ -586,6 +636,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_OFFLINE);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
+					present.setChannel(StringUtils.trimToEmpty(params.get("channel")));
 					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
@@ -637,6 +688,7 @@ public class PresentAjax {
 					present.setType(Present.TYPE_OFFLINE);
 					present.setRank(rank);
 					present.setIconSmall(iconSmall);
+					present.setChannel(StringUtils.trimToEmpty(params.get("channel")));
 					
 					present.setIsdel(isdel);
 					present.setLastModUserid(adminid);
@@ -668,17 +720,52 @@ public class PresentAjax {
 			if(params.containsKey("adminid") && params.containsKey("status")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				int status = NumberUtils.toInt(params.get("status"), -1);
+				int start = NumberUtils.toInt(params.get("start"), 0);
+				int step = NumberUtils.toInt(params.get("step"), 20);
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
-						&& status >= 0 && status <= 2){
+						&& status >= 0 && status <= 2 && start >= 0 && step > 0){
 					List<Integer> stat = new ArrayList<Integer>();
 					if(status == 0 || status == 1)
 						stat.add(IWamiConstants.ACTIVE);
 					if(status == 0 || status == 2)
 						stat.add(IWamiConstants.INACTIVE);
 							
-					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_OFFLINE, stat);
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_OFFLINE, stat, start, step);
 					result.put("data", parsePresents(presents));
+					result.put("count", presentBiz.getPresentCountByTypeNStatus(Present.TYPE_OFFLINE, stat));
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
+				} else
+					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+			} else
+				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+		} catch(UserNotLoginException e){
+			result.put(ErrorCodeConstants.STATUS_KEY, 500);
+		} catch(Throwable t){
+			if(logger.isErrorEnabled())
+				logger.error("Exception in getLuck", t);
+			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
+		}
+		
+		return result;
+	}
+
+	@AjaxMethod(path = "GET/offchannel.ajax")
+	public Map<Object, Object> getOfflineByChannel(Map<String, String> params) {
+		Map<Object, Object> result = new HashMap<Object, Object>();
+		
+		try{
+			if(params.containsKey("adminid") && params.containsKey("channel")){
+				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
+				String channel = StringUtils.trimToEmpty(params.get("channel"));
+				int start = NumberUtils.toInt(params.get("start"), 0);
+				int step = NumberUtils.toInt(params.get("step"), 20);
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
+						&& start >= 0 && step > 0){
+					List<Present> presents = presentBiz.getPresentsByChannel(Present.TYPE_OFFLINE, channel, start, step);
+					result.put("data", parsePresents(presents));
+					result.put("count", presentBiz.getPresentCountByChannel(Present.TYPE_OFFLINE, channel));
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
@@ -835,7 +922,14 @@ public class PresentAjax {
 				
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)){
 					List<Present> presents = presentBiz.getPresents();
-					result.put("data", parsePresents(presents));
+					
+					List<Present> tmps = new ArrayList<Present>();
+					if(presents != null && presents.size() > 0)
+						for(Present present : presents)
+							if(present.getType() != Present.TYPE_OFFLINE)
+								tmps.add(present);
+					
+					result.put("data", parsePresents(tmps));
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
@@ -869,7 +963,7 @@ public class PresentAjax {
 					if(status == 0 || status == 2)
 						stat.add(IWamiConstants.INACTIVE);
 							
-					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_EMS, stat);
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_EMS, stat, 0, Integer.MAX_VALUE);
 					result.put("data", parsePresents(presents));
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				} else
@@ -1036,7 +1130,7 @@ public class PresentAjax {
 					if(status == 0 || status == 2)
 						stat.add(IWamiConstants.INACTIVE);
 							
-					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_RECHARGE_MOBILE, stat);
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_RECHARGE_MOBILE, stat, 0, Integer.MAX_VALUE);
 					result.put("data", parsePresents(presents));
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				} else
@@ -1153,7 +1247,7 @@ public class PresentAjax {
 					if(status == 0 || status == 2)
 						stat.add(IWamiConstants.INACTIVE);
 							
-					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_RECHARGE_ALIPAY, stat);
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_RECHARGE_ALIPAY, stat, 0, Integer.MAX_VALUE);
 					result.put("data", parsePresents(presents));
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				} else
@@ -1270,7 +1364,7 @@ public class PresentAjax {
 					if(status == 0 || status == 2)
 						stat.add(IWamiConstants.INACTIVE);
 							
-					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_RECHARGE_BANK, stat);
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_ONLINE_RECHARGE_BANK, stat, 0, Integer.MAX_VALUE);
 					result.put("data", parsePresents(presents));
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				} else
@@ -1303,6 +1397,7 @@ public class PresentAjax {
 				tmp.put("type", present.getType());
 				tmp.put("iconSmall", present.getIconSmall());
 				tmp.put("isdel", present.getIsdel());
+				tmp.put("channel", present.getChannel());
 
 				tmp.put("lastModTime", IWamiUtils.getDateString(present.getLastModTime()));
 				tmp.put("lastModUserid", present.getLastModUserid());

@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -37,6 +38,13 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 			return users.get(0);
 		else
 			return null;
+	}
+
+	@Override
+	public List<User> getUserByIds(Set<Long> uids) {
+		return getJdbcTemplate().query("select id, current_prize, exchange_prize, last_cell_phone_1, last_alipay_account, last_bank_account, "
+				+ "last_bank_name, last_bank_no, last_address, last_cell_phone_2, last_name, name, uuid, alias, cell_phone, age, gender, job, address, add_time, b.lastmod_time as lastmod_time, b.lastmod_userid as lastmod_userid, b.isdel as isdel from " 
+				+ SqlConstants.TABLE_USER + " a join " + SqlConstants.TABLE_USERINFO + " b on a.id = b.userid where a.id in (" + StringUtils.join(uids, ",") + ") and a.isdel = 0 and b.isdel = 0", new UserRowMapper());
 	}
 
 	@Override
@@ -83,10 +91,19 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 	}
 
 	@Override
-	public List<User> getAdminUsers() {
-		return  getJdbcTemplate().query("select id, current_prize, exchange_prize, last_cell_phone_1, last_alipay_account, last_bank_account, "
+	public List<User> getAdminUsers(String key) {
+		String sql = "select id, current_prize, exchange_prize, last_cell_phone_1, last_alipay_account, last_bank_account, "
 				+ "last_bank_name, last_bank_no, last_address, last_cell_phone_2, last_name, name, uuid, alias, cell_phone, age, gender, job, address, add_time, b.lastmod_time as lastmod_time, b.lastmod_userid as lastmod_userid, b.isdel as isdel from " 
-				+ SqlConstants.TABLE_USER + " a join " + SqlConstants.TABLE_USERINFO + " b on a.id = b.userid where a.isdel in (3,4) and b.isdel in (3,4)", new UserRowMapper());
+				+ SqlConstants.TABLE_USER + " a join " + SqlConstants.TABLE_USERINFO + " b on a.id = b.userid where a.isdel in (3,4) and b.isdel in (3,4) ";
+		
+		List<Object> params = new ArrayList<Object>();
+		if(StringUtils.isNotBlank(key)){
+			sql += " and (b.cell_phone = ? or b.name = ?)";
+			params.add(key);
+			params.add(key);
+		}
+		
+		return  getJdbcTemplate().query(sql, params.toArray(), new UserRowMapper());
 	
 	}
 

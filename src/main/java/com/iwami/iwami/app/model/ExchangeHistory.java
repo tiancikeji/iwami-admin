@@ -16,6 +16,10 @@ public class ExchangeHistory {
 
 	private long userid;
 	
+	private int type;
+	
+	private long time;
+	
 	private List<Exchange> exchange;
 	
 	@Override
@@ -47,5 +51,21 @@ public class ExchangeHistory {
 
 	public void setExchange(List<Exchange> exchange) {
 		this.exchange = exchange;
+	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
+	public long getTime() {
+		return time;
+	}
+
+	public void setTime(long time) {
+		this.time = time;
 	}
 }

@@ -21,8 +21,23 @@ public class PresentBizImpl implements PresentBiz {
 	private PresentService presentService;
 	
 	@Override
-	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status) {
-		return presentService.getPresentsByTypeNStatus(type, status);
+	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status, int start, int step) {
+		return presentService.getPresentsByTypeNStatus(type, status, start, step);
+	}
+
+	@Override
+	public int getPresentCountByTypeNStatus(int type, List<Integer> status){
+		return presentService.getPresentCountByTypeNStatus(type, status);
+	}
+
+	@Override
+	public List<Present> getPresentsByChannel(int type, String channel, int start, int step){
+		return presentService.getPresentsByChannel(type, channel, start, step);
+	}
+
+	@Override
+	public int getPresentCountByChannel(int type, String channel){
+		return presentService.getPresentCountByChannel(type, channel);
 	}
 
 	@Override
@@ -77,8 +92,9 @@ public class PresentBizImpl implements PresentBiz {
 		return presentService.modExchange(name, no, id, adminid);
 	}
 
+	// userid - type - time, exchanges
 	private List<ExchangeHistory> transform(List<Exchange> exchanges) {
-		Map<Long, ExchangeHistory> result = new HashMap<Long, ExchangeHistory>();
+		Map<String, ExchangeHistory> result = new HashMap<String, ExchangeHistory>();
 		
 		if(exchanges != null && exchanges.size() > 0)
 			for(Exchange exchange : exchanges){
@@ -89,11 +105,12 @@ public class PresentBizImpl implements PresentBiz {
 					status = 3;
 				exchange.setStatus(status);
 				
-				ExchangeHistory history = result.get(exchange.getUserid());
+				String key = exchange.getUserid() + "-" + exchange.getPresentType() + "-" + exchange.getAddTime().getTime();
+				ExchangeHistory history = result.get(key);
 				if(history == null){
 					history = new ExchangeHistory();
 					history.setUserid(exchange.getUserid());
-					result.put(exchange.getUserid(), history);
+					result.put(key, history);
 				}
 				
 				List<Exchange> tmps = history.getExchange();
