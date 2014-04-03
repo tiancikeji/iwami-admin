@@ -251,6 +251,8 @@ public class TaskAjax {
 							&& (isdel == 0 || isdel == 1)
 							&& StringUtils.isNotBlank(url)){
 							
+							Task tmp = taskBiz.getTaskById(taskid);
+							
 							task.setName(name);
 							if(type == 3 && defApp == 1)
 								task.setRank(-1);
@@ -266,6 +268,10 @@ public class TaskAjax {
 								task.setType(8);
 							else if(type == 5)
 								task.setType(16);
+							
+							// share task
+							if(tmp.getType() == 4)
+								task.setType(4);
 							
 							int background = 1;
 							int register = 0;
