@@ -34,7 +34,7 @@ public class TaskBizImpl implements TaskBiz {
 	@Override
 	public List<Task> getTasks(int type, int attr, int maxL, int maxR,
 			int prizeL, int prizeR, int currL, int currR, int leftL, int leftR,
-			Date startL, Date startR, Date endL, Date endR, int status, int start, int step) {
+			Date startL, Date startR, Date endL, Date endR, int status) {
 		int ttype = 31;
 		if(type == 1)
 			ttype = 1;
@@ -47,6 +47,9 @@ public class TaskBizImpl implements TaskBiz {
 		else if(type == 5)
 			ttype = 16;
 		
+		if(attr == 4)
+			ttype = 4;
+		
 		int background = -1;
 		int register = -1;
 		if(attr == 1)
@@ -58,14 +61,22 @@ public class TaskBizImpl implements TaskBiz {
 			register = 1;
 		}
 		
-		List<Task> tasks = taskService.getTasks(ttype, background, register, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status, start, step);
+		List<Task> tasks = taskService.getTasks(ttype, background, register, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status);
 		
 		if(tasks != null && tasks.size() > 0){
 			Collections.sort(tasks, new Comparator<Task>() {
 
 				@Override
 				public int compare(Task t1, Task t2) {
-					return (int)(t1.getId() - t2.getId());
+					int result = t1.getType() - t2.getType();
+					if(result == 0){
+						if(t1.getEndTime() == null)
+							return -1;
+						if(t2.getEndTime() == null)
+							return 1;
+						return t1.getEndTime().after(t2.getEndTime()) ? -1 : 1;
+					} else
+						return result;
 				}
 			});
 			

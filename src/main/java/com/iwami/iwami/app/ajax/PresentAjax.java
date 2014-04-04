@@ -47,9 +47,9 @@ public class PresentAjax {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			if(params.containsKey("adminid") && params.containsKey("id")){
+			if(params.containsKey("adminid") && params.containsKey("ids")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
-				String[] id = StringUtils.split(params.get("id"), ",");
+				String[] id = StringUtils.split(params.get("ids"), ",");
 				List<Long> eids = new ArrayList<Long>();
 				if(id != null && id.length > 0)
 					for(String tmp : id)
@@ -154,7 +154,7 @@ public class PresentAjax {
 							
 							Map<String, Object> data = new HashMap<String, Object>();
 							data.put("list", parseExchangeHistory(htmps, users));
-							data.put("count", history.size());
+							data.put("count", history == null ? 0 : history.size());
 							result.put("data", data);
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						} else
@@ -232,7 +232,7 @@ public class PresentAjax {
 							
 							Map<String, Object> data = new HashMap<String, Object>();
 							data.put("list", parseExchangeHistory(htmps, users));
-							data.put("count", history.size());
+							data.put("count", history == null ? 0 : history.size());
 							result.put("data", data);
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						} else
@@ -322,7 +322,7 @@ public class PresentAjax {
 							
 							Map<String, Object> data = new HashMap<String, Object>();
 							data.put("list", parseExchangeHistory(htmps, users));
-							data.put("count", history.size());
+							data.put("count", history == null ? 0 : history.size());
 							result.put("data", data);
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						} else

@@ -419,9 +419,15 @@ public class TaskAjax {
 							&& prizeL >= -1 && prizeR >= -1 && prizeR >=prizeL
 							&& currL >= -1 && currR >= -1 && currR >= currL
 							&& leftL >= -1 && leftR >= -1 && leftR >= leftL && (status == 0 || status == 1 || status == 2 || status == 3)){
-						List<Task> tasks = taskBiz.getTasks(type, attr, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status, start, step);
-						result.put("data", parseTasks(tasks));
-						result.put("count", taskBiz.getTaskCount(type, attr, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status));
+						List<Task> tasks = taskBiz.getTasks(type, attr, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status);
+						
+						List<Task> tmps = new ArrayList<Task>();
+						if(tasks != null && tasks.size() > 0)
+							for(int i = start; i < tasks.size() && i < (start + step); i ++)
+								tmps.add(tasks.get(i));
+						
+						result.put("data", parseTasks(tmps));
+						result.put("count", tasks == null ? 0 : tasks.size());
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 					} else
 						result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
