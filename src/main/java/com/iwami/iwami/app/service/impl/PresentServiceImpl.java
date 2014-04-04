@@ -75,13 +75,13 @@ public class PresentServiceImpl implements PresentService {
 	}
 
 	@Override
-	public Exchange getExchangeById(long id) {
-		return presentDao.getExchangeById(id);
+	public List<Exchange> getExchangeByIds(List<Long> ids) {
+		return presentDao.getExchangeByIds(ids);
 	}
 
 	@Override
-	public boolean modExchange(String name, String no, long id, long adminid) {
-		return presentDao.modExchange(name, no, id, adminid);
+	public boolean modExchange(String name, String no, List<Long> ids, long adminid) {
+		return presentDao.modExchange(name, no, ids, adminid);
 	}
 
 	@Override

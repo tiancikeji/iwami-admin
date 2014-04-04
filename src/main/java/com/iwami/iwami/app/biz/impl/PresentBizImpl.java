@@ -83,13 +83,13 @@ public class PresentBizImpl implements PresentBiz {
 	}
 
 	@Override
-	public Exchange getExchangeById(long id) {
-		return presentService.getExchangeById(id);
+	public List<Exchange> getExchangeByIds(List<Long> ids) {
+		return presentService.getExchangeByIds(ids);
 	}
 
 	@Override
-	public boolean modExchange(String name, String no, long id, long adminid) {
-		return presentService.modExchange(name, no, id, adminid);
+	public boolean modExchange(String name, String no, List<Long> ids, long adminid) {
+		return presentService.modExchange(name, no, ids, adminid);
 	}
 
 	// userid - type - time, exchanges

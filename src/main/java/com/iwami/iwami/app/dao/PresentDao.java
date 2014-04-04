@@ -34,9 +34,9 @@ public interface PresentDao {
 
 	public List<Exchange> getExchangeHistoryByPresent(List<Integer> types, String key);
 
-	public Exchange getExchangeById(long id);
+	public List<Exchange> getExchangeByIds(List<Long> ids);
 
-	public boolean modExchange(String name, String no, long id, long adminid);
+	public boolean modExchange(String name, String no, List<Long> ids, long adminid);
 
 	public List<Exchange> getExchanges(Date start, Date end);
 

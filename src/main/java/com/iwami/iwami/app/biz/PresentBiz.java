@@ -31,9 +31,9 @@ public interface PresentBiz {
 
 	public List<ExchangeHistory> getExchangeHistoryByPresent( List<Integer> types, String key);
 
-	public Exchange getExchangeById(long id);
-
-	public boolean modExchange(String name, String no, long id, long adminid);
+	public boolean modExchange(String name, String no, List<Long> ids, long adminid);
 
 	public List<Present> getPresents();
+
+	public List<Exchange> getExchangeByIds(List<Long> ids);
 }

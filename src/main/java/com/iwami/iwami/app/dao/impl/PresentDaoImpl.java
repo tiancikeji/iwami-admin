@@ -174,20 +174,15 @@ public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 	}
 
 	@Override
-	public Exchange getExchangeById(long id) {
-		List<Exchange> result = getJdbcTemplate().query("select id, userid, presentid, present_name, present_prize, present_type, `count`, prize, status, cell_phone, alipay_account, bank_account, bank_no, bank_name, address, name, express_name, express_no, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_EXCHANGE + " where isdel = 0 and id = ?", 
-				new Object[]{id}, new ExchangeRowMapper());
-		
-		if(result != null && result.size() > 0)
-			return result.get(0);
-		else
-			return null;
+	public List<Exchange> getExchangeByIds(List<Long> ids) {
+		return getJdbcTemplate().query("select id, userid, presentid, present_name, present_prize, present_type, `count`, prize, status, cell_phone, alipay_account, bank_account, bank_no, bank_name, address, name, express_name, express_no, channel, add_time, lastmod_time, lastmod_userid from " + SqlConstants.TABLE_EXCHANGE + " where isdel = 0 and id in (" + StringUtils.join(ids, ",") + ")", 
+				new ExchangeRowMapper());
 	}
 
 	@Override
-	public boolean modExchange(String name, String no, long id, long adminid) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_EXCHANGE + " set status = ?, express_name = ?, express_no = ?, lastmod_time = now(), lastmod_userid = ? where id = ?",
-				new Object[]{Exchange.STATUS_FINISH, name, no, adminid, id});
+	public boolean modExchange(String name, String no, List<Long> ids, long adminid) {
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_EXCHANGE + " set status = ?, express_name = ?, express_no = ?, lastmod_time = now(), lastmod_userid = ? where id in (" + StringUtils.join(ids, ",") + ")",
+				new Object[]{Exchange.STATUS_FINISH, name, no, adminid});
 		return count > 0;
 	}
 

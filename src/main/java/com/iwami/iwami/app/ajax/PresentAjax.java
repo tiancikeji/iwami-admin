@@ -49,30 +49,39 @@ public class PresentAjax {
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
-				long id = NumberUtils.toLong(params.get("id"), -1);
-				if(adminid > 0 && loginBiz.checkLogin(adminid) && id > 0){
+				String[] id = StringUtils.split(params.get("id"), ",");
+				List<Long> eids = new ArrayList<Long>();
+				if(id != null && id.length > 0)
+					for(String tmp : id)
+						if(NumberUtils.isNumber(tmp))
+							eids.add(NumberUtils.toLong(tmp, -1));
+				
+				if(adminid > 0 && loginBiz.checkLogin(adminid) && eids.size() > 0){
 					List<Long> ids = new ArrayList<Long>();
 					ids.add(adminid);
 					Map<Long, UserRole> roles = userBiz.getUserRoles(ids);
 					UserRole role = roles.get(adminid);
 					
 					if(role != null){
-						Exchange exchange = presentBiz.getExchangeById(id);
+						List<Exchange> exchanges = presentBiz.getExchangeByIds(eids);
 						
 						String name = StringUtils.trimToEmpty(params.get("name"));
 						String no = StringUtils.trimToEmpty(params.get("no"));
-						if(exchange != null){
-							if((StringUtils.isNotBlank(name) && StringUtils.isNotBlank(no) && exchange.getPresentType() == Present.TYPE_ONLINE_EMS && (role.getRole() & IWamiConstants.EXCHANGE_ONLINE_MANAGEMENT) > 0)
-									|| (exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_MOBILE && (role.getRole() & IWamiConstants.EXCHANGE_MOBILE_MANAGEMENT) > 0)
-									|| (exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_ALIPAY && (role.getRole() & IWamiConstants.EXCHANGE_ALIPAY_MANAGEMENT) > 0)
-									|| (exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_BANK && (role.getRole() & IWamiConstants.EXCHANGE_BANK_MANAGEMENT) > 0)
-									|| (exchange.getPresentType() == Present.TYPE_LUCK && (role.getRole() & IWamiConstants.EXCHANGE_LUCKY_MANAGEMENT) > 0))
-								if(presentBiz.modExchange(name, no, id, adminid))
+						if(exchanges != null && exchanges.size() > 0){
+							for(Exchange exchange : exchanges)
+								if(!((StringUtils.isNotBlank(name) && StringUtils.isNotBlank(no) && exchange.getPresentType() == Present.TYPE_ONLINE_EMS && (role.getRole() & IWamiConstants.EXCHANGE_ONLINE_MANAGEMENT) > 0)
+										|| (exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_MOBILE && (role.getRole() & IWamiConstants.EXCHANGE_MOBILE_MANAGEMENT) > 0)
+										|| (exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_ALIPAY && (role.getRole() & IWamiConstants.EXCHANGE_ALIPAY_MANAGEMENT) > 0)
+										|| (exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_BANK && (role.getRole() & IWamiConstants.EXCHANGE_BANK_MANAGEMENT) > 0)
+										|| (exchange.getPresentType() == Present.TYPE_LUCK && (role.getRole() & IWamiConstants.EXCHANGE_LUCKY_MANAGEMENT) > 0))){
+									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
+									return result;
+								}
+							
+								if(presentBiz.modExchange(name, no, eids, adminid))
 									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 								else
 									result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR); 
-							else
-								result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 						} else
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
 					} else
