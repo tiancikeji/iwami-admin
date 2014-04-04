@@ -8,7 +8,7 @@ public class ExchangeHistoryComparator implements Comparator<Exchange> {
 
 	@Override
 	public int compare(Exchange e1, Exchange e2) {
-		int result = e1.getAddTime().before(e2.getAddTime()) ? -1 : (e1.getAddTime().after(e2.getAddTime()) ? 1 : 0);
+		int result = e1.getAddTime().before(e2.getAddTime()) ? 1 : (e1.getAddTime().after(e2.getAddTime()) ? -1 : 0);
 		if(result == 0){
 			long t1 = Long.MAX_VALUE;
 			long t2 = Long.MAX_VALUE;

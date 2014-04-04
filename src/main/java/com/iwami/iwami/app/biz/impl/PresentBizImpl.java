@@ -110,6 +110,8 @@ public class PresentBizImpl implements PresentBiz {
 				if(history == null){
 					history = new ExchangeHistory();
 					history.setUserid(exchange.getUserid());
+					history.setType(exchange.getPresentType());
+					history.setTime(exchange.getAddTime().getTime());
 					result.put(key, history);
 				}
 				
@@ -123,6 +125,19 @@ public class PresentBizImpl implements PresentBiz {
 			}
 		
 		List<ExchangeHistory> tmp = new ArrayList<ExchangeHistory>(result.values());
+		
+		Collections.sort(tmp, new Comparator<ExchangeHistory>() {
+
+			@Override
+			public int compare(ExchangeHistory e1, ExchangeHistory e2) {
+				int result = new Long(e1.getUserid() - e2.getUserid()).intValue();
+				if(result == 0)
+					result = new Long(e2.getTime() - e1.getTime()).intValue();
+				if(result == 0)
+					result = e1.getType() - e2.getType();
+				return result;
+			}
+		});
 		
 		for(ExchangeHistory history : tmp)
 			Collections.sort(history.getExchange(), new ExchangeHistoryComparator());

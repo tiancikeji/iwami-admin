@@ -123,13 +123,18 @@ public class PresentAjax {
 							types.add(Present.TYPE_LUCK);
 						
 						if(types != null && types.size() > 0){
+							int start = NumberUtils.toInt(params.get("start"), 0);
+							int step = NumberUtils.toInt(params.get("step"), 20);
 							List<ExchangeHistory> history = presentBiz.getExchangeHistoryByPresent(types, key);
+							List<ExchangeHistory> htmps = new ArrayList<ExchangeHistory>();
+							for(int i = start; i < history.size() && i < (start + step); i ++)
+								htmps.add(history.get(i));
 
 							Map<Long, User> users = new HashMap<Long, User>();
-							if(history != null && history.size() > 0){
+							if(htmps != null && htmps.size() > 0){
 								Set<Long> uids = new HashSet<Long>();
 
-								for(ExchangeHistory eh : history)
+								for(ExchangeHistory eh : htmps)
 									uids.add(eh.getUserid());
 								
 								List<User> tmps = userBiz.getUserByIds(uids);
@@ -139,7 +144,8 @@ public class PresentAjax {
 							}
 							
 							Map<String, Object> data = new HashMap<String, Object>();
-							data.put("list", parseExchangeHistory(history, users));
+							data.put("list", parseExchangeHistory(htmps, users));
+							data.put("count", history.size());
 							result.put("data", data);
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						} else
@@ -195,13 +201,18 @@ public class PresentAjax {
 							User user = userBiz.getUserByCellPhone(key);
 							if(user != null)
 								key = user.getId();
+							int start = NumberUtils.toInt(params.get("start"), 0);
+							int step = NumberUtils.toInt(params.get("step"), 20);
 							List<ExchangeHistory> history = presentBiz.getExchangeHistoryByUser(types, key);
+							List<ExchangeHistory> htmps = new ArrayList<ExchangeHistory>();
+							for(int i = start; i < history.size() && i < (start + step); i ++)
+								htmps.add(history.get(i));
 
 							Map<Long, User> users = new HashMap<Long, User>();
-							if(history != null && history.size() > 0){
+							if(htmps != null && htmps.size() > 0){
 								Set<Long> uids = new HashSet<Long>();
 
-								for(ExchangeHistory eh : history)
+								for(ExchangeHistory eh : htmps)
 									uids.add(eh.getUserid());
 								
 								List<User> tmps = userBiz.getUserByIds(uids);
@@ -211,7 +222,8 @@ public class PresentAjax {
 							}
 							
 							Map<String, Object> data = new HashMap<String, Object>();
-							data.put("list", parseExchangeHistory(history, users));
+							data.put("list", parseExchangeHistory(htmps, users));
+							data.put("count", history.size());
 							result.put("data", data);
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						} else
@@ -278,14 +290,19 @@ public class PresentAjax {
 								stats.add(Exchange.STATUS_READY);
 							if(status == 2 || status == 3 || status == 0)
 								stats.add(Exchange.STATUS_FINISH);
-							
+
+							int start = NumberUtils.toInt(params.get("start"), 0);
+							int step = NumberUtils.toInt(params.get("step"), 20);
 							List<ExchangeHistory> history = presentBiz.getExchangeHistory(types, stats);
+							List<ExchangeHistory> htmps = new ArrayList<ExchangeHistory>();
+							for(int i = start; i < history.size() && i < (start + step); i ++)
+								htmps.add(history.get(i));
 							
 							Map<Long, User> users = new HashMap<Long, User>();
-							if(history != null && history.size() > 0){
+							if(htmps != null && htmps.size() > 0){
 								Set<Long> uids = new HashSet<Long>();
 
-								for(ExchangeHistory eh : history)
+								for(ExchangeHistory eh : htmps)
 									uids.add(eh.getUserid());
 								
 								List<User> tmps = userBiz.getUserByIds(uids);
@@ -295,7 +312,8 @@ public class PresentAjax {
 							}
 							
 							Map<String, Object> data = new HashMap<String, Object>();
-							data.put("list", parseExchangeHistory(history, users));
+							data.put("list", parseExchangeHistory(htmps, users));
+							data.put("count", history.size());
 							result.put("data", data);
 							result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 						} else
