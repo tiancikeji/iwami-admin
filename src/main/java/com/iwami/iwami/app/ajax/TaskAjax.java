@@ -162,10 +162,16 @@ public class TaskAjax {
 						
 						int background = 1;
 						int register = 0;
-						if(attr == 2)
+						if(attr == 1){
+							background = 1;
+							register = 0;
+						} else if(attr == 2){
 							background = 0;
-						else if(attr == 3)
+							register = 0;
+						} else if(attr == 3){
+							background = 0;
 							register = 1;
+						}
 						task.setBackground(background);
 						task.setRegister(register);
 						
@@ -272,13 +278,19 @@ public class TaskAjax {
 							// share task
 							if(tmp.getType() == 4)
 								task.setType(4);
-							
+
 							int background = 1;
 							int register = 0;
-							if(attr == 2)
+							if(attr == 1){
+								background = 1;
+								register = 0;
+							} else if(attr == 2){
 								background = 0;
-							else if(attr == 3)
+								register = 0;
+							} else if(attr == 3){
+								background = 0;
 								register = 1;
+							}
 							task.setBackground(background);
 							task.setRegister(register);
 							

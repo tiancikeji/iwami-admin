@@ -35,8 +35,15 @@ public class TaskBizImpl implements TaskBiz {
 	public List<Task> getTasks(int type, int attr, int maxL, int maxR,
 			int prizeL, int prizeR, int currL, int currR, int leftL, int leftR,
 			Date startL, Date startR, Date endL, Date endR, int status) {
-		int ttype = 31;
-		if(type == 1)
+		int ttype = 0;
+		if(type == 0){
+			if(attr == 0)
+				ttype = 31;
+			else if(attr == 4)
+				ttype = 4;
+			else
+				ttype = 27;
+		} if(type == 1)
 			ttype = 1;
 		else if(type == 2)
 			ttype = 2;
@@ -47,18 +54,23 @@ public class TaskBizImpl implements TaskBiz {
 		else if(type == 5)
 			ttype = 16;
 		
-		if(attr == 4)
-			ttype = 4;
-		
 		int background = -1;
 		int register = -1;
-		if(attr == 1)
-			background = 1;
-		else if(attr == 2)
-			background = 0;
-		else if(attr == 3){
-			background = 1;
-			register = 1;
+		
+		if(ttype != 4){
+			if(attr == 1){
+				background = 1;
+				register = 0;
+			} else if(attr == 2){
+				background = 0;
+				register = 0;
+			} else if(attr == 3){
+				background = 0;
+				register = 1;
+			} else if(attr == 4){
+				background = 2;
+				register = 2;
+			}
 		}
 		
 		List<Task> tasks = taskService.getTasks(ttype, background, register, maxL, maxR, prizeL, prizeR, currL, currR, leftL, leftR, startL, startR, endL, endR, status);

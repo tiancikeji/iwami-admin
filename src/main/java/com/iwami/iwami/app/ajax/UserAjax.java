@@ -118,7 +118,7 @@ public class UserAjax {
 					user.setId(userid);
 					
 					user.setName(StringUtils.trimToEmpty(params.get("username")));
-					user.setCellPhone(NumberUtils.toLong(params.get("celllPhone"), -1));
+					user.setCellPhone(NumberUtils.toLong(params.get("cellPhone"), -1));
 					user.setAge(NumberUtils.toInt(params.get("age"), -1));
 					user.setGender(NumberUtils.toInt(params.get("gender"), -1));
 					user.setJob(StringUtils.trimToEmpty(params.get("job")));
@@ -133,7 +133,7 @@ public class UserAjax {
 					user.setLastAlipayAccount(StringUtils.trimToEmpty(params.get("lastAlipayAccount")));
 					user.setLastBankName(StringUtils.trimToEmpty(params.get("lastBankName")));
 					user.setLastBankAccount(StringUtils.trimToEmpty(params.get("lastBankAccount")));
-					user.setLastBankNo(NumberUtils.toLong("lastBankNo", -1));
+					user.setLastBankNo(NumberUtils.toLong(params.get("lastBankNo"), -1));
 					user.setLastAddres(StringUtils.trimToEmpty(params.get("lastAddress")));
 					user.setLastCellPhone2(NumberUtils.toLong(params.get("lastCellPhone2"), -1));
 					user.setLastName(StringUtils.trimToEmpty(params.get("lastName")));
