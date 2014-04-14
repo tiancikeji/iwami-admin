@@ -10,6 +10,8 @@ public class StrategyImage {
 
 	private long id;
 	
+	private long strategyId;
+	
 	private int rank;
 	
 	private String iconUrl;
@@ -81,5 +83,13 @@ public class StrategyImage {
 
 	public void setIsdel(int isdel) {
 		this.isdel = isdel;
+	}
+
+	public long getStrategyId() {
+		return strategyId;
+	}
+
+	public void setStrategyId(long strategyId) {
+		this.strategyId = strategyId;
 	}
 }

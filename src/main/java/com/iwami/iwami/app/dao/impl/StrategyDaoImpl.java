@@ -32,7 +32,7 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 	// image
 	@Override
 	public List<StrategyImage> getAllImages() {
-		return getJdbcTemplate().query("select id, rank, icon_url, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_STRATEGY_IMAGES + " where isdel = 0", new StrategyImageRowMapper());
+		return getJdbcTemplate().query("select id, strategy_id, rank, icon_url, lastmod_time, lastmod_userid, isdel from " + SqlConstants.TABLE_STRATEGY_IMAGES + " where isdel = 0", new StrategyImageRowMapper());
 	}
 
 	@Override
@@ -42,11 +42,12 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 			
 			@Override
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_STRATEGY_IMAGES + "(rank, icon_url, lastmod_time, lastmod_userid, isdel) values(?, ?, now(), ?, ?)", Statement.RETURN_GENERATED_KEYS);
+				PreparedStatement ps = con.prepareStatement("insert into " + SqlConstants.TABLE_STRATEGY_IMAGES + "(rank, strategy_id, icon_url, lastmod_time, lastmod_userid, isdel) values(?, ?, ?, now(), ?, ?)", Statement.RETURN_GENERATED_KEYS);
 				ps.setObject(1, image.getRank());
-				ps.setObject(2, image.getIconUrl());
-				ps.setObject(3, image.getLastModUserid());
-				ps.setObject(4, image.getIsdel());
+				ps.setObject(2, image.getStrategyId());
+				ps.setObject(3, image.getIconUrl());
+				ps.setObject(4, image.getLastModUserid());
+				ps.setObject(5, image.getIsdel());
 				return ps;
 			}
 		}, holder);
@@ -60,7 +61,7 @@ public class StrategyDaoImpl extends JdbcDaoSupport implements StrategyDao {
 
 	@Override
 	public boolean modImage(StrategyImage image) {
-		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_IMAGES + " set rank = ?, icon_url = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where id = ?", new Object[]{image.getRank(), image.getIconUrl(), image.getLastModUserid(), image.getIsdel(), image.getId()});
+		int count = getJdbcTemplate().update("update " + SqlConstants.TABLE_STRATEGY_IMAGES + " set rank = ?, strategy_id = ?, icon_url = ?, lastmod_time = now(), lastmod_userid = ?, isdel = ? where id = ?", new Object[]{image.getRank(), image.getStrategyId(), image.getIconUrl(), image.getLastModUserid(), image.getIsdel(), image.getId()});
 		return count > 0;
 	}
 
@@ -333,6 +334,7 @@ class StrategyImageRowMapper implements RowMapper<StrategyImage>{
 	public StrategyImage mapRow(ResultSet rs, int index) throws SQLException {
 		StrategyImage image = new StrategyImage();
 		image.setId(rs.getLong("id"));
+		image.setStrategyId(rs.getLong("strategy_id"));
 		image.setRank(rs.getInt("rank"));
 		image.setIconUrl(rs.getString("icon_url"));
 		Timestamp ts = rs.getTimestamp("lastmod_time");

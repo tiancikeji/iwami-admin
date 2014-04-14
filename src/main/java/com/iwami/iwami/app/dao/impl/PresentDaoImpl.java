@@ -29,20 +29,8 @@ import com.iwami.iwami.app.model.Share;
 public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 
 	@Override
-	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status, int start, int step) {
-		return getJdbcTemplate().query("select id, name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel, channel from " + SqlConstants.TABLE_PRESENT + " where type = ? and isdel in (" + StringUtils.join(status.toArray(), ",") + ") order by channel limit ?, ?", 
-				new Object[]{type, start, step}, new PresentRowMapper());
-	}
-
-	@Override
-	public int getPresentCountByTypeNStatus(int type, List<Integer> status){
-		return getJdbcTemplate().queryForInt("select count(1) from " + SqlConstants.TABLE_PRESENT + " where type = ? and isdel in (" + StringUtils.join(status.toArray(), ",") + ")", 
-				new Object[]{type});
-	}
-
-	@Override
-	public List<Present> getPresentsByChannel(int type, String channel, int start, int step){
-		String sql = "select id, name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel, channel from " + SqlConstants.TABLE_PRESENT + " where type = ? ";
+	public List<Present> getPresentsByTypeNStatus(int type, String channel, List<Integer> status, int start, int step) {
+		String sql = "select id, name, prize, `count`, rank, type, icon_small, icon_big, lastmod_time, lastmod_userid, isdel, channel from " + SqlConstants.TABLE_PRESENT + " where type = ? and isdel in (" + StringUtils.join(status.toArray(), ",") + ")";
 		
 		List<Object> params = new ArrayList<Object>();
 		params.add(type);
@@ -60,8 +48,8 @@ public class PresentDaoImpl extends JdbcDaoSupport implements PresentDao {
 	}
 
 	@Override
-	public int getPresentCountByTypeNStatus(int type, String channel){
-		String sql = "select count(1) from " + SqlConstants.TABLE_PRESENT + " where type = ? ";
+	public int getPresentCountByTypeNStatus(int type, String channel,  List<Integer> status){
+		String sql = "select count(1) from " + SqlConstants.TABLE_PRESENT + " where type = ? and isdel in (" + StringUtils.join(status.toArray(), ",") + ")";
 		
 		List<Object> params = new ArrayList<Object>();
 		params.add(type);

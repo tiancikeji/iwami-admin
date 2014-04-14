@@ -396,6 +396,11 @@ public class PresentAjax {
 				tmp.put("lastModTime", IWamiUtils.getDateString(exchange.getLastModTime()));
 				tmp.put("lastModUserid", exchange.getLastModUserid());
 				
+				if(exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_ALIPAY || exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_BANK)
+					tmp.put("money", exchange.getPrize() / exchange.getPresentId());
+				else
+					tmp.put("money", StringUtils.EMPTY);
+				
 				result.add(tmp);
 			}
 		
@@ -747,6 +752,7 @@ public class PresentAjax {
 			if(params.containsKey("adminid") && params.containsKey("status")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				int status = NumberUtils.toInt(params.get("status"), -1);
+				String channel = StringUtils.trimToEmpty(params.get("channel"));
 				int start = NumberUtils.toInt(params.get("start"), 0);
 				int step = NumberUtils.toInt(params.get("step"), 20);
 				
@@ -758,9 +764,9 @@ public class PresentAjax {
 					if(status == 0 || status == 2)
 						stat.add(IWamiConstants.INACTIVE);
 							
-					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_OFFLINE, stat, start, step);
+					List<Present> presents = presentBiz.getPresentsByTypeNStatus(Present.TYPE_OFFLINE, channel, stat, start, step);
 					result.put("data", parsePresents(presents));
-					result.put("count", presentBiz.getPresentCountByTypeNStatus(Present.TYPE_OFFLINE, stat));
+					result.put("count", presentBiz.getPresentCountByTypeNStatus(Present.TYPE_OFFLINE, channel, stat));
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
 				} else
 					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
@@ -779,34 +785,7 @@ public class PresentAjax {
 
 	@AjaxMethod(path = "GET/offchannel.ajax")
 	public Map<Object, Object> getOfflineByChannel(Map<String, String> params) {
-		Map<Object, Object> result = new HashMap<Object, Object>();
-		
-		try{
-			if(params.containsKey("adminid") && params.containsKey("channel")){
-				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
-				String channel = StringUtils.trimToEmpty(params.get("channel"));
-				int start = NumberUtils.toInt(params.get("start"), 0);
-				int step = NumberUtils.toInt(params.get("step"), 20);
-				
-				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.PRESENT_MANAGEMENT)
-						&& start >= 0 && step > 0){
-					List<Present> presents = presentBiz.getPresentsByChannel(Present.TYPE_OFFLINE, channel, start, step);
-					result.put("data", parsePresents(presents));
-					result.put("count", presentBiz.getPresentCountByChannel(Present.TYPE_OFFLINE, channel));
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_OK);
-				} else
-					result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
-			} else
-				result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_PARAM_ERROR);
-		} catch(UserNotLoginException e){
-			result.put(ErrorCodeConstants.STATUS_KEY, 500);
-		} catch(Throwable t){
-			if(logger.isErrorEnabled())
-				logger.error("Exception in getLuck", t);
-			result.put(ErrorCodeConstants.STATUS_KEY, ErrorCodeConstants.STATUS_ERROR);
-		}
-		
-		return result;
+		return getOffline(params);
 	}
 
 	@AjaxMethod(path = "DEL/online.ajax")

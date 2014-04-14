@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.iwami.iwami.app.biz.PresentBiz;
@@ -22,22 +23,22 @@ public class PresentBizImpl implements PresentBiz {
 	
 	@Override
 	public List<Present> getPresentsByTypeNStatus(int type, List<Integer> status, int start, int step) {
-		return presentService.getPresentsByTypeNStatus(type, status, start, step);
+		return getPresentsByTypeNStatus(type, StringUtils.EMPTY, status, start, step);
 	}
 
 	@Override
 	public int getPresentCountByTypeNStatus(int type, List<Integer> status){
-		return presentService.getPresentCountByTypeNStatus(type, status);
+		return getPresentCountByTypeNStatus(type, StringUtils.EMPTY, status);
+	}
+	
+	@Override
+	public List<Present> getPresentsByTypeNStatus(int type, String channel, List<Integer> status, int start, int step) {
+		return presentService.getPresentsByTypeNStatus(type, channel, status, start, step);
 	}
 
 	@Override
-	public List<Present> getPresentsByChannel(int type, String channel, int start, int step){
-		return presentService.getPresentsByChannel(type, channel, start, step);
-	}
-
-	@Override
-	public int getPresentCountByChannel(int type, String channel){
-		return presentService.getPresentCountByChannel(type, channel);
+	public int getPresentCountByTypeNStatus(int type, String channel, List<Integer> status){
+		return presentService.getPresentCountByTypeNStatus(type, channel, status);
 	}
 
 	@Override

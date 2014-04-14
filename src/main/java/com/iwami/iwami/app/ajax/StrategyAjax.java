@@ -322,12 +322,12 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("name")
-					 && params.containsKey("subname") && params.containsKey("intr") && params.containsKey("rank")
+					/* && params.containsKey("subname")*/ && params.containsKey("intr") && params.containsKey("rank")
 					 && params.containsKey("iconSmall") && params.containsKey("iconBig") && params.containsKey("isdel")
 					 && params.containsKey("skim") && params.containsKey("rate")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
-				String subname = StringUtils.trimToEmpty(params.get("subname"));
+				/*String subname = StringUtils.trimToEmpty(params.get("subname"));*/
 				String intr = StringUtils.trimToEmpty(params.get("intr"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
 				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
@@ -341,7 +341,7 @@ public class StrategyAjax {
 						&& rank >= 0 && skim >= 0 && rate >= 0 && (isdel == 0 || isdel == 1)){
 					Strategy strategy = new Strategy();
 					strategy.setName(name);
-					strategy.setSubName(subname);
+					/*strategy.setSubName(subname);*/
 					strategy.setIntr(intr);
 					strategy.setIconSmall(iconSmall);
 					strategy.setIconBig(iconBig);
@@ -380,13 +380,13 @@ public class StrategyAjax {
 		
 		try{
 			if(params.containsKey("adminid") && params.containsKey("id") && params.containsKey("name")
-					 && params.containsKey("subname") && params.containsKey("intr") && params.containsKey("rank")
+					 /*&& params.containsKey("subname") */&& params.containsKey("intr") && params.containsKey("rank")
 					 && params.containsKey("iconSmall") && params.containsKey("iconBig") && params.containsKey("isdel")
 					 && params.containsKey("skim") && params.containsKey("rate")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				long id = NumberUtils.toLong(params.get("id"), -1);
 				String name = StringUtils.trimToEmpty(params.get("name"));
-				String subname = StringUtils.trimToEmpty(params.get("subname"));
+				/*String subname = StringUtils.trimToEmpty(params.get("subname"));*/
 				String intr = StringUtils.trimToEmpty(params.get("intr"));
 				String iconSmall = StringUtils.trimToEmpty(params.get("iconSmall"));
 				String iconBig = StringUtils.trimToEmpty(params.get("iconBig"));
@@ -401,7 +401,7 @@ public class StrategyAjax {
 					Strategy strategy = new Strategy();
 					strategy.setId(id);
 					strategy.setName(name);
-					strategy.setSubName(subname);
+					/*strategy.setSubName(subname);*/
 					strategy.setIntr(intr);
 					strategy.setIconSmall(iconSmall);
 					strategy.setIconBig(iconBig);
@@ -591,16 +591,19 @@ public class StrategyAjax {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			if(params.containsKey("adminid") && params.containsKey("rank") && params.containsKey("url") && params.containsKey("id") && params.containsKey("isdel")){
+			if(params.containsKey("adminid") && params.containsKey("rank") && params.containsKey("url") && params.containsKey("id") && params.containsKey("isdel")
+					&& params.containsKey("strategyid")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT)){
 					int id = NumberUtils.toInt(params.get("id"), -1);
+					int strategyId = NumberUtils.toInt(params.get("strategyid"), -1);
 					int rank = NumberUtils.toInt(params.get("rank"), -2);
 					String url = StringUtils.trimToEmpty(params.get("url"));
 					int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 					if(id > 0 && rank > -2 && StringUtils.isNotBlank(url) && (isdel == 0 || isdel == 1)){
 						StrategyImage image = new StrategyImage();
 						image.setId(id);
+						image.setStrategyId(strategyId);
 						image.setRank(rank);
 						image.setIconUrl(url);
 						image.setLastModUserid(adminid);
@@ -632,14 +635,17 @@ public class StrategyAjax {
 		Map<Object, Object> result = new HashMap<Object, Object>();
 		
 		try{
-			if(params.containsKey("adminid") && params.containsKey("rank") && params.containsKey("url") && params.containsKey("isdel")){
+			if(params.containsKey("adminid") && params.containsKey("rank") && params.containsKey("url") && params.containsKey("isdel")
+					&& params.containsKey("strategyid")){
 				long adminid = NumberUtils.toLong(params.get("adminid"), -1);
 				if(adminid > 0 && loginBiz.checkLogin(adminid) && loginBiz.checkRole(adminid, IWamiConstants.STRATEGY_MANAGEMENT)){
+					int strategyId = NumberUtils.toInt(params.get("strategyid"), -1);
 					int rank = NumberUtils.toInt(params.get("rank"), -2);
 					String url = StringUtils.trimToEmpty(params.get("url"));
 					int isdel = NumberUtils.toInt(params.get("isdel"), -1);
 					if(rank > -2 && StringUtils.isNotBlank(url) && (isdel == 0 || isdel == 1)){
 						StrategyImage image = new StrategyImage();
+						image.setStrategyId(strategyId);
 						image.setRank(rank);
 						image.setIconUrl(url);
 						image.setLastModUserid(adminid);
@@ -702,6 +708,7 @@ public class StrategyAjax {
 				Map<String, Object> tmp = new HashMap<String, Object>();
 				
 				tmp.put("id", image.getId());
+				tmp.put("strategyid", image.getStrategyId());
 				tmp.put("rank", image.getRank());
 				tmp.put("url", StringUtils.trimToEmpty(image.getIconUrl()));
 				tmp.put("isdel", image.getIsdel());
