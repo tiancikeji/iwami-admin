@@ -397,7 +397,7 @@ public class PresentAjax {
 				tmp.put("lastModUserid", exchange.getLastModUserid());
 				
 				if(exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_ALIPAY || exchange.getPresentType() == Present.TYPE_ONLINE_RECHARGE_BANK)
-					tmp.put("money", exchange.getPrize() / exchange.getPresentId());
+					tmp.put("money", exchange.getPrize() / exchange.getPresentPrize());
 				else
 					tmp.put("money", StringUtils.EMPTY);
 				

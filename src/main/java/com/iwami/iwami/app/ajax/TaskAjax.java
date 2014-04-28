@@ -248,7 +248,7 @@ public class TaskAjax {
 						String url = StringUtils.trimToEmpty(params.get("url"));
 						int defApp = NumberUtils.toInt(params.get("default"), -1);
 						
-						if(StringUtils.isNotBlank(name) && rank >= 0 && StringUtils.isNotBlank(intr) && StringUtils.isNotBlank(appintr)
+						if(StringUtils.isNotBlank(name) /*&& rank >= 0*/ && StringUtils.isNotBlank(intr) && StringUtils.isNotBlank(appintr)
 							&& prize > 0 && maxPrize > -2 && addCurrentPrize != Integer.MAX_VALUE && StringUtils.isNotBlank(packageName)
 							&& (type == 1 || type == 2 || (type == 3 && StringUtils.isNotBlank(iconBig)) || type == 4 || type == 5)
 							&& (attr == 1 || attr == 2 || attr == 3 || attr == 4)
